@@ -1162,6 +1162,9 @@
  */
 #define WIZCHIP_CRITICAL_ENTER()    WIZCHIP.CRIS._enter()
 
+#ifdef _exit
+#undef _exit
+#endif
 /**
  * @brief Exit a critical section
  *
