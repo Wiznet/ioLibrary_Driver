@@ -6,6 +6,10 @@
 //! \version 1.0.3
 //! \date 2013/10/21
 //! \par  Revision history
+//!       <2015/02/05> Notice
+//!        The version history is not updated after this point.
+//!        Download the latest version directly from GitHub. Please visit the our GitHub repository for ioLibrary.
+//!        >> https://github.com/Wiznet/ioLibrary_Driver
 //!       <2014/05/01> V1.0.3. Refer to M20140501
 //!         1. Implicit type casting -> Explicit type casting.
 //!         2. replace 0x01 with PACK_REMAINED in recvfrom()
@@ -210,16 +214,16 @@ int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
    while(getSn_CR(sn));
    if(sock_io_mode & (1<<sn)) return SOCK_BUSY;
    while(getSn_SR(sn) != SOCK_ESTABLISHED)
-   {   
+   {
 		if (getSn_IR(sn) & Sn_IR_TIMEOUT)
 		{
 			setSn_IR(sn, Sn_IR_TIMEOUT);
          #if _WIZCHIP_ == 5200   // for W5200 ARP errata 
             setSUBR((uint8_t*)"\x00\x00\x00\x00");
          #endif
-         return SOCKERR_TIMEOUT;
+            return SOCKERR_TIMEOUT;
 		}
-		
+
 		if (getSn_SR(sn) == SOCK_CLOSED)
 		{
 			return SOCKERR_SOCKCLOSED;
@@ -356,6 +360,8 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
 {
    uint8_t tmp = 0;
    uint16_t freesize = 0;
+   uint32_t taddr;
+
    CHECK_SOCKNUM();
    switch(getSn_MR(sn) & 0x0F)
    {
@@ -368,16 +374,17 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    CHECK_SOCKDATA();
    //M20140501 : For avoiding fatal error on memory align mismatched
    //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
-   {
-      uint32_t taddr;
+   //{
+      //uint32_t taddr;
       taddr = ((uint32_t)addr[0]) & 0x000000FF;
       taddr = (taddr << 8) + ((uint32_t)addr[1] & 0x000000FF);
       taddr = (taddr << 8) + ((uint32_t)addr[2] & 0x000000FF);
       taddr = (taddr << 8) + ((uint32_t)addr[3] & 0x000000FF);
-   }
+   //}
    //
-   if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
-   if(port == 0)               return SOCKERR_PORTZERO;
+   //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
+   if(taddr == 0) 				return SOCKERR_IPINVALID;
+   if(port == 0)               	return SOCKERR_PORTZERO;
    tmp = getSn_SR(sn);
    if(tmp != SOCK_MACRAW && tmp != SOCK_UDP) return SOCKERR_SOCKSTATUS;
       

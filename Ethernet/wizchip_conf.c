@@ -5,6 +5,10 @@
 //! \version 1.0.1
 //! \date 2013/10/21
 //! \par  Revision history
+//!       <2015/02/05> Notice
+//!        The version history is not updated after this point.
+//!        Download the latest version directly from GitHub. Please visit the our GitHub repository for ioLibrary.
+//!        >> https://github.com/Wiznet/ioLibrary_Driver
 //!       <2014/05/01> V1.0.1  Refer to M20140501
 //!        1. Explicit type casting in wizchip_bus_readbyte() & wizchip_bus_writebyte()
 //            Issued by Mathias ClauBen.
@@ -105,6 +109,19 @@ uint8_t wizchip_spi_readbyte(void)        {return 0;};
 void 	wizchip_spi_writebyte(uint8_t wb) {};
 
 /**
+ * @brief Default function to burst read in SPI interface.
+ * @note This function help not to access wrong address. If you do not describe this function or register any functions,
+ * null function is called.
+ */
+void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{};
+/**
+ * @brief Default function to burst write in SPI interface.
+ * @note This function help not to access wrong address. If you do not describe this function or register any functions,
+ * null function is called.
+ */
+void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
+
+/**
  * @\ref _WIZCHIP instance
  */
 _WIZCHIP  WIZCHIP =
@@ -181,6 +198,23 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
    {
       WIZCHIP.IF.SPI._read_byte   = spi_rb;
       WIZCHIP.IF.SPI._write_byte  = spi_wb;
+   }
+}
+
+// 20140626 Eric Added for SPI burst operations
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len))
+{
+   while(!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_));
+
+   if(!spi_rb || !spi_wb)
+   {
+      WIZCHIP.IF.SPI._read_burst   = wizchip_spi_readburst;
+      WIZCHIP.IF.SPI._write_burst  = wizchip_spi_writeburst;
+   }
+   else
+   {
+      WIZCHIP.IF.SPI._read_burst   = spi_rb;
+      WIZCHIP.IF.SPI._write_burst  = spi_wb;
    }
 }
 

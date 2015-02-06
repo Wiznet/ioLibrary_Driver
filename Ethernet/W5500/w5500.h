@@ -5,6 +5,10 @@
 //! \version 1.0.0
 //! \date 2013/10/21
 //! \par  Revision history
+//!       <2015/02/05> Notice
+//!        The version history is not updated after this point.
+//!        Download the latest version directly from GitHub. Please visit the our GitHub repository for ioLibrary.
+//!        >> https://github.com/Wiznet/ioLibrary_Driver
 //!       <2013/10/21> 1st Release
 //! \author MidnightCow
 //! \copyright
@@ -1176,6 +1180,7 @@
  * @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
  * @sa WIZCHIP_CRITICAL_ENTER()
  */
+
 #define WIZCHIP_CRITICAL_EXIT()     WIZCHIP.CRIS._exit()
 
 
