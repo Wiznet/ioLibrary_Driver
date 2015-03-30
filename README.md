@@ -14,7 +14,7 @@ This driver provides the Berkeley Socket type APIs.
   - DNS client
   - Others will be added.
 
-## How to add an ioLibrary on project
+## How to add an ioLibrary in project through github site.
   - Example, refer to https://www.youtube.com/watch?v=mt815RBGdsA
 
 ## Revision History
