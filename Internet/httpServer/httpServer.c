@@ -400,7 +400,7 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 		read_userReg_webContent(start_addr, &buf[0], HTTPSock_Status[get_seqnum].file_offset, send_len);
 	}
 #ifdef _USE_SDCARD_
-	else if(HTTPSock_Status[get_seqnum]->storage_type == SDCARD)
+	else if(HTTPSock_Status[get_seqnum].storage_type == SDCARD)
 	{
 		// Data read from SD Card
 		fr = f_read(&fs, &buf[0], send_len, (void *)&blocklen);
@@ -561,7 +561,7 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 
 					file_len = fs.fsize;
 					content_addr = fs.sclust;
-					HTTPSock_Status[get_seqnum]->storage_type = SDCARD;
+					HTTPSock_Status[get_seqnum].storage_type = SDCARD;
 				}
 #elif _USE_FLASH_
 				else if(/* Read content from Dataflash */)
