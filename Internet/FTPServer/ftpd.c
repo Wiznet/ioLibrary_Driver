@@ -147,7 +147,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
 {
 	uint16_t size = 0, i;
 	long ret = 0;
-	uint16_t blocklen, send_byte, recv_byte;
+	uint32_t blocklen, send_byte, recv_byte;
 	uint32_t remain_filesize;
 	uint32_t remain_datasize;
 #if defined(F_FILESYSTEM)
@@ -322,7 +322,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
     						else
     							send_byte = remain_filesize;
 
-    						ftp.fr = f_read(&(ftp.fil), dbuf, send_byte , (void *)&blocklen);
+    						ftp.fr = f_read(&(ftp.fil), dbuf, send_byte , &blocklen);
     						if(ftp.fr != FR_OK)
     							break;
 #if defined(_FTP_DEBUG_)
@@ -389,7 +389,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
     								//printf("----->fn:%s data:%s \r\n", ftp.filename, dbuf);
 #endif
 
-    								ftp.fr = f_write(&(ftp.fil), dbuf, (UINT)ret, (void *)&blocklen);
+    								ftp.fr = f_write(&(ftp.fil), dbuf, (UINT)ret, &blocklen);
 #if defined(_FTP_DEBUG_)
     								//printf("----->dsize:%d recv:%d len:%d \r\n", remain_datasize, ret, blocklen);
 #endif
