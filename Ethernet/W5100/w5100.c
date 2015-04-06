@@ -40,6 +40,7 @@
 
 #include "w5100.h"
 
+#if   (_WIZCHIP_ == 5100)
 /**
 @brief  This function writes the data into W5200 registers.
 */
@@ -335,4 +336,4 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len)
   setSn_RX_RD(sn,ptr);
 }
 
-
+#endif

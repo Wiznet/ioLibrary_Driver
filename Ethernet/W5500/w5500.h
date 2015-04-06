@@ -51,6 +51,8 @@
 #include <stdint.h>
 #include "wizchip_conf.h"
 
+#if   (_WIZCHIP_ == 5500)
+
 #define _W5500_IO_BASE_              0x00000000
 
 #define _W5500_SPI_READ_			   (0x00 << 2) //< SPI interface Read operation in Control Phase
@@ -2143,5 +2145,7 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * @param len Data length
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
+
+#endif
 
 #endif   // _W5500_H_

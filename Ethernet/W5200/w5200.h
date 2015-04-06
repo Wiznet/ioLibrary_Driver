@@ -41,7 +41,9 @@
 #ifndef	_W5200_H
 #define	_W5200_H
 #include <stdint.h>
-#include "Ethernet/wizchip_conf.h"
+#include "wizchip_conf.h"
+
+#if   (_WIZCHIP_ == 5200)
 
 #define _WIZCHIP_SN_BASE_  (0x4000)
 #define _WIZCHIP_SN_SIZE_  (0x0100)
@@ -2043,6 +2045,8 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * @param len Data length
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
+
+#endif
 
 #endif //_W5200_H_
 
