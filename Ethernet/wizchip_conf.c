@@ -53,30 +53,43 @@
 //
 
 #include "wizchip_conf.h"
+
+/////////////
+//M20150401 : Remove ; in the default callback function such as wizchip_cris_enter(), wizchip_cs_select() and etc.
+/////////////
+
 /**
  * @brief Default function to enable interrupt.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	  wizchip_cris_enter(void)           {};
+//void 	  wizchip_cris_enter(void)           {};
+void 	  wizchip_cris_enter(void)           {}
+
 /**
  * @brief Default function to disable interrupt.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	  wizchip_cris_exit(void)          {};
+//void 	  wizchip_cris_exit(void)          {};
+void 	  wizchip_cris_exit(void)          {}
+
 /**
  * @brief Default function to select chip.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	wizchip_cs_select(void)            {};
+//void 	wizchip_cs_select(void)            {};
+void 	wizchip_cs_select(void)            {}
+
 /**
  * @brief Default function to deselect chip.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	wizchip_cs_deselect(void)          {};
+//void 	wizchip_cs_deselect(void)          {};
+void 	wizchip_cs_deselect(void)          {}
+
 /**
  * @brief Default function to read in direct or indirect interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
@@ -84,7 +97,9 @@ void 	wizchip_cs_deselect(void)          {};
  */
  //M20140501 : Explict pointer type casting
 //uint8_t wizchip_bus_readbyte(uint32_t AddrSel) { return * ((volatile uint8_t *) AddrSel); };
-uint8_t wizchip_bus_readbyte(uint32_t AddrSel) { return * ((volatile uint8_t *)((ptrdiff_t) AddrSel)); };
+//uint8_t wizchip_bus_readbyte(uint32_t AddrSel) { return * ((volatile uint8_t *)((ptrdiff_t) AddrSel)); };
+uint8_t wizchip_bus_readbyte(uint32_t AddrSel) { return * ((volatile uint8_t *)((ptrdiff_t) AddrSel)); }
+
 /**
  * @brief Default function to write in direct or indirect interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
@@ -93,37 +108,49 @@ uint8_t wizchip_bus_readbyte(uint32_t AddrSel) { return * ((volatile uint8_t *)(
  
 //M20140501 : Explict pointer type casting
 //void 	wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*) AddrSel) = wb; };
-void 	wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*)((ptrdiff_t)AddrSel)) = wb; };
+//void 	wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*)((ptrdiff_t)AddrSel)) = wb; };
+void 	wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*)((ptrdiff_t)AddrSel)) = wb; }
 
 /**
  * @brief Default function to read in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-uint8_t wizchip_spi_readbyte(void)        {return 0;};
+//uint8_t wizchip_spi_readbyte(void)        {return 0;};
+uint8_t wizchip_spi_readbyte(void)        {return 0;}
+
 /**
  * @brief Default function to write in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	wizchip_spi_writebyte(uint8_t wb) {};
+//void 	wizchip_spi_writebyte(uint8_t wb) {};
+void 	wizchip_spi_writebyte(uint8_t wb) {}
 
 /**
  * @brief Default function to burst read in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{};
+//void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}; 
+void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}
+
 /**
  * @brief Default function to burst write in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
+//void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
+void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
 
 /**
  * @\ref _WIZCHIP instance
  */
+//
+//M20150401 : For a compiler didnot support a member of structure
+//            Replace the assignment of struct members with the assingment of array
+//
+/*
 _WIZCHIP  WIZCHIP =
       {
       .id                  = _WIZCHIP_ID_,
@@ -137,6 +164,21 @@ _WIZCHIP  WIZCHIP =
 //    .IF.SPI._read_byte   = wizchip_spi_readbyte,
 //    .IF.SPI._write_byte  = wizchip_spi_writebyte
       };
+*/      
+_WIZCHIP  WIZCHIP =
+      {
+      _WIZCHIP_IO_MODE_,
+      _WIZCHIP_ID_ ,
+      wizchip_cris_enter,
+      wizchip_cris_exit,
+      wizchip_cs_select,
+      wizchip_cs_deselect,
+      wizchip_bus_readbyte,
+      wizchip_bus_writebyte
+//    wizchip_spi_readbyte,
+//    wizchip_spi_writebyte
+      };
+
 
 static uint8_t    _DNS_[4];      // DNS server ip address
 static dhcp_mode  _DHCP_;        // DHCP mode
@@ -220,7 +262,9 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
 
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 {
+#if	_WIZCHIP_ == 5200 || _WIZCHIP_ == 5500
    uint8_t tmp = 0;
+#endif
    uint8_t* ptmp[2] = {0,0};
    switch(cwtype)
    {
@@ -277,6 +321,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
       case CW_SET_PHYPOWMODE:
          return wizphy_setphypmode(*(uint8_t*)arg);
    #endif
+   #if _WIZCHIP_ == 5200 || _WIZCHIP_ == 5500
       case CW_GET_PHYPOWMODE:
          tmp = wizphy_getphypmode();
          if((int8_t)tmp == -1) return -1;
@@ -287,6 +332,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
          if((int8_t)tmp == -1) return -1;
          *(uint8_t*)arg = tmp;
          break;
+   #endif      
       default:
          return -1;
    }
@@ -393,7 +439,7 @@ intr_kind wizchip_getinterrupt(void)
    uint16_t ret = 0;
 #if _WIZCHIP_ == 5100
    ir = getIR();
-   sir = ir 0x0F;
+   sir = ir & 0x0F;
 #else
    ir  = getIR();
    sir = getSIR();
@@ -421,11 +467,8 @@ void wizchip_setinterruptmask(intr_kind intr)
    imr &= ~(1 << 6);
 #endif
    
-#if _WIZCHIP_ < 5200
-   simr &= 0x0F;
-#endif
-
 #if _WIZCHIP_ == 5100
+   simr &= 0x0F;
    imr |= simr;
    setIMR(imr);
 #else
@@ -441,7 +484,7 @@ intr_kind wizchip_getinterruptmask(void)
    uint16_t ret = 0;
 #if _WIZCHIP_ == 5100
    imr  = getIMR();
-   simr = imr 0x0F;
+   simr = imr & 0x0F;
 #else
    imr  = getIMR();
    simr = getSIMR();

@@ -73,7 +73,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 
    if(!WIZCHIP.IF.SPI._read_burst || !WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
-	   	WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF0000) >> 16);
+	   WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF0000) >> 16);
 		WIZCHIP.IF.SPI._write_byte((AddrSel & 0x0000FF00) >>  8);
 		WIZCHIP.IF.SPI._write_byte((AddrSel & 0x000000FF) >>  0);
    }

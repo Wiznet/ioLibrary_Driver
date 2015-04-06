@@ -60,7 +60,7 @@
  * @todo You should select one, \b 5100, \b 5200 ,\b 5500 or etc. \n\n
  *       ex> <code> #define \_WIZCHIP_      5500 </code>
  */
-#define _WIZCHIP_                      5500   // 5100, 5200, 5500
+#define _WIZCHIP_                      5100   // 5100, 5200, 5500
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
@@ -87,6 +87,8 @@
 // #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
 // #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
    #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+//A20150401 : Indclude W5100.h file   
+   #include "W5100/w5100.h"
 
 #elif (_WIZCHIP_ == 5200)
    #define _WIZCHIP_ID_                "W5200\0"
@@ -132,7 +134,9 @@
  */
 #define _WIZCHIP_IO_BASE_              0x00000000  // 
 
-#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS
+//M20150401 : Typing Error
+//#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS
+#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
    #ifndef _WIZCHIP_IO_BASE_
       #error "You should be define _WIZCHIP_IO_BASE to fit your system memory map."
    #endif
@@ -219,14 +223,16 @@ typedef enum
    CW_GET_ID,          ///< Gets WIZCHIP name.
 
 #if _WIZCHIP_ ==  5500
-   CW_RESET_PHY,       ///< Resets internal PHY. Valid Only W5000
+   CW_RESET_PHY,       ///< Resets internal PHY. Valid Only W5500
    CW_SET_PHYCONF,     ///< When PHY configured by internal register, PHY operation mode (Manual/Auto, 10/100, Half/Full). Valid Only W5000
-   CW_GET_PHYCONF,     ///< Get PHY operation mode in internal register. Valid Only W5000
-   CW_GET_PHYSTATUS,   ///< Get real PHY status on operating. Valid Only W5000
+   CW_GET_PHYCONF,     ///< Get PHY operation mode in internal register. Valid Only W5500
+   CW_GET_PHYSTATUS,   ///< Get real PHY status on operating. Valid Only W5500
    CW_SET_PHYPOWMODE,  ///< Set PHY power mode as normal and down when PHYSTATUS.OPMD == 1. Valid Only W5500
 #endif
-   CW_GET_PHYPOWMODE,  ///< Get PHY Power mode as down or normal
-   CW_GET_PHYLINK      ///< Get PHY Link status
+#if _WIZCHIP_ == 5200 || _WIZCHIP_ == 5500
+   CW_GET_PHYPOWMODE,  ///< Get PHY Power mode as down or normal, Valid Only W5100, W5200
+   CW_GET_PHYLINK      ///< Get PHY Link status, Valid Only W5100, W5200
+#endif   
 }ctlwizchip_type;
 
 /**
@@ -251,8 +257,10 @@ typedef enum
  */
 typedef enum
 {
-#if _WIZCHIP_ > 5200
+#if   _WIZCHIP_ == 5500
    IK_WOL               = (1 << 4),   ///< Wake On Lan by receiving the magic packet. Valid in W500.
+#elif _WIZCHIP_ == 5300
+   IK_FMTU              = (1 << 4),   ///< Received a ICMP message (Fragment MTU)   
 #endif   
 
    IK_PPPOE_TERMINATED  = (1 << 5),   ///< PPPoE Disconnected

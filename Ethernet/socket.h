@@ -96,7 +96,7 @@
 #define SOCK_ERROR            0        
 #define SOCKERR_SOCKNUM       (SOCK_ERROR - 1)     ///< Invalid socket number
 #define SOCKERR_SOCKOPT       (SOCK_ERROR - 2)     ///< Invalid socket option
-#define SOCKERR_SOCKINIT      (SOCK_ERROR - 3)     ///< Socket is not initialized
+#define SOCKERR_SOCKINIT      (SOCK_ERROR - 3)     ///< Socket is not initialized or SIPR is Zero IP address when Sn_MR_TCP
 #define SOCKERR_SOCKCLOSED    (SOCK_ERROR - 4)     ///< Socket unexpectedly closed.
 #define SOCKERR_SOCKMODE      (SOCK_ERROR - 5)     ///< Invalid socket mode for socket operation.
 #define SOCKERR_SOCKFLAG      (SOCK_ERROR - 6)     ///< Invalid socket flag
@@ -356,8 +356,10 @@ typedef enum
    CS_GET_MAXRXBUF,        ///< get the size of socket buffer allocated in RX memory
    CS_CLR_INTERRUPT,       ///< clear the interrupt of socket with @ref sockint_kind
    CS_GET_INTERRUPT,       ///< get the socket interrupt. refer to @ref sockint_kind
-   CS_SET_INTMASK,         ///< set the interrupt mask of socket with @ref sockint_kind
-   CS_GET_INTMASK          ///< get the masked interrupt of socket. refer to @ref sockint_kind
+#if _WIZCHIP_ > 5100
+   CS_SET_INTMASK,         ///< set the interrupt mask of socket with @ref sockint_kind, Not supported in W5100
+   CS_GET_INTMASK          ///< get the masked interrupt of socket. refer to @ref sockint_kind, Not supported in W5100
+#endif
 }ctlsock_type;
 
 
@@ -374,9 +376,9 @@ typedef enum
    SO_DESTIP,           ///< Set/Get the destination IP address. @ref Sn_DIPR ( @ref setSn_DIPR(), @ref getSn_DIPR() )
    SO_DESTPORT,         ///< Set/Get the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
 #if _WIZCHIP_ != 5100   
-   SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode
+   SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode, Not supported in W5100
    #if _WIZCHIP_ > 5200   
-      SO_KEEPALIVEAUTO, ///< Set/Get keep-alive auto transmission timer in TCP mode
+      SO_KEEPALIVEAUTO, ///< Set/Get keep-alive auto transmission timer in TCP mode, Not supported in W5100, W5200
    #endif      
 #endif
    SO_SENDBUF,          ///< Valid only in getsockopt. Get the free data size of Socekt TX buffer. @ref Sn_TX_FSR, @ref getSn_TX_FSR()

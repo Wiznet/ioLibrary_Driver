@@ -43,6 +43,8 @@
 //
 //*****************************************************************************
 
+//
+
 #ifndef  _W5500_H_
 #define  _W5500_H_
 
@@ -147,7 +149,7 @@
  * @sa MR : Mode register.
  * @sa GAR, SUBR, SHAR, SIPR
  * @sa INTLEVEL, IR, IMR, SIR, SIMR : Interrupt.
- * @sa RTR, RCR : Data retransmission.
+ * @sa _RTR_, _RCR_ : Data retransmission.
  * @sa PTIMER, PMAGIC, PHAR, PSID, PMRU : PPPoE.
  * @sa UIPR, UPORTR : ICMP message.
  * @sa PHYCFGR, VERSIONR : etc.
@@ -200,9 +202,9 @@
  * 		<tr>  <td>RST</td> <td>Reserved</td> <td>WOL</td> <td>PB</td> <td>PPPoE</td> <td>Reserved</td> <td>FARP</td> <td>Reserved</td> </tr>
  * </table>
  * - \ref MR_RST		 	: Reset
- * - \ref MR_WOL       		: Wake on LAN
- * - \ref MR_PB         	: Ping block
- * - \ref MR_PPPOE      	: PPPoE mode
+ * - \ref MR_WOL       	: Wake on LAN
+ * - \ref MR_PB         : Ping block
+ * - \ref MR_PPPOE      : PPPoE mode
  * - \ref MR_FARP			: Force ARP mode
  */
 #define MR                 (_W5500_IO_BASE_ + (0x0000 << 8) + (WIZCHIP_CREG_BLOCK << 3))
@@ -275,7 +277,9 @@
  * - \ref IM_IR5 : PPPoE Close Interrupt Mask
  * - \ref IM_IR4 : Magic Packet Interrupt Mask
  */
-#define IMR                (_W5500_IO_BASE_ + (0x0016 << 8) + (WIZCHIP_CREG_BLOCK << 3))
+//M20150401 : Rename SYMBOE ( Re-define error in a compile) 
+//#define IMR                (_W5500_IO_BASE_ + (0x0016 << 8) + (WIZCHIP_CREG_BLOCK << 3))
+#define _IMR_                (_W5500_IO_BASE_ + (0x0016 << 8) + (WIZCHIP_CREG_BLOCK << 3))
 
 /**
  * @ingroup Common_register_group
@@ -297,20 +301,24 @@
 /**
  * @ingroup Common_register_group
  * @brief Timeout register address( 1 is 100us )(R/W)
- * @details @ref RTR configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref RTR is x07D0or 000
- * And so the default timeout period is 200ms(100us X 2000). During the time configured by @ref RTR, W5500 waits for the peer response
+ * @details @ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref _RTR_ is x07D0or 000
+ * And so the default timeout period is 200ms(100us X 2000). During the time configured by @ref _RTR_, W5500 waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
- * If the peer does not respond within the @ref RTR time, W5500 retransmits the packet or issues timeout.
+ * If the peer does not respond within the @ref _RTR_ time, W5500 retransmits the packet or issues timeout.
  */
-#define RTR                (_W5500_IO_BASE_ + (0x0019 << 8) + (WIZCHIP_CREG_BLOCK << 3))
+//M20150401 : Rename SYMBOE ( Re-define error in a compile)  
+//#define RTR                (_W5500_IO_BASE_ + (0x0019 << 8) + (WIZCHIP_CREG_BLOCK << 3))
+#define _RTR_                (_W5500_IO_BASE_ + (0x0019 << 8) + (WIZCHIP_CREG_BLOCK << 3))
 
 /**
  * @ingroup Common_register_group
  * @brief Retry count register(R/W)
- * @details @ref RCR configures the number of time of retransmission.
- * When retransmission occurs as many as ref RCR+1 Timeout interrupt is issued (@ref Sn_IR[TIMEOUT] = .
+ * @details @ref _RCR_ configures the number of time of retransmission.
+ * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (@ref Sn_IR[TIMEOUT] = .
  */
-#define RCR                (_W5500_IO_BASE_ + (0x001B << 8) + (WIZCHIP_CREG_BLOCK << 3))
+//M20150401 : Rename SYMBOE ( Re-define error in a compile)
+//#define RCR                (_W5500_IO_BASE_ + (0x001B << 8) + (WIZCHIP_CREG_BLOCK << 3))  
+#define _RCR_                (_W5500_IO_BASE_ + (0x001B << 8) + (WIZCHIP_CREG_BLOCK << 3))
 
 /**
  * @ingroup Common_register_group
@@ -819,7 +827,7 @@
  * 1 : Enable No Delayed ACK option\n
  * This bit is applied only during TCP mode (P[3:0] = 001.\n
  * When this bit is  It sends the ACK packet without delay as soon as a Data packet is received from a peer.\n
- * When this bit is  It sends the ACK packet after waiting for the timeout time configured by @ref RTR.
+ * When this bit is  It sends the ACK packet after waiting for the timeout time configured by @ref _RTR_.
  */
 #define Sn_MR_ND                     0x20
 
@@ -1169,6 +1177,7 @@
 #ifdef _exit
 #undef _exit
 #endif
+
 /**
  * @brief Exit a critical section
  *
@@ -1180,9 +1189,7 @@
  * @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
  * @sa WIZCHIP_CRITICAL_ENTER()
  */
-
 #define WIZCHIP_CRITICAL_EXIT()     WIZCHIP.CRIS._exit()
-
 
 
 ////////////////////////
@@ -1337,8 +1344,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint16_t. Value of @ref INTLEVEL register.
  * @sa setINTLEVEL()
  */
+//M20150401 : Type explict declaration
+/*
 #define getINTLEVEL() \
 		((WIZCHIP_READ(INTLEVEL) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(INTLEVEL,1)))
+*/
+#define getINTLEVEL() \
+		(((uint16_t)WIZCHIP_READ(INTLEVEL) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(INTLEVEL,1)))
 
 /**
  * @ingroup Common_register_access_function
@@ -1359,22 +1371,21 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		(WIZCHIP_READ(IR) & 0xF0)
 /**
  * @ingroup Common_register_access_function
- * @brief Set @ref IMR register
- * @param (uint8_t)imr Value to set @ref IMR register.
+ * @brief Set @ref _IMR_ register
+ * @param (uint8_t)imr Value to set @ref _IMR_ register.
  * @sa getIMR()
  */
 #define setIMR(imr) \
-		WIZCHIP_WRITE(IMR, imr)
+		WIZCHIP_WRITE(_IMR_, imr)
 
 /**
  * @ingroup Common_register_access_function
- * @brief Get @ref IMR register
- * @return uint8_t. Value of @ref IMR register.
+ * @brief Get @ref _IMR_ register
+ * @return uint8_t. Value of @ref _IMR_ register.
  * @sa setIMR()
  */
 #define getIMR() \
-		WIZCHIP_READ(IMR)
-
+		WIZCHIP_READ(_IMR_)
 
 /**
  * @ingroup Common_register_access_function
@@ -1413,41 +1424,47 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function
- * @brief Set @ref RTR register
- * @param (uint16_t)rtr Value to set @ref RTR register.
+ * @brief Set @ref _RTR_ register
+ * @param (uint16_t)rtr Value to set @ref _RTR_ register.
  * @sa getRTR()
  */
 #define setRTR(rtr)   {\
-		WIZCHIP_WRITE(RTR,   (uint8_t)(rtr >> 8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(RTR,1), (uint8_t) rtr); \
+		WIZCHIP_WRITE(_RTR_,   (uint8_t)(rtr >> 8)); \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(_RTR_,1), (uint8_t) rtr); \
 	}
 
 /**
  * @ingroup Common_register_access_function
- * @brief Get @ref RTR register
- * @return uint16_t. Value of @ref RTR register.
+ * @brief Get @ref _RTR_ register
+ * @return uint16_t. Value of @ref _RTR_ register.
  * @sa setRTR()
  */
+//M20150401 : Type explict declaration
+/*
 #define getRTR() \
-		((WIZCHIP_READ(RTR) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(RTR,1)))
+		((WIZCHIP_READ(_RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_RTR_,1)))
+*/
+#define getRTR() \
+		(((uint16_t)WIZCHIP_READ(_RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_RTR_,1)))
+
 
 /**
  * @ingroup Common_register_access_function
- * @brief Set @ref RCR register
- * @param (uint8_t)rcr Value to set @ref RCR register.
+ * @brief Set @ref _RCR_ register
+ * @param (uint8_t)rcr Value to set @ref _RCR_ register.
  * @sa getRCR()
  */
 #define setRCR(rcr) \
-		WIZCHIP_WRITE(RCR, rcr)
+		WIZCHIP_WRITE(_RCR_, rcr)
 
 /**
  * @ingroup Common_register_access_function
- * @brief Get @ref RCR register
- * @return uint8_t. Value of @ref RCR register.
+ * @brief Get @ref _RCR_ register
+ * @return uint8_t. Value of @ref _RCR_ register.
  * @sa setRCR()
  */
 #define getRCR() \
-		WIZCHIP_READ(RCR)
+		WIZCHIP_READ(_RCR_)
 
 //================================================== test done ===========================================================
 
@@ -1523,8 +1540,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setPSID()
  */
 //uint16_t getPSID(void);
+//M20150401 : Type explict declaration
+/*
 #define getPSID() \
 		((WIZCHIP_READ(PSID) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PSID,1)))
+*/
+#define getPSID() \
+		(((uint16_t)WIZCHIP_READ(PSID) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PSID,1)))
 
 /**
  * @ingroup Common_register_access_function
@@ -1543,24 +1565,39 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint16_t. Value of @ref PMRU register.
  * @sa setPMRU()
  */
+//M20150401 : Type explict declaration
+/*
 #define getPMRU() \
 		((WIZCHIP_READ(PMRU) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PMRU,1)))
+*/
+#define getPMRU() \
+		(((uint16_t)WIZCHIP_READ(PMRU) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(PMRU,1)))
 
 /**
  * @ingroup Common_register_access_function
  * @brief Get unreachable IP address
  * @param (uint8_t*)uipr Pointer variable to get unreachable IP address. It should be allocated 4 bytes.
  */
+//M20150401 : Size Error of UIPR (6 -> 4)
+/*
 #define getUIPR(uipr) \
 		WIZCHIP_READ_BUF(UIPR,uipr,6)
+*/
+#define getUIPR(uipr) \
+		WIZCHIP_READ_BUF(UIPR,uipr,4)
 
 /**
  * @ingroup Common_register_access_function
  * @brief Get @ref UPORTR register
  * @return uint16_t. Value of @ref UPORTR register.
  */
+//M20150401 : Type explict declaration 
+/*
 #define getUPORTR() \
 	((WIZCHIP_READ(UPORTR) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(UPORTR,1)))
+*/
+#define getUPORTR() \
+	(((uint16_t)WIZCHIP_READ(UPORTR) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(UPORTR,1)))	
 
 /**
  * @ingroup Common_register_access_function
@@ -1701,8 +1738,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint16_t. Value of @ref Sn_PORT.
  * @sa setSn_PORT()
  */
+//M20150401 : Type explict declaration 
+/*
 #define getSn_PORT(sn) \
 		((WIZCHIP_READ(Sn_PORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1)))
+*/
+#define getSn_PORT(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_PORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1763,8 +1805,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint16_t. Value of @ref Sn_DPORT.
  * @sa setSn_DPORT()
  */
+//M20150401 : Type explict declaration
+/*
 #define getSn_DPORT(sn) \
 		((WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1)))
+*/
+#define getSn_DPORT(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1785,8 +1832,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint16_t. Value of @ref Sn_MSSR.
  * @sa setSn_MSSR()
  */
+//M20150401 : Type explict declaration
+/*
 #define getSn_MSSR(sn) \
 		((WIZCHIP_READ(Sn_MSSR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_MSSR(sn),1)))
+*/
+#define getSn_MSSR(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_MSSR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_MSSR(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1885,8 +1937,13 @@ uint16_t getSn_TX_FSR(uint8_t sn);
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of @ref Sn_TX_RD.
  */
+//M20150401 : Type explict declaration
+/*
 #define getSn_TX_RD(sn) \
 		((WIZCHIP_READ(Sn_TX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_RD(sn),1)))
+*/
+#define getSn_TX_RD(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_TX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_RD(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1907,8 +1964,13 @@ uint16_t getSn_TX_FSR(uint8_t sn);
  * @return uint16_t. Value of @ref Sn_TX_WR.
  * @sa setSn_TX_WR()
  */
+//M20150401 : Type explict declaration
+/*
 #define getSn_TX_WR(sn) \
 		((WIZCHIP_READ(Sn_TX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn),1)))
+*/
+#define getSn_TX_WR(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_TX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_TX_WR(sn),1)))		
 
 
 /**
@@ -1939,8 +2001,13 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @regurn uint16_t. Value of @ref Sn_RX_RD.
  * @sa setSn_RX_RD()
  */
+//M20150401 : Type explict declaration 
+/*
 #define getSn_RX_RD(sn) \
 		((WIZCHIP_READ(Sn_RX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn),1)))
+*/		
+#define getSn_RX_RD(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_RX_RD(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_RD(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1948,9 +2015,13 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of @ref Sn_RX_WR.
  */
+//M20150401 : Type explict declaration
+/*  
 #define getSn_RX_WR(sn) \
 		((WIZCHIP_READ(Sn_RX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn),1)))
-
+*/		
+#define getSn_RX_WR(sn) \
+		(((uint16_t)WIZCHIP_READ(Sn_RX_WR(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_WR(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -1971,8 +2042,13 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Value of @ref Sn_FRAG.
  * @sa setSn_FRAG()
  */
+//M20150401 : Type explict declaration  
+/*
 #define getSn_FRAG(sn) \
 		((WIZCHIP_READ(Sn_FRAG(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_FRAG(sn),1)))
+*/		
+#define getSn_FRAG(sn) \
+      (((uint16_t)WIZCHIP_READ(Sn_FRAG(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_FRAG(sn),1)))		
 
 /**
  * @ingroup Socket_register_access_function
@@ -2004,17 +2080,26 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of Socket n RX max buffer size.
  */
+//M20150401 : Type explict declaration 
+/*
 #define getSn_RxMAX(sn) \
 		(getSn_RXBUF_SIZE(sn) << 10)
+*/		
+#define getSn_RxMAX(sn) \
+		(((uint16_t)getSn_RXBUF_SIZE(sn)) << 10)		
 
 /**  
  * @brief Gets the max buffer size of socket sn passed as parameters.
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of Socket n TX max buffer size.
  */
-//uint16_t getSn_TxMAX(uint8_t sn);
+//M20150401 : Type explict declaration 
+/*
 #define getSn_TxMAX(sn) \
 		(getSn_TXBUF_SIZE(sn) << 10)
+*/		
+#define getSn_TxMAX(sn) \
+		(((uint16_t)getSn_TXBUF_SIZE(sn)) << 10)		
 
 /**
  * @ingroup Basic_IO_function
