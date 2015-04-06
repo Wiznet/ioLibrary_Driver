@@ -28,8 +28,8 @@ un_l2cval remote_ip;
 uint16_t  remote_port;
 un_l2cval local_ip;
 uint16_t  local_port;
-uint8_t connect_state_control = 0;
-uint8_t connect_state_data = 0;
+uint8_t connect_state_controlc = 0;
+uint8_t connect_state_datac = 0;
 uint8_t gModeActivePassiveflag = 0;
 struct ftpd ftp;
 
@@ -52,12 +52,12 @@ struct Command {
 
 struct Command Command;
 
-int current_year = 2014;
-int current_month = 12;
-int current_day = 31;
-int current_hour = 10;
-int current_min = 10;
-int current_sec = 30;
+int current_yearc = 2014;
+int current_monthc = 12;
+int current_dayc = 31;
+int current_hourc = 10;
+int current_minc = 10;
+int current_secc = 30;
 
 uint8_t gMenuStart = 0;
 uint8_t gDataSockReady = 0;
@@ -83,28 +83,7 @@ uint8_t* User_Keyboard_MSG()
 	return gMsgBuf;
 }
 
-int fsprintf(uint8_t s, const char *format, ...)
-{
-	int i;
-/*
-	char buf[LINELEN];
-	FILE f;
-	va_list ap;
-
-	f.flags = __SWR | __SSTR;
-	f.buf = buf;
-	f.size = INT_MAX;
-	va_start(ap, format);
-	i = vfprintf(&f, format, ap);
-	va_end(ap);
-	buf[f.len] = 0;
-
-	send(s, (uint8_t *)buf, strlen(buf));
-*/
-	return i;
-}
-
-void ftpd_init(uint8_t * src_ip)
+void ftpc_init(uint8_t * src_ip)
 {
 	ftp.state = FTPS_NOT_LOGIN;
 	ftp.dsock_mode = ACTIVE_MODE;
@@ -117,7 +96,7 @@ void ftpd_init(uint8_t * src_ip)
 	socket(CTRL_SOCK, Sn_MR_TCP, IPPORT_FTP, 0x0);
 }
 
-uint8_t ftpd_run(uint8_t * dbuf)
+uint8_t ftpc_run(uint8_t * dbuf)
 {
 	uint16_t size = 0;
 	long ret = 0;
@@ -132,10 +111,10 @@ uint8_t ftpd_run(uint8_t * dbuf)
     switch(getSn_SR(CTRL_SOCK))
     {
     	case SOCK_ESTABLISHED :
-    		if(!connect_state_control){
+    		if(!connect_state_controlc){
     			printf("%d:FTP Connected\r\n", CTRL_SOCK);
     			strcpy(ftp.workingdir, "/");
-    			connect_state_control = 1;
+    			connect_state_controlc = 1;
     		}
     		if(gMenuStart){
 				gMenuStart = 0;
@@ -312,7 +291,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
     				}
     			}
     			printf("Rcvd Command: %s\r\n", dbuf);
-    			proc_ftpd((char *)dbuf);
+    			proc_ftpc((char *)dbuf);
     		}
     		break;
     	case SOCK_CLOSE_WAIT :
@@ -334,7 +313,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
 				printf("%d:Connect error\r\n",CTRL_SOCK);
 				return ret;
 			}
-			connect_state_control = 0;
+			connect_state_controlc = 0;
 			printf("%d:Connectting...\r\n",CTRL_SOCK);
 			break;
     	default :
@@ -343,9 +322,9 @@ uint8_t ftpd_run(uint8_t * dbuf)
 
     switch(getSn_SR(DATA_SOCK)){
     	case SOCK_ESTABLISHED :
-    		if(!connect_state_data){
+    		if(!connect_state_datac){
     			printf("%d:FTP Data socket Connected\r\n", DATA_SOCK);
-    			connect_state_data = 1;
+    			connect_state_datac = 1;
     			//gDataSockReady = 1;
     		}
 			if(gDataPutGetStart){
@@ -501,7 +480,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
    				}
    				gDataSockReady = 1;
    			}
-   			connect_state_data = 0;
+   			connect_state_datac = 0;
    			break;
    		default :
    			break;
@@ -509,7 +488,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
     return 0;
 }
 
-char proc_ftpd(char * buf)
+char proc_ftpc(char * buf)
 {
 	uint16_t Responses;
 	uint8_t dat[30]={0,};
@@ -569,7 +548,7 @@ char proc_ftpd(char * buf)
 			gMenuStart = 1;
 			break;
 		case R_227:
-			if (pport(buf) == -1){
+			if (pportc(buf) == -1){
 				printf("Bad port syntax\r\n");
 			}
 			else{
@@ -585,7 +564,7 @@ char proc_ftpd(char * buf)
 		}
 	return 1;
 }
-int pport(char * arg)
+int pportc(char * arg)
 {
 	int i;
 	char* tok=0;

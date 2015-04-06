@@ -81,10 +81,10 @@ typedef union _un_l2cval {
 }un_l2cval;
 #endif
 
-void ftpd_init(uint8_t * src_ip);
-uint8_t ftpd_run(uint8_t * dbuf);
-char proc_ftpd(char * buf);
-int pport(char * arg);
+void ftpc_init(uint8_t * src_ip);
+uint8_t ftpc_run(uint8_t * dbuf);
+char proc_ftpc(char * buf);
+int pportc(char * arg);
 uint8_t* User_Keyboard_MSG();
 
 int sendit(char * command);
