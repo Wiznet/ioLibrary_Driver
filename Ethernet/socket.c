@@ -171,7 +171,7 @@ int8_t close(uint8_t sn)
 	while( getSn_CR(sn) );
 	/* clear all interrupt of the socket. */
 	setSn_IR(sn, 0xFF);
-	//A20130325 : Release the sock_io_mode of socket n.
+	//A20150401 : Release the sock_io_mode of socket n.
 	sock_io_mode &= ~(1<<sn);
 	//
 	sock_is_sending &= ~(1<<sn);
@@ -317,7 +317,9 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
    /* wait to process the command... */
    while(getSn_CR(sn));
    sock_is_sending |= (1 << sn);
-   return len;
+   //M20150409 : Explicit Type Casting
+   //return len;
+   return (int32_t)len;
 }
 
 
@@ -359,7 +361,9 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
    wiz_recv_data(sn, buf, len);
    setSn_CR(sn,Sn_CR_RECV);
    while(getSn_CR(sn));
-   return len;
+   //M20150409 : Explicit Type Casting
+   //return len;
+   return (int32_t)len;
 }
 
 int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port)
@@ -433,16 +437,22 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
       else if(tmp & Sn_IR_TIMEOUT)
       {
          setSn_IR(sn, Sn_IR_TIMEOUT);
-         len = SOCKERR_TIMEOUT;
-         break;
+         //M20150409 : Fixed the lost of sign bits by type casting.
+         //len = (uint16_t)SOCKERR_TIMEOUT;
+         //break;
+         #if _WIZCHIP_ < 5500   //M20150401 : for WIZCHIP Errata #4, #5 (ARP errata)
+            if(taddr) setSUBR((uint8_t*)&taddr);
+         #endif
+         return SOCKERR_TIMEOUT;
       }
       ////////////
    }
    #if _WIZCHIP_ < 5500   //M20150401 : for WIZCHIP Errata #4, #5 (ARP errata)
       if(taddr) setSUBR((uint8_t*)&taddr);
    #endif
-   
-	return len;
+   //M20150409 : Explicit Type Casting
+   //return len;
+   return (int32_t)len;
 }
 
 
@@ -489,7 +499,7 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
    			setSn_CR(sn,Sn_CR_RECV);
    			while(getSn_CR(sn));
    			// read peer's IP address, port number & packet length
-    			addr[0] = head[0];
+            addr[0] = head[0];
    			addr[1] = head[1];
    			addr[2] = head[2];
    			addr[3] = head[3];
@@ -564,7 +574,9 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
 	//if(sock_remained_size[sn] != 0) sock_pack_info[sn] |= 0x01;
 	if(sock_remained_size[sn] != 0) sock_pack_info[sn] |= PACK_REMAINED;
    //
- 	return pack_len;
+   //M20150409 : Explicit Type Casting
+   //return pack_len;
+   return (int32_t)pack_len;
 }
 
 
