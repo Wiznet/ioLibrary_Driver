@@ -341,7 +341,9 @@ typedef enum
    SIK_RECEIVED      = (1 << 2),    ///< data received
    SIK_TIMEOUT       = (1 << 3),    ///< timeout occurred
    SIK_SENT          = (1 << 4),    ///< send ok
-   SIK_ALL           = 0x1F,        ///< all interrupt
+   //M20150410 : Remove the comma of last member
+   //SIK_ALL           = 0x1F,        ///< all interrupt
+   SIK_ALL           = 0x1F         ///< all interrupt
 }sockint_kind;
 
 /**

@@ -252,7 +252,9 @@
  * @brief Socket Interrupt Mask Register(R/W)
  * @details Each bit of \ref _IMR_ corresponds to each bit of \ref IR2.
  * When a bit of \ref _IMR_ is and the corresponding bit of \ref IR2 is  Interrupt will be issued.
- * In other words, if a bit of \ref SIMR is  an interrupt will be not issued even if the corresponding bit of \ref IR is 
+ * In other words, if a bit of \ref _IMR_, an interrupt will be not issued even if the corresponding bit of \ref IR2 is set
+ * @note  This Register is same operated as <b>SMIR<b> of W5100, W5300 and W5550.\n
+ *        So, \ref setSIMR() set a value to _IMR_ for integrating with ioLibrary
  */
 #define _IMR_    			(_W5200_IO_BASE_ + (0x0016)) // Socket Interrupt Mask
 
@@ -375,6 +377,8 @@
  * </table>
  * - \ref IM_IR7 : IP Conflict Interrupt Mask
  * - \ref IM_IR5 : PPPoE Close Interrupt Mask
+ * @note  This Register is same operated as <b>_IMR_<b> of W5100, W5300 and W5550.\n
+ *        So, \ref setIMR() set a value to IMR2 for integrating with ioLibrary
  */
 #define IMR2     			(_W5200_IO_BASE_ + (0x0036)) // Interrupt Mask
 
@@ -1328,21 +1332,31 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5200
- * @brief Set \ref _IMR_ register
- * @param (uint8_t)imr Value to set @ref _IMR_ register.
+ * @brief Set \ref IMR2 register
+ * @param (uint8_t)imr Value to set @ref IMR2 register.
  * @sa getIMR()
  */
+//M20150410 : Replace _IMR_ with IMR2 for integrating with ioLibrary
+/*
 #define setIMR(imr) \
 		WIZCHIP_WRITE(_IMR_, imr)
+*/		
+#define setIMR(imr) \
+		WIZCHIP_WRITE(IMR2, imr)
 
 /**
  * @ingroup Common_register_access_function_W5200
- * @brief Get \ref _IMR_ register
- * @return uint8_t. Value of @ref _IMR_ register.
+ * @brief Get \ref IMR2 register
+ * @return uint8_t. Value of @ref IMR2 register.
  * @sa setIMR()
  */
+//M20150410 : Replace _IMR_ with IMR2 for integrating with ioLibrary
+/*
 #define getIMR() \
 		WIZCHIP_READ(_IMR_)
+*/		
+#define getIMR() \
+		WIZCHIP_READ(IMR2)
 
 /**
  * @ingroup Common_register_access_function_W5200
@@ -1492,23 +1506,34 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5200
- * @brief Set \ref IMR2 register
+ * @brief Set \ref _IMR_ register
  * @param (uint8_t)imr2 Value to set \ref IMR2 register.
  * @sa getIMR2()
+ * @note If possible, Don't use this function. Instead, Use setSIMR() for compatible with ioLibrary.
  */
+ //M20150410 : Replace IMR2 with _IMR_ for integrating with ioLibrary
+/*
 #define setIMR2(imr2) \
 		WIZCHIP_WRITE(IMR2, (imr2 & 0xA0))
+*/		
+#define setIMR2(imr2) \
+		WIZCHIP_WRITE(_IMR_, (imr2 & 0xA0))
 #define  setSIMR(imr2)  setIMR2(imr2)
 
 /**
  * @ingroup Common_register_access_function_W5200
- * @brief Get \ref IMR2 register
+ * @brief Get \ref _IMR_ register
  * @return uint8_t. Value of \ref IMR2 register.
  * @sa setIMR2()
  */
+ //M20150410 : Replace IMR2 with _IMR_ for integrating with ioLibrary
+/*
 #define getIMR2() \
 		(WIZCHIP_READ(IMR2) & 0xA0)
-#define  getSIMR()      getIMR2()
+*/		
+#define getIMR2() \
+		(WIZCHIP_READ(_IMR_) & 0xA0)
+#define getSIMR()      getIMR2()
 ///////////////////////////////////
 // Socket N register I/O function //
 ///////////////////////////////////
