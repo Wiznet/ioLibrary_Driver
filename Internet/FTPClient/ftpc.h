@@ -15,7 +15,6 @@
 #define F_APP_FTP_CLIENT
 
 #define LINELEN		100
-//#define DATA_BUF_SIZE	100
 #if !defined(F_FILESYSTEM)
 #define _MAX_SS		512
 #endif
@@ -23,45 +22,52 @@
 #define CTRL_SOCK	2
 #define DATA_SOCK	3
 
-#define	IPPORT_FTPD	20	/* FTP Data port */
-#define	IPPORT_FTP	21	/* FTP Control port */
-
-#define HOSTNAME	"iinChip"
-#define VERSION		"1.0"
-
-#define FILENAME	"a.txt"
-
-enum ftp_type {
+enum ftpc_type {
 	ASCII_TYPE,
 	IMAGE_TYPE,
 	LOGICAL_TYPE
 };
 
-enum ftp_state {
+enum ftpc_state {
 	FTPS_NOT_LOGIN,
 	FTPS_LOGIN
 };
 
-enum datasock_state{
+enum ftpc_datasock_state{
 	DATASOCK_IDLE,
 	DATASOCK_READY,
 	DATASOCK_START
 };
 
-enum datasock_mode{
+enum ftpc_datasock_mode{
 	PASSIVE_MODE,
 	ACTIVE_MODE
 };
-
-struct ftpd {
+enum CommandFirst {
+	f_nocmd,
+	f_dir,
+	f_put,
+	f_get,
+};
+enum CommandSecond {
+	s_nocmd,
+	s_dir,
+	s_put,
+	s_get,
+};
+struct Command {
+	enum CommandFirst First;
+	enum CommandSecond Second;
+};
+struct ftpc {
 	uint8_t control;			/* Control stream */
 	uint8_t data;			/* Data stream */
 
-	enum ftp_type type;		/* Transfer type */
-	enum ftp_state state;
+	enum ftpc_type type;		/* Transfer type */
+	enum ftpc_state state;
 
-	enum datasock_state dsock_state;
-	enum datasock_mode dsock_mode;
+	enum ftpc_datasock_state dsock_state;
+	enum ftpc_datasock_mode dsock_mode;
 
 	char username[LINELEN];		/* Arg to USER command */
 	char workingdir[LINELEN];
@@ -87,13 +93,4 @@ char proc_ftpc(char * buf);
 int pportc(char * arg);
 uint8_t* User_Keyboard_MSG();
 
-int sendit(char * command);
-int recvit(char * command);
-
-long sendfile(uint8_t s, char * command);
-long recvfile(uint8_t s);
-
-#if defined(F_FILESYSTEM)
-void print_filedsc(FIL *fil);
-#endif
 #endif // _FTPC_H_
