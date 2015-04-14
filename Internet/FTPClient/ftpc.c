@@ -64,8 +64,8 @@ uint8_t* User_Keyboard_MSG()
 
 void ftpc_init(uint8_t * src_ip)
 {
-	ftpc.state = FTPS_NOT_LOGIN;
 	ftpc.dsock_mode = ACTIVE_MODE;
+
 	local_ip.cVal[0] = src_ip[0];
 	local_ip.cVal[1] = src_ip[1];
 	local_ip.cVal[2] = src_ip[2];
@@ -106,7 +106,9 @@ uint8_t ftpc_run(uint8_t * dbuf)
 				printf("4> Sets Data Connection. Current state : %s\r\n", (ftpc.dsock_mode==ACTIVE_MODE)?"Active":"Passive");
 				printf("5> Put File to Server\r\n");
 				printf("6> Get File from Server\r\n");
+#if defined(F_FILESYSTEM)
 				printf("7> Delete My File\r\n");
+#endif
 				printf("----------------------------------------\r\n");
 				while(1){
 					msg_c=Board_UARTGetCharBlocking();
@@ -166,10 +168,16 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						}
 					}
 					else if(msg_c=='2'){
+#if defined(F_FILESYSTEM)
 						scan_files(ftpc.workingdir, dbuf, (int *)&size);
 						printf("\r\n%s\r\n", dbuf);
 						getMountedMemorySize(SPI_FLASHM, &totalSize, &availableSize);
 						printf(" - Available Memory Size : %ld kB / %ld kB ( %ld kB is used )\r\n", availableSize, totalSize, (totalSize - availableSize));
+#else
+						if (strncmp(ftpc.workingdir, "/$Recycle.Bin", sizeof("/$Recycle.Bin")) != 0)
+							size = sprintf(dbuf, "drwxr-xr-x 1 ftp ftp 0 Dec 31 2014 $Recycle.Bin\r\n-rwxr-xr-x 1 ftp ftp 512 Dec 31 2014 test.txt\r\n");
+						printf("\r\n%s\r\n", dbuf);
+#endif
 						gMenuStart = 1;
 						break;
 					}
@@ -333,6 +341,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						sprintf(ftpc.filename, "/%s", (uint8_t *)gMsgBuf);
 					else
 						sprintf(ftpc.filename, "%s/%s", ftpc.workingdir, (uint8_t *)gMsgBuf);
+#if defined(F_FILESYSTEM)
 					ftpc.fr = f_open(&(ftpc.fil), (const char *)ftpc.filename, FA_READ);
 					if(ftpc.fr == FR_OK){
 						remain_filesize = ftpc.fil.fsize;
@@ -353,15 +362,23 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						}while(remain_filesize != 0);
 						printf("\r\nFile read finished\r\n");
 						ftpc.fr = f_close(&(ftpc.fil));
-						gDataPutGetStart = 0;
-						disconnect(DATA_SOCK);
 					}
 					else{
 						printf("File Open Error: %d\r\n", ftpc.fr);
 						ftpc.fr = f_close(&(ftpc.fil));
-						gDataPutGetStart = 0;
-						disconnect(DATA_SOCK);
 					}
+#else
+					remain_filesize = strlen(ftpc.filename);
+					do{
+						memset(dbuf, 0, _MAX_SS);
+						blocklen = sprintf(dbuf, "%s", ftpc.filename);
+						printf("########## dbuf:%s\r\n", dbuf);
+						send(DATA_SOCK, dbuf, blocklen);
+						remain_filesize -= blocklen;
+					}while(remain_filesize != 0);
+#endif
+					gDataPutGetStart = 0;
+					disconnect(DATA_SOCK);
 					break;
 				case s_get:
 					printf("waitng...\r\n");
@@ -369,6 +386,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						sprintf(ftpc.filename, "/%s", (uint8_t *)gMsgBuf);
 					else
 						sprintf(ftpc.filename, "%s/%s", ftpc.workingdir, (uint8_t *)gMsgBuf);
+#if defined(F_FILESYSTEM)
 					ftpc.fr = f_open(&(ftpc.fil), (const char *)ftpc.filename, FA_CREATE_ALWAYS | FA_WRITE);
 					if(ftpc.fr == FR_OK){
 						printf("f_open return FR_OK\r\n");
@@ -403,6 +421,28 @@ uint8_t ftpc_run(uint8_t * dbuf)
 					}else{
 						printf("File Open Error: %d\r\n", ftpc.fr);
 					}
+#else
+					while(1){
+						if((remain_datasize = getSn_RX_RSR(DATA_SOCK)) > 0){
+							while(1){
+								memset(dbuf, 0, _MAX_SS);
+								if(remain_datasize > _MAX_SS)
+									recv_byte = _MAX_SS;
+								else
+									recv_byte = remain_datasize;
+								ret = recv(DATA_SOCK, dbuf, recv_byte);
+								printf("########## dbuf:%s\r\n", dbuf);
+								remain_datasize -= ret;
+								if(remain_datasize <= 0)
+									break;
+							}
+						}else{
+							if(getSn_SR(DATA_SOCK) != SOCK_ESTABLISHED)
+								break;
+						}
+					}
+					gDataPutGetStart = 0;
+#endif
 					break;
 				default:
 					printf("Command.Second = default\r\n");
@@ -521,7 +561,7 @@ char proc_ftpc(char * buf)
 				break;
 			}
 			break;
-		case R_226:					/* Closing data connection.  File transfer/abort successful */
+		case R_226:
 			gMenuStart = 1;
 			break;
 		case R_227:
