@@ -4,15 +4,13 @@
 
 #include <stdint.h>
 
-#define F_FILESYSTEM // If your target support a file system, you have to activate this feature and implement.
+//#define F_FILESYSTEM // If your target support a file system, you have to activate this feature and implement.
 
 #if defined(F_FILESYSTEM)
 #include "ff.h"
 #endif
 
 #define F_APP_FTP
-#define _FTP_DEBUG_
-#define F_APP_FTP_CLIENT
 
 #define LINELEN		100
 #if !defined(F_FILESYSTEM)
@@ -26,11 +24,6 @@ enum ftpc_type {
 	ASCII_TYPE,
 	IMAGE_TYPE,
 	LOGICAL_TYPE
-};
-
-enum ftpc_state {
-	FTPS_NOT_LOGIN,
-	FTPS_LOGIN
 };
 
 enum ftpc_datasock_state{
@@ -61,15 +54,13 @@ struct Command {
 };
 struct ftpc {
 	uint8_t control;			/* Control stream */
-	uint8_t data;			/* Data stream */
+	uint8_t data;				/* Data stream */
 
 	enum ftpc_type type;		/* Transfer type */
-	enum ftpc_state state;
 
 	enum ftpc_datasock_state dsock_state;
 	enum ftpc_datasock_mode dsock_mode;
 
-	char username[LINELEN];		/* Arg to USER command */
 	char workingdir[LINELEN];
 	char filename[LINELEN];
 
