@@ -126,8 +126,6 @@ uint8_t ftpc_run(uint8_t * dbuf)
 #if defined(F_FILESYSTEM)
 						scan_files(ftpc.workingdir, dbuf, (int *)&size);
 						printf("\r\n%s\r\n", dbuf);
-						getMountedMemorySize(SPI_FLASHM, &totalSize, &availableSize);
-						printf(" - Available Memory Size : %ld kB / %ld kB ( %ld kB is used )\r\n", availableSize, totalSize, (totalSize - availableSize));
 #else
 						if (strncmp(ftpc.workingdir, "/$Recycle.Bin", sizeof("/$Recycle.Bin")) != 0)
 							size = sprintf(dbuf, "drwxr-xr-x 1 ftp ftp 0 Dec 31 2014 $Recycle.Bin\r\n-rwxr-xr-x 1 ftp ftp 512 Dec 31 2014 test.txt\r\n");
@@ -273,7 +271,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 			if(gDataPutGetStart){
 				switch(Command.Second){
 				case s_dir:
-					printf("dir waitng...\r\n");
+					printf("dir waiting...\r\n");
 					if((size = getSn_RX_RSR(DATA_SOCK)) > 0){ // Don't need to check SOCKERR_BUSY because it doesn't not occur.
 						printf("ok\r\n");
 						memset(dbuf, 0, _MAX_SS);
@@ -290,10 +288,11 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						}
 						printf("Rcvd Data:\n\r%s\n\r", dbuf);
 						gDataPutGetStart = 0;
+						Command.Second = s_nocmd;
 					}
 					break;
 				case s_put:
-					printf("put waitng...\r\n");
+					printf("put waiting...\r\n");
 					if(strlen(ftpc.workingdir) == 1)
 						sprintf(ftpc.filename, "/%s", (uint8_t *)gMsgBuf);
 					else
@@ -335,10 +334,11 @@ uint8_t ftpc_run(uint8_t * dbuf)
 					}while(remain_filesize != 0);
 #endif
 					gDataPutGetStart = 0;
+					Command.Second = s_nocmd;
 					disconnect(DATA_SOCK);
 					break;
 				case s_get:
-					printf("get waitng...\r\n");
+					printf("get waiting...\r\n");
 					if(strlen(ftpc.workingdir) == 1)
 						sprintf(ftpc.filename, "/%s", (uint8_t *)gMsgBuf);
 					else
@@ -399,6 +399,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						}
 					}
 					gDataPutGetStart = 0;
+					Command.Second = s_nocmd;
 #endif
 					break;
 				default:
@@ -504,14 +505,17 @@ char proc_ftpc(char * buf)
 		case R_150:
 			switch(Command.First){
 			case f_dir:
+				Command.First = f_nocmd;
 				Command.Second = s_dir;
 				gDataPutGetStart = 1;
 				break;
 			case f_get:
+				Command.First = f_nocmd;
 				Command.Second = s_get;
 				gDataPutGetStart = 1;
 				break;
 			case f_put:
+				Command.First = f_nocmd;
 				Command.Second = s_put;
 				gDataPutGetStart = 1;
 				break;

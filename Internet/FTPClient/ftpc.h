@@ -16,7 +16,7 @@
 //#define F_FILESYSTEM
 
 /* Change to your Chipset Uart function, you have to activate this feature and implement.
- * Board_UARTGetCharBlocking()
+ * Change!! -> Board_UARTGetCharBlocking()
  * Below is an example of a function of lpc_chip library. */
 //#define ftp_getc()	Board_UARTGetCharBlocking()
 
@@ -27,6 +27,9 @@
 #ifndef	ftp_getc()
 #define Need_UARTGetCharBlocking_func
 #else
+/* Change library
+ * Change!! -> board_api.h,
+ * Below is an example of a function of lpc_chip library. */
 #include "board_api.h"
 #endif
 
