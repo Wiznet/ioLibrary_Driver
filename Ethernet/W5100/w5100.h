@@ -196,7 +196,11 @@
  * - \ref MR_AI         	: Address Auto-Increment in Indirect Bus Interface
  * - \ref MR_IND         	: Indirect Bus Interface mode
  */
-#define MR					(_W5100_IO_BASE_ + (0x0000))  // Mode
+#if _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_
+   #define MR					(_WIZCHIP_IO_BASE_ + (0x0000))  // Mode
+#else
+   #define MR					(_W5500_IO_BASE_ + (0x0000))  // Mode
+#endif   
 
 /**
  * @ingroup Common_register_group_W5100

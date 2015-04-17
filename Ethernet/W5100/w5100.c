@@ -1,7 +1,7 @@
 //*****************************************************************************
 //
-//! \file w5200.c
-//! \brief W5200 HAL Interface.
+//! \file w5100.c
+//! \brief W5100 HAL Interface.
 //! \version 1.0.0
 //! \date 2013/10/21
 //! \par  Revision history
