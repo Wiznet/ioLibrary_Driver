@@ -199,7 +199,11 @@
  * - \ref MR_AI         	: Address Auto-Increment in Indirect Bus Interface
  * - \ref MR_IND         	: Indirect Bus Interface mode
  */
-#define MR					(_W5200_IO_BASE_ + (0x0000))  // Mode
+#if  (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_) 
+   #define MR					(_WIZCHIP_IO_BASE_ + (0x0000))  // Mode
+#else   
+   #define MR					(_W5200_IO_BASE_ + (0x0000))  // Mode
+#endif   
 
 /**
  * @ingroup Common_register_group_W5200
@@ -1342,7 +1346,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(_IMR_, imr)
 */		
 #define setIMR(imr) \
-		WIZCHIP_WRITE(IMR2, imr)
+		WIZCHIP_WRITE(IMR2, imr & 0xA0)
 
 /**
  * @ingroup Common_register_access_function_W5200
@@ -1356,7 +1360,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_READ(_IMR_)
 */		
 #define getIMR() \
-		WIZCHIP_READ(IMR2)
+		(WIZCHIP_READ(IMR2) & 0xA0)
 
 /**
  * @ingroup Common_register_access_function_W5200
@@ -1517,7 +1521,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(IMR2, (imr2 & 0xA0))
 */		
 #define setIMR2(imr2) \
-		WIZCHIP_WRITE(_IMR_, (imr2 & 0xA0))
+		WIZCHIP_WRITE(_IMR_, imr2)
 #define  setSIMR(imr2)  setIMR2(imr2)
 
 /**
@@ -1532,7 +1536,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		(WIZCHIP_READ(IMR2) & 0xA0)
 */		
 #define getIMR2() \
-		(WIZCHIP_READ(_IMR_) & 0xA0)
+		WIZCHIP_READ(_IMR_)
 #define getSIMR()      getIMR2()
 ///////////////////////////////////
 // Socket N register I/O function //

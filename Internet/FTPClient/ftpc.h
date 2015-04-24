@@ -1,36 +1,62 @@
 #ifndef _FTPC_H_
 #define _FTPC_H_
 
-
 #include <stdint.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <limits.h>
+#include <stdarg.h>
+#include "stdio_private.h"
+#include "socket.h"
 
-#define F_FILESYSTEM // If your target support a file system, you have to activate this feature and implement.
+#define F_APP_FTPC
 
-#if defined(F_FILESYSTEM)
+/* If your target support a file system, you have to activate this feature and implement. */
+//#define F_FILESYSTEM
+
+/* Change to your Chipset Uart function, you have to activate this feature and implement.
+ * Change!! -> Board_UARTGetCharBlocking()
+ * Below is an example of a function of lpc_chip library. */
+//#define ftp_getc()	Board_UARTGetCharBlocking()
+
+#ifdef F_FILESYSTEM
 #include "ff.h"
 #endif
 
-#define F_APP_FTP
-#define _FTP_DEBUG_
-#define F_APP_FTP_CLIENT
+#ifndef	ftp_getc()
+#define Need_UARTGetCharBlocking_func
+#else
+/* Change library
+ * Change!! -> board_api.h,
+ * Below is an example of a function of lpc_chip library. */
+#include "board_api.h"
+#endif
+
 
 #define LINELEN		100
-#if !defined(F_FILESYSTEM)
+#ifndef F_FILESYSTEM
 #define _MAX_SS		512
 #endif
 
 #define CTRL_SOCK	2
 #define DATA_SOCK	3
 
+/* FTP Responses */
+#define R_150	150		/* File status ok; opening data conn */
+#define R_200	200		/* 'Generic' command ok */
+#define R_220	220		/* Service ready for new user. */
+#define R_226	226		/* Closing data connection.  File transfer/abort successful */
+#define R_227	227		/* Entering passive mode (h1,h2,h3,h4,p1,p2) */
+#define R_230	230		/* User logged in, proceed */
+#define R_331	331		/* User name okay, need password. */
+
+#define TransferAscii		'A'
+#define TransferBinary		'I'
+
 enum ftpc_type {
 	ASCII_TYPE,
 	IMAGE_TYPE,
-	LOGICAL_TYPE
-};
-
-enum ftpc_state {
-	FTPS_NOT_LOGIN,
-	FTPS_LOGIN
 };
 
 enum ftpc_datasock_state{
@@ -61,23 +87,20 @@ struct Command {
 };
 struct ftpc {
 	uint8_t control;			/* Control stream */
-	uint8_t data;			/* Data stream */
+	uint8_t data;				/* Data stream */
 
 	enum ftpc_type type;		/* Transfer type */
-	enum ftpc_state state;
 
 	enum ftpc_datasock_state dsock_state;
 	enum ftpc_datasock_mode dsock_mode;
 
-	char username[LINELEN];		/* Arg to USER command */
 	char workingdir[LINELEN];
 	char filename[LINELEN];
 
-#if defined(F_FILESYSTEM)
+#ifdef F_FILESYSTEM
 	FIL fil;	// FatFs File objects
 	FRESULT fr;	// FatFs function common result code
 #endif
-
 };
 
 #ifndef un_I2cval
