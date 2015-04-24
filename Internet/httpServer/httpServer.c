@@ -9,8 +9,6 @@
 #include "httpParser.h"
 #include "httpUtil.h"
 
-#include "common.h"
-
 #ifdef	_USE_SDCARD_
 #include "ff.h" 	// header file for FatFs library (FAT file system)
 #endif
