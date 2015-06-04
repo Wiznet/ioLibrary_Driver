@@ -51,7 +51,9 @@
 #include <stdint.h>
 #include "wizchip_conf.h"
 
+/// @cond DOXY_APPLY_CODE
 #if   (_WIZCHIP_ == 5500)
+/// @endcond
 
 #define _W5500_IO_BASE_              0x00000000
 
@@ -266,10 +268,10 @@
 /**
  * @ingroup Common_register_group
  * @brief Interrupt mask register(R/W)
- * @details @ref IMR is used to mask interrupts. Each bit of @ref IMR corresponds to each bit of @ref IR.
- * When a bit of @ref IMR is and the corresponding bit of @ref IR is  an interrupt will be issued. In other words,
- * if a bit of @ref IMR is  an interrupt will not be issued even if the corresponding bit of @ref IR is \n\n
- * Each bit of @ref IMR defined as the following.
+ * @details @ref _IMR_ is used to mask interrupts. Each bit of @ref _IMR_ corresponds to each bit of @ref IR.
+ * When a bit of @ref _IMR_ is and the corresponding bit of @ref IR is  an interrupt will be issued. In other words,
+ * if a bit of @ref _IMR_ is  an interrupt will not be issued even if the corresponding bit of @ref IR is \n\n
+ * Each bit of @ref _IMR_ defined as the following.
  * <table>
  * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
  * 		<tr>  <td>IM_IR7</td> <td>IM_IR6</td> <td>IM_IR5</td> <td>IM_IR4</td> <td>Reserved</td> <td>Reserved</td> <td>Reserved</td> <td>Reserved</td> </tr>
@@ -303,7 +305,7 @@
 /**
  * @ingroup Common_register_group
  * @brief Timeout register address( 1 is 100us )(R/W)
- * @details @ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref _RTR_ is x07D0or 000
+ * @details @ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref _RTR_ is x07D0.
  * And so the default timeout period is 200ms(100us X 2000). During the time configured by @ref _RTR_, W5500 waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
  * If the peer does not respond within the @ref _RTR_ time, W5500 retransmits the packet or issues timeout.
@@ -316,7 +318,7 @@
  * @ingroup Common_register_group
  * @brief Retry count register(R/W)
  * @details @ref _RCR_ configures the number of time of retransmission.
- * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (@ref Sn_IR[TIMEOUT] = .
+ * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (@ref Sn_IR_TIMEOUT = '1').
  */
 //M20150401 : Rename SYMBOE ( Re-define error in a compile)
 //#define RCR                (_W5500_IO_BASE_ + (0x001B << 8) + (WIZCHIP_CREG_BLOCK << 3))  
@@ -361,7 +363,7 @@
  * @ingroup Common_register_group
  * @brief Unreachable IP register address in UDP mode(R)
  * @details W5500 receives an ICMP packet(Destination port unreachable) when data is sent to a port number
- * which socket is not open and @ref UNREACH bit of @ref IR becomes and @ref UIPR & @ref UPORTR indicates
+ * which socket is not open and @ref IR_UNREACH bit of @ref IR becomes and @ref UIPR & @ref UPORTR indicates
  * the destination IP address & port number respectively.
  */
 #define UIPR               (_W5500_IO_BASE_ + (0x0028 << 8) + (WIZCHIP_CREG_BLOCK << 3))
@@ -370,7 +372,7 @@
  * @ingroup Common_register_group
  * @brief Unreachable Port register address in UDP mode(R)
  * @details W5500 receives an ICMP packet(Destination port unreachable) when data is sent to a port number
- * which socket is not open and @ref UNREACH bit of @ref IR becomes and @ref UIPR & @ref UPORTR
+ * which socket is not open and @ref IR_UNREACH bit of @ref IR becomes and @ref UIPR & @ref UPORTR
  * indicates the destination IP address & port number respectively.
  */
 #define UPORTR              (_W5500_IO_BASE_ + (0x002C << 8) + (WIZCHIP_CREG_BLOCK << 3))
@@ -498,7 +500,7 @@
  * @ingroup Socket_register_group
  * @brief source port register(R/W)
  * @details @ref Sn_PORT configures the source port number of Socket n.
- * It is valid when Socket n is used in TCP/UPD mode. It should be set before OPEN command is ordered.
+ * It is valid when Socket n is used in TCP/UDP mode. It should be set before OPEN command is ordered.
  */
 #define Sn_PORT(N)         (_W5500_IO_BASE_ + (0x0004 << 8) + (WIZCHIP_SREG_BLOCK(N) << 3))
 
@@ -514,8 +516,8 @@
  * @ingroup Socket_register_group
  * @brief Peer IP register address(R/W)
  * @details @ref Sn_DIPR configures or indicates the destination IP address of Socket n. It is valid when Socket n is used in TCP/UDP mode.
- * In TCP client mode, it configures an IP address of �TCP serverbefore CONNECT command.
- * In TCP server mode, it indicates an IP address of �TCP clientafter successfully establishing connection.
+ * In TCP client mode, it configures an IP address of TCP serverbefore CONNECT command.
+ * In TCP server mode, it indicates an IP address of TCP clientafter successfully establishing connection.
  * In UDP mode, it configures an IP address of peer to be received the UDP packet by SEND or SEND_MAC command.
  */
 #define Sn_DIPR(N)         (_W5500_IO_BASE_ + (0x000C << 8) + (WIZCHIP_SREG_BLOCK(N) << 3))
@@ -524,8 +526,8 @@
  * @ingroup Socket_register_group
  * @brief Peer port register address(R/W)
  * @details @ref Sn_DPORT configures or indicates the destination port number of Socket n. It is valid when Socket n is used in TCP/UDP mode.
- * In �TCP clientmode, it configures the listen port number of �TCP serverbefore CONNECT command.
- * In �TCP Servermode, it indicates the port number of TCP client after successfully establishing connection.
+ * In TCP clientmode, it configures the listen port number of TCP serverbefore CONNECT command.
+ * In TCP Servermode, it indicates the port number of TCP client after successfully establishing connection.
  * In UDP mode, it configures the port number of peer to be transmitted the UDP packet by SEND/SEND_MAC command.
  */
 #define Sn_DPORT(N)        (_W5500_IO_BASE_ + (0x0010 << 8) + (WIZCHIP_SREG_BLOCK(N) << 3))
@@ -926,46 +928,46 @@
  * The table below shows the value of @ref Sn_SR corresponding to @ref Sn_MR.\n
  * <table>
  *   <tr>  <td>\b Sn_MR (P[3:0])</td> <td>\b Sn_SR</td>            		 </tr>
- *   <tr>  <td>Sn_MR_CLOSE  (000</td> <td></td>         	   		 </tr>
- *   <tr>  <td>Sn_MR_TCP  (001</td> <td>SOCK_INIT (0x13)</td>  		 </tr>
- *   <tr>  <td>Sn_MR_UDP  (010</td>  <td>SOCK_UDP (0x22)</td>  		 </tr>
- *   <tr>  <td>S0_MR_MACRAW  (100</td>  <td>SOCK_MACRAW (0x02)</td>  </tr>
+ *   <tr>  <td>Sn_MR_CLOSE  (000)</td> <td></td>         	   		 </tr>
+ *   <tr>  <td>Sn_MR_TCP  (001)</td> <td>SOCK_INIT (0x13)</td>  		 </tr>
+ *   <tr>  <td>Sn_MR_UDP  (010)</td>  <td>SOCK_UDP (0x22)</td>  		 </tr>
+ *   <tr>  <td>S0_MR_MACRAW  (100)</td>  <td>SOCK_MACRAW (0x02)</td>  </tr>
  * </table>
  */
 #define Sn_CR_OPEN                   0x01
 
 /**
  * @brief Wait connection request in TCP mode(Server mode)
- * @details This is valid only in TCP mode (Sn_MR(P3:P0) = Sn_MR_TCP).
- * In this mode, Socket n operates as a �TCP serverand waits for  connection-request (SYN packet) from any �TCP client
- * The @ref Sn_SR changes the state from SOCK_INIT to SOCKET_LISTEN.
- * When a �TCP clientconnection request is successfully established,
- * the @ref Sn_SR changes from SOCK_LISTEN to SOCK_ESTABLISHED and the Sn_IR(0) becomes 
- * But when a �TCP clientconnection request is failed, Sn_IR(3) becomes and the status of @ref Sn_SR changes to SOCK_CLOSED.
+ * @details This is valid only in TCP mode (\ref Sn_MR(P3:P0) = \ref Sn_MR_TCP).
+ * In this mode, Socket n operates as a TCP serverand waits for  connection-request (SYN packet) from any TCP client
+ * The @ref Sn_SR changes the state from \ref SOCK_INIT to \ref SOCKET_LISTEN.
+ * When a TCP clientconnection request is successfully established,
+ * the @ref Sn_SR changes from SOCK_LISTEN to SOCK_ESTABLISHED and the @ref Sn_IR(0) becomes 
+ * But when a TCP clientconnection request is failed, @ref Sn_IR(3) becomes and the status of @ref Sn_SR changes to SOCK_CLOSED.
  */
 #define Sn_CR_LISTEN                 0x02
 
 /**
  * @brief Send connection request in TCP mode(Client mode)
- * @details  To connect, a connect-request (SYN packet) is sent to b>TCP server</b>configured by @ref Sn_DIPR & Sn_DPORT(destination address & port).
+ * @details  To connect, a connect-request (SYN packet) is sent to <b>TCP server</b>configured by @ref Sn_DIPR & Sn_DPORT(destination address & port).
  * If the connect-request is successful, the @ref Sn_SR is changed to @ref SOCK_ESTABLISHED and the Sn_IR(0) becomes \n\n
  * The connect-request fails in the following three cases.\n
  * 1. When a @b ARPTO occurs (@ref Sn_IR[3] =  ) because destination hardware address is not acquired through the ARP-process.\n
  * 2. When a @b SYN/ACK packet is not received and @b TCPTO (Sn_IR(3) =  )\n
  * 3. When a @b RST packet is received instead of a @b SYN/ACK packet. In these cases, @ref Sn_SR is changed to @ref SOCK_CLOSED.
- * @note This is valid only in TCP mode and operates when Socket n acts as b>TCP client</b>
+ * @note This is valid only in TCP mode and operates when Socket n acts as <b>TCP client</b>
  */
 #define Sn_CR_CONNECT                0x04
 
 /**
  * @brief Send closing request in TCP mode
- * @details Regardless of b>TCP server</b>or b>TCP client</b> the DISCON command processes the disconnect-process (b>Active close</b>or b>Passive close</b>.\n
+ * @details Regardless of <b>TCP server</b>or <b>TCP client</b> the DISCON command processes the disconnect-process (b>Active close</b>or <b>Passive close</b>.\n
  * @par Active close
  * it transmits disconnect-request(FIN packet) to the connected peer\n
  * @par Passive close
  * When FIN packet is received from peer, a FIN packet is replied back to the peer.\n
  * @details When the disconnect-process is successful (that is, FIN/ACK packet is received successfully), @ref Sn_SR is changed to @ref SOCK_CLOSED.\n
- * Otherwise, TCPTO occurs (Sn_IR(3)=)= and then @ref Sn_SR is changed to @ref SOCK_CLOSED.
+ * Otherwise, TCPTO occurs (\ref Sn_IR(3)='1') and then @ref Sn_SR is changed to @ref SOCK_CLOSED.
  * @note Valid only in TCP mode.
  */
 #define Sn_CR_DISCON                 0x08
@@ -1044,24 +1046,24 @@
 /* Sn_SR values */
 /**
  * @brief Closed
- * @details This indicates that Socket n is released.\N
+ * @details This indicates that Socket n is released.\n
  * When DICON, CLOSE command is ordered, or when a timeout occurs, it is changed to @ref SOCK_CLOSED regardless of previous status.
  */
 #define SOCK_CLOSED                  0x00
 
 /**
  * @brief Initiate state
- * @details This indicates Socket n is opened with TCP mode.\N
- * It is changed to @ref SOCK_INIT when Sn_MR(P[3:0]) = 001and OPEN command is ordered.\N
+ * @details This indicates Socket n is opened with TCP mode.\n
+ * It is changed to @ref SOCK_INIT when @ref Sn_MR(P[3:0]) = 001 and OPEN command is ordered.\n
  * After @ref SOCK_INIT, user can use LISTEN /CONNECT command.
  */
 #define SOCK_INIT                    0x13
 
 /**
  * @brief Listen state
- * @details This indicates Socket n is operating as b>TCP server</b>mode and waiting for connection-request (SYN packet) from a peer (b>TCP client</b>.\n
+ * @details This indicates Socket n is operating as <b>TCP server</b>mode and waiting for connection-request (SYN packet) from a peer <b>TCP client</b>.\n
  * It will change to @ref SOCK_ESTALBLISHED when the connection-request is successfully accepted.\n
- * Otherwise it will change to @ref SOCK_CLOSED after TCPTO occurred (Sn_IR(TIMEOUT) = .
+ * Otherwise it will change to @ref SOCK_CLOSED after TCPTO @ref Sn_IR(TIMEOUT) = '1') is occurred.
  */
 #define SOCK_LISTEN                  0x14
 
@@ -1070,7 +1072,7 @@
  * @details This indicates Socket n sent the connect-request packet (SYN packet) to a peer.\n
  * It is temporarily shown when @ref Sn_SR is changed from @ref SOCK_INIT to @ref SOCK_ESTABLISHED by CONNECT command.\n
  * If connect-accept(SYN/ACK packet) is received from the peer at SOCK_SYNSENT, it changes to @ref SOCK_ESTABLISHED.\n
- * Otherwise, it changes to @ref SOCK_CLOSED after TCPTO (@ref Sn_IR[TIMEOUT] =  is occurred.
+ * Otherwise, it changes to @ref SOCK_CLOSED after TCPTO (@ref Sn_IR[TIMEOUT] = '1') is occurred.
  */
 #define SOCK_SYNSENT                 0x15
 
@@ -1078,14 +1080,14 @@
  * @brief Connection state
  * @details It indicates Socket n successfully received the connect-request packet (SYN packet) from a peer.\n
  * If socket n sends the response (SYN/ACK  packet) to the peer successfully,  it changes to @ref SOCK_ESTABLISHED. \n
- * If not, it changes to @ref SOCK_CLOSED after timeout occurs (@ref Sn_IR[TIMEOUT] = .
+ * If not, it changes to @ref SOCK_CLOSED after timeout (@ref Sn_IR[TIMEOUT] = '1') is occurred.
  */
 #define SOCK_SYNRECV                 0x16
 
 /**
  * @brief Success to connect
  * @details This indicates the status of the connection of Socket n.\n
- * It changes to @ref SOCK_ESTABLISHED when the b>TCP SERVER</b>processed the SYN packet from the b>TCP CLIENT</b>during @ref SOCK_LISTEN, or
+ * It changes to @ref SOCK_ESTABLISHED when the <b>TCP SERVER</b>processed the SYN packet from the <b>TCP CLIENT</b>during @ref SOCK_LISTEN, or
  * when the CONNECT command is successful.\n
  * During @ref SOCK_ESTABLISHED, DATA packet can be transferred using SEND or RECV command.
  */
@@ -1126,14 +1128,14 @@
 /**
  * @brief Closing state
  * @details This indicates Socket n is waiting for the response (FIN/ACK packet) to the disconnect-request (FIN packet) by passive-close.\n
- * It changes to @ref SOCK_CLOSED when Socket n received the response successfully, or when timeout occurs  (@ref Sn_IR[TIMEOUT] = .
+ * It changes to @ref SOCK_CLOSED when Socket n received the response successfully, or when timeout(@ref Sn_IR[TIMEOUT] = '1') is occurred.
  */
 #define SOCK_LAST_ACK                0x1D
 
 /**
  * @brief UDP socket
- * @details This indicates Socket n is opened in UDP mode(Sn_MR(P[3:0]) = 010.\n
- * It changes to SOCK_UPD when Sn_MR(P[3:0]) = 010 and OPEN command is ordered.\n
+ * @details This indicates Socket n is opened in UDP mode(@ref Sn_MR(P[3:0]) = '010').\n
+ * It changes to SOCK_UDP when @ref Sn_MR(P[3:0]) = '010' and @ref Sn_CR_OPEN command is ordered.\n
  * Unlike TCP mode, data can be transfered without the connection-process.
  */
 #define SOCK_UDP                     0x22
@@ -1508,7 +1510,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function
- * @brief Set PHAR address
+ * @brief Set @ref PHAR address
  * @param (uint8_t*)phar Pointer variable to set PPP destination MAC register address. It should be allocated 6 bytes.
  * @sa getPHAR()
  */
@@ -1517,7 +1519,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function
- * @brief Get local IP address
+ * @brief Get @ref PHAR address
  * @param (uint8_t*)phar Pointer variable to PPP destination MAC register address. It should be allocated 6 bytes.
  * @sa setPHAR()
  */
@@ -1783,7 +1785,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @brief Get @ref Sn_DIPR register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @param (uint8_t*)dipr Pointer variable to get socket n destination IP address. It should be allocated 4 bytes.
- * @sa SetSn_DIPR()
+ * @sa setSn_DIPR()
  */
 #define getSn_DIPR(sn, dipr) \
 		WIZCHIP_READ_BUF(Sn_DIPR(sn), dipr, 4)
@@ -2000,7 +2002,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @ingroup Socket_register_access_function
  * @brief Get @ref Sn_RX_RD register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
- * @regurn uint16_t. Value of @ref Sn_RX_RD.
+ * @return uint16_t. Value of @ref Sn_RX_RD.
  * @sa setSn_RX_RD()
  */
 //M20150401 : Type explict declaration 
@@ -2078,6 +2080,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
 // Sn_TXBUF & Sn_RXBUF IO function //
 /////////////////////////////////////
 /**  
+ * @brief Socket_register_access_function
  * @brief Gets the max buffer size of socket sn passed as parameter.
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of Socket n RX max buffer size.
@@ -2091,6 +2094,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
 		(((uint16_t)getSn_RXBUF_SIZE(sn)) << 10)		
 
 /**  
+ * @brief Socket_register_access_function
  * @brief Gets the max buffer size of socket sn passed as parameters.
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @return uint16_t. Value of Socket n TX max buffer size.
@@ -2112,7 +2116,6 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * and updates the Tx write pointer register.
  * This function is being called by send() and sendto() function also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @param wizdata Pointer buffer to write data
  * @param len Data length
@@ -2129,7 +2132,6 @@ void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * to <i>wizdata(pointer variable)</i> of the length of <i>len(variable)</i> bytes.
  * This function is being called by recv() also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.
  * @param wizdata Pointer buffer to read data
  * @param len Data length
@@ -2146,6 +2148,8 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
 
+/// @cond DOXY_APPLY_CODE
 #endif
+/// @endcond
 
 #endif   // _W5500_H_

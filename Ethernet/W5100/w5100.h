@@ -43,7 +43,9 @@
 #include <stdint.h>
 #include "wizchip_conf.h"
 
+/// \cond DOXY_APPLY_CODE
 #if   (_WIZCHIP_ == 5100)
+/// \endcond
 
 #define _WIZCHIP_SN_BASE_  (0x0400)
 #define _WIZCHIP_SN_SIZE_  (0x0100)
@@ -199,7 +201,7 @@
 #if _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_
    #define MR					(_WIZCHIP_IO_BASE_ + (0x0000))  // Mode
 #else
-   #define MR					(_W5500_IO_BASE_ + (0x0000))  // Mode
+   #define MR					(_W5100_IO_BASE_ + (0x0000))  // Mode
 #endif   
 
 /**
@@ -275,7 +277,7 @@
  * @ingroup Common_register_group_W5100
  * @brief Retry count register(R/W)
  * @details \ref _RCR_ configures the number of time of retransmission.
- * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR[TIMEOUT] = '1').
+ * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
  */
 #define _RCR_      		(_W5100_IO_BASE_ + (0x0019)) // Retry Count
 #define RMSR				(_W5100_IO_BASE_ + (0x001A)) // Receicve Memory Size
@@ -425,7 +427,7 @@
  * @ingroup Socket_register_group_W5100
  * @brief source port register(R/W)
  * @details \ref Sn_PORT configures the source port number of Socket n.
- * It is valid when Socket n is used in TCP/UPD mode. It should be set before OPEN command is ordered.
+ * It is valid when Socket n is used in TCP/UDP mode. It should be set before OPEN command is ordered.
 */
 #define Sn_PORT(sn)		(_W5100_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0004)) // source port register
 
@@ -960,7 +962,7 @@
  * @brief Closing state
  * @details This indicates Socket n received the disconnect-request (FIN packet) from the connected peer.\n
  * This is half-closing status, and data can be transferred.\n
- * For full-closing, DISCON command is used. But For just-closing, CLOSE command is used.
+ * For full-closing, DISCON command is used. But For just-closing, @ref Sn_CR_CLOSE command is used.
  */
 #define SOCK_CLOSE_WAIT     0x1C
 
@@ -974,23 +976,23 @@
 /**
  * @brief UDP socket
  * @details This indicates Socket n is opened in UDP mode(Sn_MR(P[3:0]) = 010).\n
- * It changes to SOCK_UPD when Sn_MR(P[3:0]) = 010 and OPEN command is ordered.\n
+ * It changes to SOCK_UDP when Sn_MR(P[3:0]) = 010 and @ref Sn_CR_OPEN command is ordered.\n
  * Unlike TCP mode, data can be transfered without the connection-process.
  */
 #define SOCK_UDP			0x22 ///< udp socket 
 
 /**
-* @brief IP raw mode socket
- * @details TThe socket is opened in IPRAW mode. The SOCKET status is change to SOCK_IPRAW when Sn_MR (P3:P0) is
- * Sn_MR_IPRAW and OPEN command is used.\n
+ * @brief IP raw mode socket
+ * @details TThe socket is opened in IPRAW mode. The SOCKET status is change to SOCK_IPRAW when @ref Sn_MR (P3:P0) is
+ * Sn_MR_IPRAW and @ref Sn_CR_OPEN command is used.\n
  * IP Packet can be transferred without a connection similar to the UDP mode.
 */
 #define SOCK_IPRAW			0x32 ///< ip raw mode socket 
 
 /**
  * @brief MAC raw mode socket
- * @details This indicates Socket 0 is opened in MACRAW mode (S0_MR(P[3:0]) = 100and is valid only in Socket 0.\n
- * It changes to SOCK_MACRAW when S0_MR(P[3:0] = 100)and OPEN command is ordered.\n
+ * @details This indicates Socket 0 is opened in MACRAW mode (@ref Sn_MR(P[3:0]) = '100' and n=0) and is valid only in Socket 0.\n
+ * It changes to SOCK_MACRAW when @ref Sn_MR(P[3:0]) = '100' and @ref Sn_CR_OPEN command is ordered.\n
  * Like UDP mode socket, MACRAW mode Socket 0 can transfer a MAC packet (Ethernet frame) without the connection-process.
  */
 #define SOCK_MACRAW			0x42 ///< mac raw mode socket 
@@ -1051,13 +1053,16 @@ connection.
 ////////////////////////
 // Basic I/O Function //
 ////////////////////////
+//
+//M20150601 :  uint16_t AddrSel --> uint32_t AddrSel
+//
 /**
  * @ingroup Basic_IO_function_W5100
  * @brief It reads 1 byte value from a register.
  * @param AddrSel Register address
  * @return The value of register
  */
-uint8_t  WIZCHIP_READ (uint16_t AddrSel);
+uint8_t  WIZCHIP_READ (uint32_t AddrSel);
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1066,7 +1071,7 @@ uint8_t  WIZCHIP_READ (uint16_t AddrSel);
  * @param wb Write data
  * @return void
  */
-void     WIZCHIP_WRITE(uint16_t AddrSel, uint8_t wb );
+void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb );
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1075,7 +1080,7 @@ void     WIZCHIP_WRITE(uint16_t AddrSel, uint8_t wb );
  * @param pBuf Pointer buffer to read data
  * @param len Data length
  */
-void     WIZCHIP_READ_BUF (uint16_t AddrSel, uint8_t* pBuf, uint16_t len);
+void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Basic_IO_function_W5100
@@ -1084,7 +1089,7 @@ void     WIZCHIP_READ_BUF (uint16_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param pBuf Pointer buffer to write data
  * @param len Data length
  */
-void     WIZCHIP_WRITE_BUF(uint16_t AddrSel, uint8_t* pBuf, uint16_t len);
+void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 
 /////////////////////////////////
@@ -1727,7 +1732,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @brief Set @ref Sn_FRAG register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param (uint16_t)frag Value to set \ref Sn_FRAG
- * @sa getSn_FRAD()
+ * @sa getSn_FRAG()
  */
 #define setSn_FRAG(sn, frag) { \
 		WIZCHIP_WRITE(Sn_FRAG(sn),  (uint8_t)(frag >>8)); \
@@ -1809,7 +1814,6 @@ uint32_t getSn_TxBASE(uint8_t sn);
  * and updates the Tx write pointer register.
  * This function is being called by send() and sendto() function also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param wizdata Pointer buffer to write data
  * @param len Data length
@@ -1826,7 +1830,6 @@ void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * to <i>wizdata(pointer variable)</i> of the length of <i>len(variable)</i> bytes.
  * This function is being called by recv() also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param wizdata Pointer buffer to read data
  * @param len Data length
@@ -1843,7 +1846,9 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
 
+/// @cond DOXY_APPLY_CODE
 #endif
+/// @endcond
 
 #endif //_W5100_H_
 

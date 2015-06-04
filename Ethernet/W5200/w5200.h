@@ -43,7 +43,9 @@
 #include <stdint.h>
 #include "wizchip_conf.h"
 
+/// \cond DOXY_APPLY_CODE
 #if   (_WIZCHIP_ == 5200)
+/// \endcond
 
 #define _WIZCHIP_SN_BASE_  (0x4000)
 #define _WIZCHIP_SN_SIZE_  (0x0100)
@@ -265,7 +267,7 @@
 /**
  * @ingroup Common_register_group_W5200
  * @brief Timeout register address( 1 is 100us )(R/W)
- * @details \ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of \ref _RTR_ is x07D0or 000
+ * @details \ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of \ref _RTR_ is x07D0.
  * And so the default timeout period is 200ms(100us X 2000). During the time configured by \ref _RTR_, W5200 waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
  * If the peer does not respond within the \ref _RTR_ time, W5200 retransmits the packet or issues timeout.
@@ -276,7 +278,7 @@
  * @ingroup Common_register_group_W5200
  * @brief Retry count register(R/W)
  * @details \ref _RCR_ configures the number of time of retransmission.
- * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR[TIMEOUT] = '1').
+ * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
  */
 #define _RCR_      			(_W5200_IO_BASE_ + (0x0019)) // Retry Count
 
@@ -502,7 +504,7 @@
  * @ingroup Socket_register_group_W5200
  * @brief source port register(R/W)
  * @details \ref Sn_PORT configures the source port number of Socket n.
- * It is valid when Socket n is used in TCP/UPD mode. It should be set before OPEN command is ordered.
+ * It is valid when Socket n is used in TCP/UDP mode. It should be set before OPEN command is ordered.
 */
 #define Sn_PORT(sn)		(_W5200_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0004)) // source port register
 
@@ -1107,7 +1109,7 @@
 /**
  * @brief UDP socket
  * @details This indicates Socket n is opened in UDP mode(Sn_MR(P[3:0]) = 010).\n
- * It changes to SOCK_UPD when Sn_MR(P[3:0]) = 010 and OPEN command is ordered.\n
+ * It changes to SOCK_UDP when Sn_MR(P[3:0]) = 010 and OPEN command is ordered.\n
  * Unlike TCP mode, data can be transfered without the connection-process.
  */
 #define SOCK_UDP			0x22 ///< udp socket 
@@ -1230,8 +1232,11 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint8_t)mr The value to be set.
  * @sa getMR()
  */
-#define setMR(mr) \
-	WIZCHIP_WRITE(MR,mr)
+#if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
+   #define setMR(mr) 	WIZCHIP_WRITE(MR,mr)
+#else 
+   #define setMR(mr)    (*((uint8_t*)MR) = mr)
+#endif
 
 /**
  * @ingroup Common_register_access_function_W5200
@@ -1239,8 +1244,11 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. The value of Mode register.
  * @sa setMR()
  */
-#define getMR() \
-		WIZCHIP_READ(MR)
+#if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
+   #define getMR() 		WIZCHIP_READ(MR)
+#else
+   #define getMR()      (*(uint8_t*)MR)
+#endif
 
 /**
  * @ingroup Common_register_access_function_W5200
@@ -1743,8 +1751,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param (uint8_t)proto Value to set \ref Sn_PROTO
  * @sa getSn_PROTO()
  */
+//M20150601 : Fixed Wrong Register address
+/*
 #define setSn_PROTO(sn, proto) \
 		WIZCHIP_WRITE(Sn_TOS(sn), tos)
+*/
+#define setSn_PROTO(sn, proto) \
+		WIZCHIP_WRITE(Sn_PROTO(sn), proto)
 
 /**
  * @ingroup Socket_register_access_function_W5200
@@ -1753,8 +1766,13 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @return uint8_t. Value of @ref Sn_PROTO.
  * @sa setSn_PROTO()
  */
+//M20150601 : Fixed Wrong Register address
+/*
 #define getSn_PROTO(sn) \
 		WIZCHIP_READ(Sn_TOS(sn))
+*/
+#define getSn_PROTO(sn) \
+		WIZCHIP_READ(Sn_PROTO(sn))
 
 /**
  * @ingroup Socket_register_access_function_W5200
@@ -1907,7 +1925,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @ingroup Socket_register_access_function_W5200
  * @brief Get @ref Sn_RX_RD register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
- * @regurn uint16_t. Value of @ref Sn_RX_RD.
+ * @return uint16_t. Value of @ref Sn_RX_RD.
  * @sa setSn_RX_RD()
  */
 #define getSn_RX_RD(sn) \
@@ -1960,7 +1978,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @brief Set @ref Sn_FRAG register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param (uint16_t)frag Value to set \ref Sn_FRAG
- * @sa getSn_FRAD()
+ * @sa getSn_FRAG()
  */
 #define setSn_FRAG(sn, frag) { \
 		WIZCHIP_WRITE(Sn_FRAG(sn),  (uint8_t)(frag >>8)); \
@@ -2041,7 +2059,6 @@ uint16_t getSn_TxBASE(uint8_t sn);
  * and updates the Tx write pointer register.
  * This function is being called by send() and sendto() function also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param wizdata Pointer buffer to write data
  * @param len Data length
@@ -2058,7 +2075,6 @@ void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * to <i>wizdata(pointer variable)</i> of the length of <i>len(variable)</i> bytes.
  * This function is being called by recv() also.
  *
- * @note User should read upper byte first and lower byte later to get proper value.
  * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
  * @param wizdata Pointer buffer to read data
  * @param len Data length
@@ -2075,7 +2091,9 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
 
+/// \cond DOXY_APPLY_CODE
 #endif
+/// \endcond
 
 #endif //_W5200_H_
 
