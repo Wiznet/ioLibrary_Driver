@@ -60,7 +60,9 @@
  * @todo You should select one, \b 5100, \b 5200, \b 5300, \b 5500 or etc. \n\n
  *       ex> <code> #define \_WIZCHIP_      5500 </code>
  */
+#ifndef _WIZCHIP_
 #define _WIZCHIP_                      5500   // 5100, 5200, 5300, 5500
+#endif
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
@@ -98,8 +100,10 @@
  * @brief Define interface mode.
  * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
  */
+#ifndef _WIZCHIP_IO_MODE_
 // #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
    #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+#endif
 //A20150601 : Define the unit of IO DATA.   
    typedef   uint8_t   iodata_t;
    #include "W5200/w5200.h"
@@ -119,8 +123,10 @@
  *        ex> <code> #define \_WIZCHIP_IO_MODE_ \_WIZCHIP_IO_MODE_SPI_VDM_ </code>
  *       
  */
+#ifndef _WIZCHIP_IO_MODE_
    //#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_FDM_
    #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+#endif
 //A20150601 : Define the unit of IO DATA.   
    typedef   uint8_t   iodata_t;
    #include "W5500/w5500.h"
@@ -130,15 +136,19 @@
  * @brief Define interface mode.
  * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
  */
+#ifndef _WIZCHIP_IO_MODE_
 //   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
  #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+#endif
 
 //A20150601 : Define the unit and bus width of IO DATA. 
    /**
     * @brief Select the data width 8 or 16 bits.
     * @todo you should select the bus width. Select one of 8 or 16.
     */
+   #ifndef _WIZCHIP_IO_BUS_WIDTH_
    #define _WIZCHIP_IO_BUS_WIDTH_       8  // 16
+   #endif
    #if _WIZCHIP_IO_BUS_WIDTH_ == 8
       typedef   uint8_t   iodata_t;
    #elif _WIZCHIP_IO_BUS_WIDTH_ == 16
@@ -162,7 +172,9 @@
  *       @ref \_WIZCHIP_IO_MODE_BUS_DIR_, @ref \_WIZCHIP_IO_MODE_BUS_INDIR_). \n\n
  *       ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
  */
+#ifndef _WIZCHIP_IO_BASE_
 #define _WIZCHIP_IO_BASE_              0x00000000  // 0x8000
+#endif
 
 //M20150401 : Typing Error
 //#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS
