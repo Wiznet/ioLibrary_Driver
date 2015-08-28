@@ -132,7 +132,7 @@ void get_seconds_from_ntp_server(uint8_t *buf, uint16_t idx)
 	case 20:
 		seconds -=  1*3600;
 		break;
-	case 21:                            //ï¼Ÿ
+	case 21:                            //ï¼?
 	case 22:
 		break;
 	case 23:
@@ -217,6 +217,8 @@ void get_seconds_from_ntp_server(uint8_t *buf, uint16_t idx)
 
 void SNTP_init(uint8_t s, uint8_t *ntp_server, uint8_t tz, uint8_t *buf)
 {
+	NTP_SOCKET = s;
+
 	NTPformat.dstaddr[0] = ntp_server[0];
 	NTPformat.dstaddr[1] = ntp_server[1];
 	NTPformat.dstaddr[2] = ntp_server[2];
