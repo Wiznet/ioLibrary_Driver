@@ -113,16 +113,21 @@
 /*
  * SOCKET FLAG
  */
-#define SF_ETHER_OWN           (Sn_MR_MFEN)        ///< In \ref Sn_MR_MACRAW, Receive only the packet as broadcast, multicast and own packet
-#define SF_IGMP_VER2           (Sn_MR_MC)          ///< In \ref Sn_MR_UDP with \ref SF_MULTI_ENABLE, Select IGMP version 2.   
-#define SF_TCP_NODELAY         (Sn_MR_ND)          ///< In \ref Sn_MR_TCP, Use to nodelayed ack.
-#define SF_MULTI_ENABLE        (Sn_MR_MULTI)       ///< In \ref Sn_MR_UDP, Enable multicast mode.
+#define SF_ETHER_OWN           (Sn_MR_MFEN)        ///< In @ref Sn_MR_MACRAW, Receive only the packet as broadcast, multicast and own packet
+#define SF_IGMP_VER2           (Sn_MR_MC)          ///< In @ref Sn_MR_UDP with \ref SF_MULTI_ENABLE, Select IGMP version 2.   
+#define SF_TCP_NODELAY         (Sn_MR_ND)          ///< In @ref Sn_MR_TCP, Use to nodelayed ack.
+#define SF_MULTI_ENABLE        (Sn_MR_MULTI)       ///< In @ref Sn_MR_UDP, Enable multicast mode.
 
 #if _WIZCHIP_ == 5500
-   #define SF_BROAD_BLOCK         (Sn_MR_BCASTB)   ///< In \ref Sn_MR_UDP or \ref Sn_MR_MACRAW, Block broadcast packet. Valid only in W5500
-   #define SF_MULTI_BLOCK         (Sn_MR_MMB)      ///< In \ref Sn_MR_MACRAW, Block multicast packet. Valid only in W5500
-   #define SF_IPv6_BLOCK          (Sn_MR_MIP6B)    ///< In \ref Sn_MR_MACRAW, Block IPv6 packet. Valid only in W5500
-   #define SF_UNI_BLOCK           (Sn_MR_UCASTB)   ///< In \ref Sn_MR_UDP with \ref SF_MULTI_ENABLE. Valid only in W5500
+   #define SF_BROAD_BLOCK         (Sn_MR_BCASTB)   ///< In @ref Sn_MR_UDP or @ref Sn_MR_MACRAW, Block broadcast packet. Valid only in W5500
+   #define SF_MULTI_BLOCK         (Sn_MR_MMB)      ///< In @ref Sn_MR_MACRAW, Block multicast packet. Valid only in W5500
+   #define SF_IPv6_BLOCK          (Sn_MR_MIP6B)    ///< In @ref Sn_MR_MACRAW, Block IPv6 packet. Valid only in W5500
+   #define SF_UNI_BLOCK           (Sn_MR_UCASTB)   ///< In @ref Sn_MR_UDP with \ref SF_MULTI_ENABLE. Valid only in W5500
+#endif
+
+//A201505 : For W5300
+#if _WIZCHIP_ == 5300
+   #define SF_TCP_ALIGN		     0x02			   ///< Valid only \ref Sn_MR_TCP and W5300, refer to \ref Sn_MR_ALIGN
 #endif
 
 #define SF_IO_NONBLOCK           0x01              ///< Socket nonblock io mode. It used parameter in \ref socket().
@@ -130,9 +135,12 @@
 /*
  * UDP & MACRAW Packet Infomation
  */
-#define PACK_FIRST               0x80              ///< In Non-TCP packet, It indicates to start receiving a packet.
-#define PACK_REMAINED            0x01              ///< In Non-TCP packet, It indicates to remain a packet to be received.
-#define PACK_COMPLETED           0x00              ///< In Non-TCP packet, It indicates to complete to receive a packet.
+#define PACK_FIRST               0x80              ///< In Non-TCP packet, It indicates to start receiving a packet. (When W5300, This flag can be applied)
+#define PACK_REMAINED            0x01              ///< In Non-TCP packet, It indicates to remain a packet to be received. (When W5300, This flag can be applied)
+#define PACK_COMPLETED           0x00              ///< In Non-TCP packet, It indicates to complete to receive a packet. (When W5300, This flag can be applied)
+//A20150601 : For Integrating with W5300
+#define PACK_FIFOBYTE            0x02              ///< Valid only W5300, It indicate to have read already the Sn_RX_FIFOR.
+//
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -372,11 +380,11 @@ typedef enum
 typedef enum
 {
    SO_FLAG,           ///< Valid only in getsockopt(), For set flag of socket refer to <I>flag</I> in @ref socket().
-   SO_TTL,              ///< Set/Get TTL. @ref Sn_TTL  ( @ref setSn_TTL(), @ref getSn_TTL() )
-   SO_TOS,              ///< Set/Get TOS. @ref Sn_TOS  ( @ref setSn_TOS(), @ref getSn_TOS() )
-   SO_MSS,              ///< Set/Get MSS. @ref Sn_MSSR ( @ref setSn_MSSR(), @ref getSn_MSSR() )
-   SO_DESTIP,           ///< Set/Get the destination IP address. @ref Sn_DIPR ( @ref setSn_DIPR(), @ref getSn_DIPR() )
-   SO_DESTPORT,         ///< Set/Get the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
+   SO_TTL,              ///< Set TTL. @ref Sn_TTL  ( @ref setSn_TTL(), @ref getSn_TTL() )
+   SO_TOS,              ///< Set TOS. @ref Sn_TOS  ( @ref setSn_TOS(), @ref getSn_TOS() )
+   SO_MSS,              ///< Set MSS. @ref Sn_MSSR ( @ref setSn_MSSR(), @ref getSn_MSSR() )
+   SO_DESTIP,           ///< Set the destination IP address. @ref Sn_DIPR ( @ref setSn_DIPR(), @ref getSn_DIPR() )
+   SO_DESTPORT,         ///< Set the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
 #if _WIZCHIP_ != 5100   
    SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode, Not supported in W5100
    #if _WIZCHIP_ > 5200   
