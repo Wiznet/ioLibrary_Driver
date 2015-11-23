@@ -8,10 +8,16 @@ This driver provides the Berkeley Socket type APIs.
 <!-- ioLibrary pic -->
 ![ioLibrary](http://wizwiki.net/wiki/lib/exe/fetch.php?media=products:w5500:iolibrary_bsd.jpg "ioLibrary")
 
-- Ethernet : SOCKET APIs like BSD & WIZCHIP([W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start), W5200 and etc) Driver
+- Ethernet : SOCKET APIs like BSD & WIZCHIP([W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start), W5200 and etc.) Driver
 - Internet :
   - DHCP client
   - DNS client
+  - FTP client
+  - FTP server
+  - SNMP agent/trap
+  - SNTP client
+  - TFTP client
+  - HTTP server
   - Others will be added.
 
 ## How to add an ioLibrary in project through github site.
