@@ -27,6 +27,8 @@ This driver provides the Berkeley Socket type APIs.
     - Define what Host I/F mode is used in **wizchip_conf.h**
 
 ## Revision History
+  * ioLibrary V3.0.2 Released : 26, April, 2016
+    * Applied the erratum #1 in close() of socket.c (Refer to A20160426)
   * ioLibrary V3.0.1 Released : 15, July, 2015
     * Bug fixed : In W5100, Fixed CS control problem in read/write buffer with SPI. Refer to M20150715.
   * ioLibrary V3.0 Released : 01, June, 2015

@@ -197,7 +197,22 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 int8_t close(uint8_t sn)
 {
 	CHECK_SOCKNUM();
-	
+//A20160426 : Applied the erratum 1 of W5300
+#if   (_WIZCHIP_ == 5300) 
+   if( ((getSn_MR(s)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(s) != getSn_TxMAX(s)) ) 
+   { 
+      uint8 destip[4] = {0, 0, 0, 1};
+      // TODO
+      // You can wait for completing to sending data;
+      // wait about 1 second;
+      // if you have completed to send data, skip the code of erratum 1
+      // ex> wait_1s();
+      //     if (getSn_TX_FSR(s) == getSn_TxMAX(s)) continue;
+      // 
+      socket(s,Sn_MR_UDP,0x3000,0);
+      sendto(s,destip,1,destip,0x3000); // send the dummy data to an unknown destination(0.0.0.1).
+   };   
+#endif 
 	setSn_CR(sn,Sn_CR_CLOSE);
    /* wait to process the command... */
 	while( getSn_CR(sn) );
