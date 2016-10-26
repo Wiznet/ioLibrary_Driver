@@ -276,7 +276,7 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
 
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 {
-#if	_WIZCHIP_ == 5200 || _WIZCHIP_ == 5500
+#if	_WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
    uint8_t tmp = 0;
 #endif
    uint8_t* ptmp[2] = {0,0};
@@ -305,8 +305,8 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
          *((intr_kind*)arg) = wizchip_getinterruptmask();
          break;
    //M20150601 : This can be supported by W5200, W5500
-   //#if _WIZCHIP_ > 5100
-   #if (_WIZCHIP_ == 5200 || _WIZCHIP_ == 5500)
+   //#if _WIZCHIP_ > W5100
+   #if (_WIZCHIP_ == W5200 || _WIZCHIP_ == W5500)
       case CW_SET_INTRTIME:
          setINTLEVEL(*(uint16_t*)arg);
          break;
@@ -322,7 +322,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
          ((uint8_t*)arg)[4] = WIZCHIP.id[4];
          ((uint8_t*)arg)[5] = 0;
          break;
-   #if _WIZCHIP_ ==  5500
+   #if _WIZCHIP_ == W5500
       case CW_RESET_PHY:
          wizphy_reset();
          break;
@@ -337,7 +337,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
       case CW_SET_PHYPOWMODE:
          return wizphy_setphypmode(*(uint8_t*)arg);
    #endif
-   #if _WIZCHIP_ == 5200 || _WIZCHIP_ == 5500
+   #if _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
       case CW_GET_PHYPOWMODE:
          tmp = wizphy_getphypmode();
          if((int8_t)tmp == -1) return -1;
@@ -418,7 +418,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
    {
       tmp = 0;
    //M20150601 : For integrating with W5300
-   #if _WIZCHIP_ == 5300
+   #if _WIZCHIP_ == W5300
       for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
       {
          if(txsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
@@ -439,7 +439,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
    if(rxsize)
    {
       tmp = 0;
-   #if _WIZCHIP_ == 5300
+   #if _WIZCHIP_ == W5300
       for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
       {
          if(rxsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation         
@@ -465,22 +465,22 @@ void wizchip_clrinterrupt(intr_kind intr)
 {
    uint8_t ir  = (uint8_t)intr;
    uint8_t sir = (uint8_t)((uint16_t)intr >> 8);
-#if _WIZCHIP_ < 5500
+#if _WIZCHIP_ < W5500
    ir |= (1<<4); // IK_WOL
 #endif
-#if _WIZCHIP_ == 5200
+#if _WIZCHIP_ == W5200
    ir |= (1 << 6);
 #endif
    
-#if _WIZCHIP_ < 5200
+#if _WIZCHIP_ < W5200
    sir &= 0x0F;
 #endif
 
-#if _WIZCHIP_ == 5100
+#if _WIZCHIP_ <= W5100S
    ir |= sir;
    setIR(ir);
 //A20150601 : For integrating with W5300
-#elif _WIZCHIP_ == 5300
+#elif _WIZCHIP_ == W5300
    setIR( ((((uint16_t)ir) << 8) | (((uint16_t)sir) & 0x00FF)) );
 #else
    setIR(ir);
@@ -493,11 +493,11 @@ intr_kind wizchip_getinterrupt(void)
    uint8_t ir  = 0;
    uint8_t sir = 0;
    uint16_t ret = 0;
-#if _WIZCHIP_ == 5100
+#if _WIZCHIP_ <= W5100S
    ir = getIR();
    sir = ir & 0x0F;
 //A20150601 : For integrating with W5300
-#elif _WIZCHIP_  == 5300
+#elif _WIZCHIP_  == W5300
    ret = getIR();
    ir = (uint8_t)(ret >> 8);
    sir = (uint8_t)ret;
@@ -507,11 +507,11 @@ intr_kind wizchip_getinterrupt(void)
 #endif         
 
 //M20150601 : For Integrating with W5300
-//#if _WIZCHIP_ < 5500
-#if _WIZCHIP_ < 5200
+//#if _WIZCHIP_ < W5500
+#if _WIZCHIP_ < W5200
    ir &= ~(1<<4); // IK_WOL
 #endif
-#if _WIZCHIP_ == 5200
+#if _WIZCHIP_ == W5200
    ir &= ~(1 << 6);
 #endif
   ret = sir;
@@ -523,19 +523,19 @@ void wizchip_setinterruptmask(intr_kind intr)
 {
    uint8_t imr  = (uint8_t)intr;
    uint8_t simr = (uint8_t)((uint16_t)intr >> 8);
-#if _WIZCHIP_ < 5500
+#if _WIZCHIP_ < W5500
    imr &= ~(1<<4); // IK_WOL
 #endif
-#if _WIZCHIP_ == 5200
+#if _WIZCHIP_ == W5200
    imr &= ~(1 << 6);
 #endif
    
-#if _WIZCHIP_ == 5100
+#if _WIZCHIP_ < W5200
    simr &= 0x0F;
    imr |= simr;
    setIMR(imr);
 //A20150601 : For integrating with W5300
-#elif _WIZCHIP_ == 5300
+#elif _WIZCHIP_ == W5300
    setIMR( ((((uint16_t)imr) << 8) | (((uint16_t)simr) & 0x00FF)) );
 #else
    setIMR(imr);
@@ -548,11 +548,11 @@ intr_kind wizchip_getinterruptmask(void)
    uint8_t imr  = 0;
    uint8_t simr = 0;
    uint16_t ret = 0;
-#if _WIZCHIP_ == 5100
+#if _WIZCHIP_ < W5200
    imr  = getIMR();
    simr = imr & 0x0F;
 //A20150601 : For integrating with W5300
-#elif _WIZCHIP_ == 5300
+#elif _WIZCHIP_ == W5300
    ret = getIMR();
    imr = (uint8_t)(ret >> 8);
    simr = (uint8_t)ret;
@@ -561,10 +561,10 @@ intr_kind wizchip_getinterruptmask(void)
    simr = getSIMR();
 #endif         
 
-#if _WIZCHIP_ < 5500
+#if _WIZCHIP_ < W5500
    imr &= ~(1<<4); // IK_WOL
 #endif
-#if _WIZCHIP_ == 5200
+#if _WIZCHIP_ == W5200
    imr &= ~(1 << 6);  // IK_DEST_UNREACH
 #endif
   ret = simr;
@@ -575,15 +575,14 @@ intr_kind wizchip_getinterruptmask(void)
 int8_t wizphy_getphylink(void)
 {
    int8_t tmp;
-#if   _WIZCHIP_ == 5200
+#if   _WIZCHIP_ == W5200
    if(getPHYSTATUS() & PHYSTATUS_LINK)
       tmp = PHY_LINK_ON;
    else
       tmp = PHY_LINK_OFF;
-#elif _WIZCHIP_ == 5500
+#elif _WIZCHIP_ == W5500
    if(getPHYCFGR() & PHYCFGR_LNK_ON)
       tmp = PHY_LINK_ON;
-   else
       tmp = PHY_LINK_OFF;
 #else
    tmp = -1;
@@ -591,17 +590,17 @@ int8_t wizphy_getphylink(void)
    return tmp;
 }
 
-#if _WIZCHIP_ > 5100
+#if _WIZCHIP_ > W5100
 
 int8_t wizphy_getphypmode(void)
 {
    int8_t tmp = 0;
-   #if   _WIZCHIP_ == 5200
+   #if   _WIZCHIP_ == W5200
       if(getPHYSTATUS() & PHYSTATUS_POWERDOWN)
          tmp = PHY_POWER_DOWN;
       else          
          tmp = PHY_POWER_NORM;
-   #elif _WIZCHIP_ == 5500
+   #elif _WIZCHIP_ == W5500
       if(getPHYCFGR() & PHYCFGR_OPMDC_PDOWN)
          tmp = PHY_POWER_DOWN;
       else 
@@ -613,7 +612,7 @@ int8_t wizphy_getphypmode(void)
 }
 #endif
 
-#if _WIZCHIP_ == 5500
+#if _WIZCHIP_ == W5500
 void wizphy_reset(void)
 {
    uint8_t tmp = getPHYCFGR();
@@ -728,6 +727,7 @@ int8_t wizphy_setphypmode(uint8_t pmode)
 
 void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
 {
+	int i,j,k;
    setSHAR(pnetinfo->mac);
    setGAR(pnetinfo->gw);
    setSUBR(pnetinfo->sn);
@@ -755,7 +755,7 @@ void wizchip_getnetinfo(wiz_NetInfo* pnetinfo)
 int8_t wizchip_setnetmode(netmode_type netmode)
 {
    uint8_t tmp = 0;
-#if _WIZCHIP_ != 5500   
+#if _WIZCHIP_ != W5500
    if(netmode & ~(NM_WAKEONLAN | NM_PPPOE | NM_PINGBLOCK)) return -1;
 #else
    if(netmode & ~(NM_WAKEONLAN | NM_PPPOE | NM_PINGBLOCK | NM_FORCEARP)) return -1;
