@@ -44,7 +44,7 @@
 #include "wizchip_conf.h"
 
 /// \cond DOXY_APPLY_CODE
-#if   (_WIZCHIP_ == W5100)
+#if   (_WIZCHIP_ == 5100)
 /// \endcond
 
 #define _WIZCHIP_SN_BASE_  (0x0400)

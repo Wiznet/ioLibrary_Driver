@@ -118,7 +118,7 @@
 #define SF_TCP_NODELAY         (Sn_MR_ND)          ///< In @ref Sn_MR_TCP, Use to nodelayed ack.
 #define SF_MULTI_ENABLE        (Sn_MR_MULTI)       ///< In @ref Sn_MR_UDP, Enable multicast mode.
 
-#if _WIZCHIP_ == W5500
+#if _WIZCHIP_ == 5500
    #define SF_BROAD_BLOCK         (Sn_MR_BCASTB)   ///< In @ref Sn_MR_UDP or @ref Sn_MR_MACRAW, Block broadcast packet. Valid only in W5500
    #define SF_MULTI_BLOCK         (Sn_MR_MMB)      ///< In @ref Sn_MR_MACRAW, Block multicast packet. Valid only in W5500
    #define SF_IPv6_BLOCK          (Sn_MR_MIP6B)    ///< In @ref Sn_MR_MACRAW, Block IPv6 packet. Valid only in W5500
@@ -126,7 +126,7 @@
 #endif
 
 //A201505 : For W5300
-#if _WIZCHIP_ == W5300
+#if _WIZCHIP_ == 5300
    #define SF_TCP_ALIGN		     0x02			   ///< Valid only \ref Sn_MR_TCP and W5300, refer to \ref Sn_MR_ALIGN
 #endif
 
@@ -366,7 +366,7 @@ typedef enum
    CS_GET_MAXRXBUF,        ///< get the size of socket buffer allocated in RX memory
    CS_CLR_INTERRUPT,       ///< clear the interrupt of socket with @ref sockint_kind
    CS_GET_INTERRUPT,       ///< get the socket interrupt. refer to @ref sockint_kind
-#if _WIZCHIP_ > W5100S
+#if _WIZCHIP_ > 5100
    CS_SET_INTMASK,         ///< set the interrupt mask of socket with @ref sockint_kind, Not supported in W5100
    CS_GET_INTMASK          ///< get the masked interrupt of socket. refer to @ref sockint_kind, Not supported in W5100
 #endif
@@ -385,9 +385,9 @@ typedef enum
    SO_MSS,              ///< Set MSS. @ref Sn_MSSR ( @ref setSn_MSSR(), @ref getSn_MSSR() )
    SO_DESTIP,           ///< Set the destination IP address. @ref Sn_DIPR ( @ref setSn_DIPR(), @ref getSn_DIPR() )
    SO_DESTPORT,         ///< Set the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
-#if _WIZCHIP_ > W5100S
+#if _WIZCHIP_ != 5100   
    SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode, Not supported in W5100
-   #if _WIZCHIP_ > W5200
+   #if _WIZCHIP_ > 5200   
       SO_KEEPALIVEAUTO, ///< Set/Get keep-alive auto transmission timer in TCP mode, Not supported in W5100, W5200
    #endif      
 #endif
