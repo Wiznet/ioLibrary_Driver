@@ -496,6 +496,7 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    switch(getSn_MR(sn) & 0x0F)
    {
       case Sn_MR_UDP:
+      case Sn_MR_IPRAW:
       case Sn_MR_MACRAW:
          break;
       default:
@@ -513,10 +514,10 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    //}
    //
    //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
-   if(taddr == 0) 				return SOCKERR_IPINVALID;
-   if(port == 0)              return SOCKERR_PORTZERO;
+   if((taddr == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_IPINVALID;
+   if((port  == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_PORTZERO;
    tmp = getSn_SR(sn);
-   if(tmp != SOCK_MACRAW && tmp != SOCK_UDP) return SOCKERR_SOCKSTATUS;
+   if(tmp != SOCK_MACRAW && tmp != SOCK_UDP && tmp != SOCK_IPRAW) return SOCKERR_SOCKSTATUS;
       
    setSn_DIPR(sn,addr);
    setSn_DPORT(sn,port);      
@@ -692,7 +693,13 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
    			while(getSn_CR(sn));
    			// read peer's IP address, port number & packet length
     			sock_remained_size[sn] = head[0];
-   			sock_remained_size[sn] = (sock_remained_size[sn] <<8) + head[1];
+   			sock_remained_size[sn] = (sock_remained_size[sn] <<8) + head[1] -2;
+   			#if _WIZCHIP_ == W5300
+   			if(sock_remained_size[sn] & 0x01)
+   				sock_remained_size[sn] = sock_remained_size[sn] + 1 - 4;
+   			else
+   				sock_remained_size[sn] -= 4;
+			#endif
    			if(sock_remained_size[sn] > 1514) 
    			{
    			   close(sn);

@@ -28,6 +28,8 @@ This driver provides the Berkeley Socket type APIs.
     - Define what Host I/F mode is used in **wizchip_conf.h**
 
 ## Revision History
+  * ioLibrary V3.1.1 Released : 14, Dec, 2016
+    * Bug fixed : In Socket.c Fixed MACraw & IPraw sendto function.
   * ioLibrary V3.1.0 Released : 05, Dec, 2016
     * Internet application protocol add to MQTT Client (using paho MQTT 3.11)
   * ioLibrary V3.0.3 Released : 03, May, 2016
