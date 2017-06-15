@@ -484,11 +484,11 @@
 /**
  *  @ingroup Common_register_group_W5300
  *  @brief Memory Type Register
- *  @details W5300°Øs 128Kbytes data memory (Internal TX/RX memory) is composed of 16 memory blocks
+ *  @details W5300‚Äôs 128Kbytes data memory (Internal TX/RX memory) is composed of 16 memory blocks
  *  of 8Kbytes. MTYPER configures type of each 8KB memory block in order to select RX or TX memory. 
- *  The type of 8KB memory block corresponds to each bit of MTYPER. When the bit is °Æ1°Ø, it is used as TX
- *  memory, and the bit is °Æ0°Ø, it is used as RX memory. MTYPER is configured as TX memory type
- *  from the lower bit. The rest of the bits not configured as TX memory, should be set as °Æ0°Ø.
+ *  The type of 8KB memory block corresponds to each bit of MTYPER. When the bit is ‚Äò1‚Äô, it is used as TX
+ *  memory, and the bit is ‚Äò0‚Äô, it is used as RX memory. MTYPER is configured as TX memory type
+ *  from the lower bit. The rest of the bits not configured as TX memory, should be set as ‚Äò0‚Äô.
  */
 #define MTYPER          (_W5300_IO_BASE_ + 0x30)
 
@@ -514,7 +514,7 @@
 /**
  *  @ingroup Common_register_group_W5300
  *  @brief PPP LCP magic number register
- *  @details It configures byte value to be used for 4bytes °∞Magic Number°± during LCP negotiation with PPPoE server.
+ *  @details It configures byte value to be used for 4bytes ‚ÄúMagic Number‚Äù during LCP negotiation with PPPoE server.
  */
 #define PMAGICR         (_W5300_IO_BASE_ + 0x38)
 
@@ -555,7 +555,7 @@
  *  @ingroup Common_register_group_W5300 
  *  @brief Fragment MTU register
  *  @details When communicating with the peer having a different MTU, W5300 can receive an ICMP(Fragment MTU) packet. 
- *  At this case, IR(FMTU) becomes °Æ1°Ø and destination IP address and fragment MTU value of ICMP packet can be acquired through UIPR and FMTUR. 
+ *  At this case, IR(FMTU) becomes ‚Äò1‚Äô and destination IP address and fragment MTU value of ICMP packet can be acquired through UIPR and FMTUR. 
  *  In order to keep communicating with the peer having Fragment MTU, set the FMTUR first in Sn_MSSR of the SOCKETn, and try the next communication. 
  */
 #define FMTUR           (_W5300_IO_BASE_ + 0x4E)
@@ -939,9 +939,9 @@
 /**
  * @brief  MAC filter bit of \ref Sn_MR
  * @details It is valid in MACRAW(@ref Sn_MR_MACRAW).
- * When this bit is set as °Æ1°Ø, W5300 can receive packet that is belong in itself or broadcasting. 
- * When this bit is set as °Æ0°Ø, W5300 can receive all packets on Ethernet. 
- * When using the hybrid TCP/IP stack, it is recommended to be set as °Æ1°Ø for reducing the receiving overhead of host. \n
+ * When this bit is set as ‚Äò1‚Äô, W5300 can receive packet that is belong in itself or broadcasting. 
+ * When this bit is set as ‚Äò0‚Äô, W5300 can receive all packets on Ethernet. 
+ * When using the hybrid TCP/IP stack, it is recommended to be set as ‚Äò1‚Äô for reducing the receiving overhead of host. \n
  * 0 : Disable, 1 : Enable
  */
 #define Sn_MR_MF           (1 << 6)             
@@ -1328,14 +1328,14 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @ingroup Common_register_access_function_W5300
  * @brief Set Mode Register
  * @param (@ref iodata_t)mr The value to be set.
- * @sa getMR()
+ * @sa setMR()
  */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_)
    #if (_WIZCHIP_IO_BUS_WIDTH_ == 8)
       #define setMR(mr) \
          (*((uint8_t*)MR) = (uint8_t)((mr) >> 8)); (*((uint8_t*)WIZCHIP_OFFSET_INC(MR,1)) = (uint8_t)((mr) & 0xFF))
    #elif (_WIZCHIP_IO_BUS_WIDTH_ == 16)
-      #define setMR(mr)    (*((uint16_t*)MR) = (uint16_t)((mr) & 0xFFFF))
+      #define setMR(mr)    (*((uint16_t*)MR)) = (uint16_t)((mr) & 0xFFFF))
    #else
       #error "Unknown _WIZCHIP_IO_BUS_WIDTH_. You should be define _WIZCHIP_IO_BUS_WIDTH as 8 or 16."   
    #endif
@@ -1343,17 +1343,17 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
    #error "Unknown _WIZCHIP_IO_MODE_"   
 #endif
 
-/**
+ /**
  * @ingroup Common_register_access_function_W5300
  * @brief Get @ref MR.
  * @return @ref iodata_t. The value of Mode register.
- * @sa setMR()
+ * @sa getMR()
  */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_)
    #if (_WIZCHIP_IO_BUS_WIDTH_ == 8)
       #define getMR()    (((uint16_t)(*((uint8_t*)MR)) << 8) + (((uint16_t)(*((uint8_t*)WIZCHIP_OFFSET_INC(MR,1)))) & 0x00FF))
    #elif(_WIZCHIP_IO_BUS_WIDTH_ == 16)
-      #define getMR()    (*((uint16_t*)MR)
+      #define getMR()    (*((uint16_t*)MR))
    #else
       #error "Unknown _WIZCHIP_IO_BUS_WIDTH_. You should be define _WIZCHIP_IO_BUS_WIDTH as 8 or 16."   
    #endif

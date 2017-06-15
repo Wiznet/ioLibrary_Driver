@@ -197,7 +197,31 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 int8_t close(uint8_t sn)
 {
 	CHECK_SOCKNUM();
-	
+//A20160426 : Applied the erratum 1 of W5300
+#if   (_WIZCHIP_ == 5300) 
+   //M20160503 : Wrong socket parameter. s -> sn 
+   //if( ((getSn_MR(s)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(s) != getSn_TxMAX(s)) ) 
+   if( ((getSn_MR(sn)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(sn) != getSn_TxMAX(sn)) ) 
+   { 
+      uint8 destip[4] = {0, 0, 0, 1};
+      // TODO
+      // You can wait for completing to sending data;
+      // wait about 1 second;
+      // if you have completed to send data, skip the code of erratum 1
+      // ex> wait_1s();
+      //     if (getSn_TX_FSR(s) == getSn_TxMAX(s)) continue;
+      // 
+      //M20160503 : The socket() of close() calls close() itself again. It occures a infinite loop - close()->socket()->close()->socket()-> ~
+      //socket(s,Sn_MR_UDP,0x3000,0);
+      //sendto(s,destip,1,destip,0x3000); // send the dummy data to an unknown destination(0.0.0.1).
+      setSn_MR(sn,Sn_MR_UDP);
+      setSn_PORTR(sn, 0x3000);
+      setSn_CR(sn,Sn_CR_OPEN);
+      while(getSn_CR(sn) != 0);
+      while(getSn_SR(sn) != SOCK_UDP);
+      sendto(sn,destip,1,destip,0x3000); // send the dummy data to an unknown destination(0.0.0.1).
+   };   
+#endif 
 	setSn_CR(sn,Sn_CR_CLOSE);
    /* wait to process the command... */
 	while( getSn_CR(sn) );
@@ -222,11 +246,8 @@ int8_t listen(uint8_t sn)
 	while(getSn_CR(sn));
    while(getSn_SR(sn) != SOCK_LISTEN)
    {
-      if(getSn_CR(sn) == SOCK_CLOSED)
-      {
          close(sn);
          return SOCKERR_SOCKCLOSED;
-      }
    }
    return SOCK_OK;
 }
@@ -475,6 +496,7 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    switch(getSn_MR(sn) & 0x0F)
    {
       case Sn_MR_UDP:
+      case Sn_MR_IPRAW:
       case Sn_MR_MACRAW:
          break;
       default:
@@ -492,10 +514,10 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    //}
    //
    //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
-   if(taddr == 0) 				return SOCKERR_IPINVALID;
-   if(port == 0)              return SOCKERR_PORTZERO;
+   if((taddr == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_IPINVALID;
+   if((port  == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_PORTZERO;
    tmp = getSn_SR(sn);
-   if(tmp != SOCK_MACRAW && tmp != SOCK_UDP) return SOCKERR_SOCKSTATUS;
+   if(tmp != SOCK_MACRAW && tmp != SOCK_UDP && tmp != SOCK_IPRAW) return SOCKERR_SOCKSTATUS;
       
    setSn_DIPR(sn,addr);
    setSn_DPORT(sn,port);      
@@ -671,7 +693,13 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
    			while(getSn_CR(sn));
    			// read peer's IP address, port number & packet length
     			sock_remained_size[sn] = head[0];
-   			sock_remained_size[sn] = (sock_remained_size[sn] <<8) + head[1];
+   			sock_remained_size[sn] = (sock_remained_size[sn] <<8) + head[1] -2;
+   			#if _WIZCHIP_ == W5300
+   			if(sock_remained_size[sn] & 0x01)
+   				sock_remained_size[sn] = sock_remained_size[sn] + 1 - 4;
+   			else
+   				sock_remained_size[sn] -= 4;
+			#endif
    			if(sock_remained_size[sn] > 1514) 
    			{
    			   close(sn);
