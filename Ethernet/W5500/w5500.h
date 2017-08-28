@@ -850,7 +850,7 @@
  */
 #define Sn_MR_MACRAW                 0x04
 
-//#define Sn_MR_IPRAW                  0x03     /**< IP LAYER RAW SOCK */
+#define Sn_MR_IPRAW                  0x03     /**< IP LAYER RAW SOCK */
 
 /**
  * @brief UDP
@@ -1140,7 +1140,7 @@
  */
 #define SOCK_UDP                     0x22
 
-//#define SOCK_IPRAW                   0x32     /**< IP raw mode socket */
+#define SOCK_IPRAW                   0x32     /**< IP raw mode socket */
 
 /**
  * @brief MAC raw mode socket
