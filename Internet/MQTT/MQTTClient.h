@@ -33,7 +33,7 @@
   #define DLLExport
 #endif
 
-#include "MQTTPacket.h"
+#include "./MQTTPacket/src/MQTTPacket.h"
 #include "stdio.h"
 #include "mqtt_interface.h"
 
