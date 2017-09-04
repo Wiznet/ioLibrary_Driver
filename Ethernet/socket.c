@@ -496,9 +496,12 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    switch(getSn_MR(sn) & 0x0F)
    {
       case Sn_MR_UDP:
-      case Sn_MR_IPRAW:
       case Sn_MR_MACRAW:
          break;
+   #if ( _WIZCHIP_ < 5200 )
+      case Sn_MR_IPRAW:
+         break;
+   #endif
       default:
          return SOCKERR_SOCKMODE;
    }
@@ -514,10 +517,14 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
    //}
    //
    //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
-   if((taddr == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_IPINVALID;
-   if((port  == 0)&(getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_PORTZERO;
+   if((taddr == 0) && (getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_IPINVALID;
+   if((port  == 0) && (getSn_MR(sn)&Sn_MR_MACRAW != Sn_MR_MACRAW)) return SOCKERR_PORTZERO;
    tmp = getSn_SR(sn);
+#if ( _WIZCHIP_ < 5200 )
    if(tmp != SOCK_MACRAW && tmp != SOCK_UDP && tmp != SOCK_IPRAW) return SOCKERR_SOCKSTATUS;
+#else
+   if(tmp != SOCK_MACRAW && tmp != SOCK_UDP) return SOCKERR_SOCKSTATUS;
+#endif
       
    setSn_DIPR(sn,addr);
    setSn_DPORT(sn,port);      
@@ -909,7 +916,11 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
             *(uint16_t*)arg = sock_remained_size[sn];
          break;
       case SO_PACKINFO:
-         CHECK_SOCKMODE(Sn_MR_TCP);
+         //CHECK_SOCKMODE(Sn_MR_TCP);
+#if _WIZCHIP_ != 5300
+         if((getSn_MR(sn) == Sn_MR_TCP))
+             return SOCKERR_SOCKMODE;
+#endif
          *(uint8_t*)arg = sock_pack_info[sn];
          break;
       default:
