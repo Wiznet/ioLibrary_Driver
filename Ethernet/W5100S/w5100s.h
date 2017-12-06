@@ -918,10 +918,10 @@
 #define IMR_UNREACH			0x40
 
 /**
- * @brief PADT/LCPT interrupt mask bit
+ * @brief PADT/LCPT interrupt mask bit(PPPoE)
  * @details If this bit is set, PADT/LCPT interrupt is enabled.
  */
-#define IMR_PADT			0x20
+#define IMR_PPPoE			0x20
 
 /**
  * @brief Socket interrupt mask bit
@@ -930,40 +930,35 @@
 #define IMR_SOCK(sn)		(0x01 << sn)
 
 /**
- * @brief Magic packet interrupt mask bit
- * @details If this bit is set, each socket interrupt is enabled.
- */
-#define IMR2_MGCPAK		0x01
-
-/**
- * @brief Request command register bit
+ * @brief Socket-less command register bit
  * @details ARP command
  */
-#define RQCMD_ARP		(1<<1)
+#define SLCMD_ARP		(1<<1)
 
 /**
- * @brief Request command register bit
+ * @brief Socket-less command register bit
  * @details ARP command
  */
-#define RQCMD_PING		(1<<0)
+#define SLCMD_PING		(1<<0)
 
 /**
- * @brief Request command interrupt and interrupt mask register bit
+ * @brief Socket-less command interrupt and interrupt mask register bit
  * @details Request command time out interrupt and interrupt mask
  */
-#define RQCMD_TIMEOUT		(1<<2)
+#define SLCMD_TIMEOUT		(1<<2)
 
 /**
- * @brief Request command interrupt and interrupt mask register bit
- * @details Request command ARP interrupt and interrupt mask
- */
-#define RQCMD_ARP		(1<<1)
+* @brief Socket less command interrupt and interrupt mask register bit
+* @details Socket less command ARP interrupt and interrupt mask
+*/
+#define SLIR_ARP (1<<1)
 
 /**
- * @brief Request command interrupt and interrupt mask register bit
- * @details Request command PING interrupt and interruptmask
- */
-#define RQCMD_PING		(1<<0)
+* @brief Socket less command interrupt and interrupt mask register bit
+* @details Socket less command PING interrupt and interruptmask
+*/
+#define SLIR_PING (1<<0)
+
 
 
 // Sn_MR values
@@ -1415,6 +1410,12 @@ connection.
  * @details
  */
 #define IR2_MGC				(1<<1)
+
+/**
+ * @brief Magic packet interrupt mask bit
+ * @details If this bit is set, each socket interrupt is enabled.
+ */
+#define IMR2_MGC			(1<<1)
 
 /**
  * @brief
