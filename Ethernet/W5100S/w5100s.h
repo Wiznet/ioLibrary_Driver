@@ -285,15 +285,6 @@
 #define RMSR				(_W5100S_IO_BASE_ + (0x001A)) // Receicve Memory Size
 #define TMSR				(_W5100S_IO_BASE_ + (0x001B)) // Trnasmit Memory Size
 
-
-/**
- * @ingroup Common_register_group_W5100S
- * @brief PPP LCP Request Timer register  in PPPoE mode(R)
- * @details \ref PATR notifies authentication method that has been agreed at the connection with
- * PPPoE Server. W5100 supports two types of Authentication method - PAP and CHAP.
- */
-#define PATR				(_W5100S_IO_BASE_ + (0x001C))
-
 /*
  * @ingroup Common_register_group_W5100S
  * @brief IR2
@@ -442,7 +433,7 @@
  */
 #define PHYCR1					(_W5100S_IO_BASE_ + (0x0047))
 
-/*------------------------------------------ RMC registers ------------------------------------------*/
+/*------------------------------------------ Socket Less registers ------------------------------------------*/
 
 /*
  * @ingroup Common_register_group_W5100S
@@ -1134,53 +1125,19 @@
 #define Sn_CR_RECV          0x40
 
 /**
- * @brief PPPoE connection
- * @details PPPoE connection begins by transmitting PPPoE discovery packet
+ * @brief
+ * @details
  */
-#define Sn_CR_PCON			0x23
+#define Sn_CR_IGMP_JOIN			0x23
 
 /**
- * @brief Closes PPPoE connection
- * @details Closes PPPoE connection
+ * @brief
+ * @details
  */
-#define Sn_CR_PDISCON		0x24
+#define Sn_CR_IGMP_LEAVE		0x24
 
-/**
- * @brief REQ message transmission
- * @details In each phase, it transmits REQ message.
- */
-#define Sn_CR_PCR			0x25
-
-/**
- * @brief NAK massage transmission
- * @details In each phase, it transmits NAK message.
- */
-#define Sn_CR_PCN			0x26
-
-/**
- * @brief REJECT message transmission
- * @details In each phase, it transmits REJECT message.
- */
-#define Sn_CR_PCJ			0x27
 
 /* Sn_IR values */
-/**
- * @brief PPP Receive Interrupt
- * @details PPP Receive Interrupts when the option which is not supported is received.
- */
-#define Sn_IR_PRECV			0x80
-
-/**
- * @brief PPP Fail Interrupt
- * @details PPP Fail Interrupts when PAP Authentication is failed.
- */
-#define Sn_IR_PFAIL			0x40
-
-/**
- * @brief PPP Next Phase Interrupt
- * @details PPP Next Phase Interrupts when the phase is changed during ADSL connection process.
- */
-#define Sn_IR_PNEXT			0x20
 
 /**
  * @brief SEND_OK Interrupt
@@ -1498,6 +1455,51 @@ connection.
 #define PHYCR_HALF_DUP			(1<<0)
 #define PHYCR_FULL_DUP			(0<<0)
 
+#define PHYCR1_RST				(0<<0)
+
+#define	PHYCR1_PWDN_ENABLE		(1<<5)
+#define	PHYCR1_PWDN_DISABLE		(0<<5)
+
+
+/* Socket n MODE register 2 values */
+
+/**
+ * @brief Broadcast Blocking bit in MACRAW mode
+ * @details In MACRAW mode, this bit is set to ????to block the broadcast packet.
+ */
+#define Sn_MR2_MBBLK  			(1<<6)
+
+/**
+ * @brief Multicast Blocking bit in MACRAW mode
+ * @details In MACRAW mode, this bit is set to ????to block the multicast packet.
+ */
+#define Sn_MR2_MMBLK  			(1<<5)
+
+/**
+ * @brief IPv6 packet Blocking bit in MACRAW mode
+ * @details In MACRAW mode, this bit is set to ????to block the IPv6 packet.
+ */
+#define Sn_MR2_IPV6BLK  		(1<<4)
+
+
+/**
+ * @brief Broadcast Blocking bit in UDP mode
+ * @details In UDP mode, this bit is set to ????to block the broadcast packet.
+ */
+#define Sn_MR2_UBBLK			(1<<1)
+
+
+/**
+ * @brief TCP Force PSH bit
+ * @details When the SOCKET transmits data in TCP mode, PSH Flag is set to all packets.
+ */
+#define Sn_MR2_FPSH			Sn_MR2_UBBLK
+
+/**
+ * @brief Unicast Blocking bit in UDP mode
+ * @details In UDP mode, this bit is set to ????to block the Unicast packet.
+ */
+#define Sn_MR2_UUBLK			(1<<0)
 
 /*----------------------------For PHY Control-------------------------------*/
 
