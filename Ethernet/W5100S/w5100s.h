@@ -936,7 +936,7 @@
  * @brief Socket-less command interrupt and interrupt mask register bit
  * @details Request command time out interrupt and interrupt mask
  */
-#define SLCMD_TIMEOUT		(1<<2)
+#define SLIR_TIMEOUT		(1<<2)
 
 /**
 * @brief Socket less command interrupt and interrupt mask register bit
