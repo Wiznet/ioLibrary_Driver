@@ -742,6 +742,32 @@
 // Reserved					(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x001C))
 // Reserved					(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x001D))
 
+
+
+/**
+ * @ingroup Socket_register_group
+ * @brief Receive memory size register(R/W)
+ * @details @ref Sn_RXBUF_SIZE configures the RX buffer block size of Socket n.
+ * Socket n RX Buffer Block size can be configured with 1,2,4 and 8Kbytes.
+ * If a different size is configured, the data cannot be normally received from a peer.
+ * Although Socket n RX Buffer Block size is initially configured to 2Kbytes,
+ * user can re-configure its size using @ref Sn_RXBUF_SIZE. The total sum of @ref Sn_RXBUF_SIZE can not be exceed 8Kbytes.
+ * When exceeded, the data reception error is occurred.
+ */
+#define Sn_RXBUF_SIZE(sn)   (_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x001E))
+
+/**
+ * @ingroup Socket_register_group
+ * @brief Transmit memory size register(R/W)
+ * @details @ref Sn_TXBUF_SIZE configures the TX buffer block size of Socket n. Socket n TX Buffer Block size can be configured with 1,2,4 and 8Kbytes.
+ * If a different size is configured, the data can占퐐 be normally transmitted to a peer.
+ * Although Socket n TX Buffer Block size is initially configured to 2Kbytes,
+ * user can be re-configure its size using @ref Sn_TXBUF_SIZE. The total sum of @ref Sn_TXBUF_SIZE can not be exceed 8Kbytes.
+ * When exceeded, the data transmission error is occurred.
+ */
+#define Sn_TXBUF_SIZE(sn)   (_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x001F))
+
+
 /**
  * @ingroup Socket_register_group_W5100S
  * @brief Transmit free memory size register(R)
@@ -2440,7 +2466,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_RXMEM_SIZE()
  */
 #define  setSn_RXMEM_SIZE(sn, rxmemsize) \
-      WIZCHIP_WRITE(RMSR, (WIZCHIP_READ(RMSR) & ~(0x03 << (2*sn))) | (rxmemsize << (2*sn)))
+		WIZCHIP_WRITE(Sn_RXBUF_SIZE(sn),rxmemsize)
 #define  setSn_RXBUF_SIZE(sn,rxmemsize) setSn_RXMEM_SIZE(sn,rxmemsize)
 
 /**
@@ -2451,7 +2477,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_RXMEM_SIZE()
  */
 #define  getSn_RXMEM_SIZE(sn) \
-      ((WIZCHIP_READ(RMSR) & (0x03 << (2*sn))) >> (2*sn))
+		WIZCHIP_READ(Sn_RXBUF_SIZE(sn))
 #define  getSn_RXBUF_SIZE(sn) getSn_RXMEM_SIZE(sn)
 
 /**
@@ -2462,7 +2488,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getSn_TXMEM_SIZE()
  */
 #define setSn_TXMEM_SIZE(sn, txmemsize) \
-      WIZCHIP_WRITE(TMSR, (WIZCHIP_READ(TMSR) & ~(0x03 << (2*sn))) | (txmemsize << (2*sn)))
+		WIZCHIP_WRITE(Sn_TXBUF_SIZE(sn),txmemsize)
 #define  setSn_TXBUF_SIZE(sn, txmemsize) setSn_TXMEM_SIZE(sn,txmemsize)
 
 /**
@@ -2473,7 +2499,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setSn_TXMEM_SIZE()
  */
 #define  getSn_TXMEM_SIZE(sn) \
-      ((WIZCHIP_READ(TMSR) & (0x03 << (2*sn))) >> (2*sn))
+		WIZCHIP_READ(Sn_TXBUF_SIZE(sn))
 #define  getSn_TXBUF_SIZE(sn) getSn_TXMEM_SIZE(sn)
 
 /**
@@ -2596,7 +2622,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_RxMAX(sn) \
-		((uint16_t)(1 << getSn_RXMEM_SIZE(sn)) << 10)
+		((uint16_t)(getSn_RXMEM_SIZE(sn)) << 10)
 
 
 /**
@@ -2606,7 +2632,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_TxMAX(sn) \
-		((uint16_t)(1 << getSn_TXMEM_SIZE(sn)) << 10)
+		((uint16_t)(getSn_TXMEM_SIZE(sn)) << 10)
 
 /**
  * @ingroup Socket_register_access_function_W5100S
