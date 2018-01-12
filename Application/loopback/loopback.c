@@ -34,6 +34,7 @@ int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 			ret = recv(sn, buf, size);
 
 			if(ret <= 0) return ret;      // check SOCKERR_BUSY & SOCKERR_XXX. For showing the occurrence of SOCKERR_BUSY.
+			size = (uint16_t) ret;
 			sentsize = 0;
 
 			while(size != sentsize)
@@ -115,6 +116,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 			ret = recv(sn, buf, size); // Data Receive process (H/W Rx socket buffer -> User's buffer)
 
 			if(ret <= 0) return ret; // If the received data length <= 0, receive failed and process end
+			size = (uint16_t) ret;
 			sentsize = 0;
 
 			// Data sentsize control
