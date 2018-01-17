@@ -886,7 +886,7 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
          *(uint8_t*) arg = getSn_TOS(sn);
          break;
       case SO_MSS:   
-         *(uint8_t*) arg = getSn_MSSR(sn);
+         *(uint16_t*) arg = getSn_MSSR(sn);
          break;
       case SO_DESTIP:
          getSn_DIPR(sn, (uint8_t*)arg);
