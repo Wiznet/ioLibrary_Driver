@@ -204,7 +204,7 @@ int8_t close(uint8_t sn)
    //if( ((getSn_MR(s)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(s) != getSn_TxMAX(s)) ) 
    if( ((getSn_MR(sn)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(sn) != getSn_TxMAX(sn)) ) 
    { 
-      uint8 destip[4] = {0, 0, 0, 1};
+      uint8_t destip[4] = {0, 0, 0, 1};
       // TODO
       // You can wait for completing to sending data;
       // wait about 1 second;
