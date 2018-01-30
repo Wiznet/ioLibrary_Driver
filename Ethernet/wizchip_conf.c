@@ -602,7 +602,7 @@ int8_t wizphy_getphypmode(void)
       else          
          tmp = PHY_POWER_NORM;
    #elif _WIZCHIP_ == 5500
-      if(getPHYCFGR() & PHYCFGR_OPMDC_PDOWN)
+      if((getPHYCFGR() & PHYCFGR_OPMDC_ALLA) == PHYCFGR_OPMDC_PDOWN)
          tmp = PHY_POWER_DOWN;
       else 
          tmp = PHY_POWER_NORM;
