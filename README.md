@@ -1,6 +1,6 @@
 # ioLibrary Driver
 The ioLibrary means “Internet Offload Library” for WIZnet chip. It includes drivers and application protocols.
-The driver (ioLibrary) can be used for the application design of WIZnet TCP/IP chips as [W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start), W5300, W5200 and W5100.
+The driver (ioLibrary) can be used for the application design of WIZnet TCP/IP chips as [W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start), W5300, W5200, W5100 [W5100S](http://wizwiki.net/wiki/doku.php?id=products:w5100s:start).
 
 ## ioLibrary
 This driver provides the Berkeley Socket type APIs.
@@ -8,7 +8,7 @@ This driver provides the Berkeley Socket type APIs.
 <!-- ioLibrary pic -->
 ![ioLibrary](http://wizwiki.net/wiki/lib/exe/fetch.php?media=products:w5500:iolibrary_bsd.jpg "ioLibrary")
 
-- Ethernet : SOCKET APIs like BSD & WIZCHIP([W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start) / W5300 /  W5200 / W5100) Driver
+- Ethernet : SOCKET APIs like BSD & WIZCHIP([W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start) / W5300 /  W5200 / W5100 / [W5100S](http://wizwiki.net/wiki/doku.php?id=products:w5100s:start)) Driver
 - Internet :
   - DHCP client
   - DNS client
@@ -28,6 +28,8 @@ This driver provides the Berkeley Socket type APIs.
     - Define what Host I/F mode is used in **wizchip_conf.h**
 
 ## Revision History
+  * ioLibrary V3.2.1 Released : 29, MAR, 2018
+    * New features added: Library for W5100S added.
   * ioLibrary V3.1.1 Released : 14, Dec, 2016
     * Bug fixed : In Socket.c Fixed MACraw & IPraw sendto function.
   * ioLibrary V3.1.0 Released : 05, Dec, 2016

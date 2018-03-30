@@ -1,12 +1,12 @@
 //*****************************************************************************
 //
-//! \file w5100.c
-//! \brief W5100 HAL Interface.
+//! \file w5100S.c
+//! \brief W5100S HAL Interface.
 //! \version 1.0.0
-//! \date 2013/10/21
+//! \date 2018/03/29
 //! \par  Revision history
-//!       <2013/10/21> 1st Release
-//! \author MidnightCow
+//!       <2018/03/29> 1st Release
+//! \author Peter
 //! 
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
@@ -38,26 +38,28 @@
 //
 //*****************************************************************************
 
-#include "w5100.h"
+#include "w5100s.h"
 
-#if   (_WIZCHIP_ == 5100)
+#if   (_WIZCHIP_ == W5100S)
 /**
-@brief  This function writes the data into W5100 registers.
+@brief  This function writes the data into W5100S registers.
 */
 void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
 {
+	int i;
    WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();
 
-#if( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_))
+#if( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_))
    WIZCHIP.IF.SPI._write_byte(0xF0);
    WIZCHIP.IF.SPI._write_byte((AddrSel & 0xFF00) >>  8);
    WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF) >>  0);
    WIZCHIP.IF.SPI._write_byte(wb);    // Data write (write 1byte data)
-#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_) )
-   //M20150601 : Rename the function for integrating with ioLibrary
-   //WIZCHIP.IF.BUS._write_byte(AddrSel,wb);
-   WIZCHIP.IF.BUS._write_data(AddrSel,wb);
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
+	WIZCHIP.IF.SPI._write_byte((AddrSel & 0xFF00) >>  8);
+	WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF) >>  0);
+	WIZCHIP.IF.SPI._write_byte(0xF0);
+	WIZCHIP.IF.SPI._write_byte(wb);    // Data write (write 1byte data)
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
 
    //add indirect bus 
@@ -76,24 +78,25 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    WIZCHIP_CRITICAL_EXIT();
 }
 /**
-@brief  This function reads the value from W5100 registers.
+@brief  This function reads the value from W5100S registers.
 */
 uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 {
    uint8_t ret;
-
+   int i;
    WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();
 
-#if( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_))
+#if( (_WIZCHIP_IO_MODE_ ==  _WIZCHIP_IO_MODE_SPI_))
    WIZCHIP.IF.SPI._write_byte(0x0F);
    WIZCHIP.IF.SPI._write_byte((AddrSel & 0xFF00) >>  8);
    WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF) >>  0);
    ret = WIZCHIP.IF.SPI._read_byte(); 
-#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_) )
-   //M20150601 : Rename the function for integrating with ioLibrary
-   //ret = WIZCHIP.IF.BUS._read_byte(AddrSel);
-   ret = WIZCHIP.IF.BUS._read_data(AddrSel);   
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
+	WIZCHIP.IF.SPI._write_byte((AddrSel & 0xFF00) >>  8);
+	WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF) >>  0);
+	WIZCHIP.IF.SPI._write_byte(0x0F);
+	ret = WIZCHIP.IF.SPI._read_byte();
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
 
    //add indirect bus
@@ -102,11 +105,11 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    //WIZCHIP.IF.BUS._write_byte(IDM_AR1,(AddrSel & 0x00FF));	
    //ret = WIZCHIP.IF.BUS._read_byte(IDM_DR);
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0xFF00) >>  8);
-   WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x00FF));	
+   WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x00FF));
    ret = WIZCHIP.IF.BUS._read_data(IDM_DR);
 
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!"   
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!"   
 #endif
 
    WIZCHIP.CS._deselect();
@@ -116,33 +119,36 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 
 
 /**
-@brief  This function writes into W5100 memory(Buffer)
+@brief  This function writes into W5100S memory(Buffer)
 */ 
 void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
    uint16_t i = 0;
-
+   int j,k,l;
    WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();   //M20150601 : Moved here.
 
-#if( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_))
-  for(i = 0; i < len; i++)
-  {
-     //M20160715 : Depricated "M20150601 : Remove _select() to top-side"
-     //            CS should be controlled every SPI frames
-     WIZCHIP.CS._select();
-     WIZCHIP.IF.SPI._write_byte(0xF0);
-     WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0xFF00) >>  8);
-     WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0x00FF) >>  0);
-     WIZCHIP.IF.SPI._write_byte(pBuf[i]);    // Data write (write 1byte data)
-     //M20160715 : Depricated "M20150601 : Remove _select() to top-side"
-	  WIZCHIP.CS._deselect();
-  }
-#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_) )
+#if((_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_))
+
+   WIZCHIP.IF.SPI._write_byte(0xF0);
+   WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0xFF00) >>  8);
+   WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0x00FF) >>  0);
+
    for(i = 0; i < len; i++)
-   //M20150601 : Rename the function for integrating with ioLibrary  
-   //  WIZCHIP.IF.BUS._write_byte(AddrSel+i,pBuf[i]);  
-       WIZCHIP.IF.BUS._write_data(AddrSel+i,pBuf[i]);  
+   {
+	   WIZCHIP.IF.SPI._write_byte(pBuf[i]);    // Data write (write 1byte data)
+   }
+
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
+
+	WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0xFF00) >>  8);
+	WIZCHIP.IF.SPI._write_byte((((uint16_t)(AddrSel+i)) & 0x00FF) >>  0);
+	WIZCHIP.IF.SPI._write_byte(0xF0);
+
+	for(i = 0; i < len; i++)
+	{
+		WIZCHIP.IF.SPI._write_byte(pBuf[i]);    // Data write (write 1byte data)
+	}
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
    //M20150601 : Rename the function for integrating with ioLibrary  
    /*
@@ -161,7 +167,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    setMR(getMR() & ~MR_AI);   
 
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!!"
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!!"
 #endif
    
    WIZCHIP.CS._deselect();  //M20150601 : Moved here.
@@ -169,7 +175,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 }
 
 /**
-@brief  This function reads into W5100 memory(Buffer)
+@brief  This function reads into W5100S memory(Buffer)
 */ 
 
 void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
@@ -178,24 +184,27 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    WIZCHIP_CRITICAL_ENTER();
    WIZCHIP.CS._select();   //M20150601 : Moved here.
    
-   #if( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_))
+#if( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_) )
+
+   WIZCHIP.IF.SPI._write_byte(0x0F);
+   WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0xFF00) >>  8);
+   WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0x00FF) >>  0);
+
    for(i = 0; i < len; i++)
    {
-     //M20160715 : Depricated "M20150601 : Remove _select() to top-side"
-     //            CS should be controlled every SPI frames
-     WIZCHIP.CS._select();
-      WIZCHIP.IF.SPI._write_byte(0x0F);
-      WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0xFF00) >>  8);
-      WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0x00FF) >>  0);
       pBuf[i] = WIZCHIP.IF.SPI._read_byte(); 
-     //M20160715 : Depricated "M20150601 : Remove _select() to top-side"
-	  WIZCHIP.CS._deselect();
    }
-#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_) )
-   for(i = 0 ; i < len; i++)
-   //M20150601 : Rename the function for integrating with ioLibrary  
-   // pBuf[i]	= WIZCHIP.IF.BUS._read_byte(AddrSel+i);
-      pBuf[i]	= WIZCHIP.IF.BUS._read_data(AddrSel+i);
+#elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
+
+   WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0xFF00) >>  8);
+   WIZCHIP.IF.SPI._write_byte((uint16_t)((AddrSel+i) & 0x00FF) >>  0);
+   WIZCHIP.IF.SPI._write_byte(0x0F);
+
+   for(i = 0; i < len; i++)
+   {
+      pBuf[i] = WIZCHIP.IF.SPI._read_byte();
+   }
+
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
    //M20150601 : Rename the function for integrating with ioLibrary  
    /*
@@ -214,7 +223,7 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    setMR(getMR() & ~MR_AI); 
    
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!!"
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!!"
 #endif
 
    WIZCHIP.CS._deselect();    //M20150601 : Moved Here.
@@ -265,7 +274,7 @@ uint32_t getSn_RxBASE(uint8_t sn)
 {
    int8_t  i;
 #if ( _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_)
-   uint32_t rxbase = _W5100_IO_BASE_ + _WIZCHIP_IO_RXBUF_;
+   uint32_t rxbase = _W5100S_IO_BASE_ + _WIZCHIP_IO_RXBUF_;
 #else   
    uint32_t rxbase = _WIZCHIP_IO_RXBUF_;
 #endif   
@@ -279,7 +288,7 @@ uint32_t getSn_TxBASE(uint8_t sn)
 {
    int8_t  i;
 #if ( _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_)
-   uint32_t txbase = _W5100_IO_BASE_ + _WIZCHIP_IO_TXBUF_;
+   uint32_t txbase = _W5100S_IO_BASE_ + _WIZCHIP_IO_TXBUF_;
 #else   
    uint32_t txbase = _WIZCHIP_IO_TXBUF_;
 #endif   
@@ -381,6 +390,36 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len)
   
   ptr += len;
   setSn_RX_RD(sn,ptr);
+}
+
+void wiz_mdio_write(uint8_t PHYMDIO_regadr, uint16_t var)
+{
+    WIZCHIP_WRITE(PHYRAR,PHYMDIO_regadr);
+    WIZCHIP_WRITE(PHYDIR, (uint8_t)(var >> 8));
+    WIZCHIP_WRITE(PHYDIR+1, (uint8_t)(var));
+    WIZCHIP_WRITE(PHYACR, PHYACR_WRITE);
+    while(WIZCHIP_READ(PHYACR));  //wait for command complete
+}
+
+uint16_t wiz_mdio_read(uint8_t PHYMDIO_regadr)
+{
+    WIZCHIP_WRITE(PHYRAR,PHYMDIO_regadr);
+    WIZCHIP_WRITE(PHYACR, PHYACR_READ);
+    while(WIZCHIP_READ(PHYACR));  //wait for command complete
+    return ((uint16_t)WIZCHIP_READ(PHYDOR) << 8) | WIZCHIP_READ(PHYDOR+1);
+}
+
+void wiz_delay_ms(uint32_t milliseconds)
+{
+	uint32_t i;
+	for(i = 0 ; i < milliseconds ; i++)
+	{
+		//Write any values to clear the TCNTCLKR register
+		setTCNTCLKR(0xff);
+
+		// Wait until counter register value reaches 10.(10 = 1ms : TCNTR is 100us tick counter register)
+		while(getTCNTR() < 0x0a){}
+	}
 }
 
 #endif
