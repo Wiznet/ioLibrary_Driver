@@ -42,7 +42,7 @@
 
 #if   (_WIZCHIP_ == 5100)
 /**
-@brief  This function writes the data into W5200 registers.
+@brief  This function writes the data into W5100 registers.
 */
 void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
 {
@@ -76,7 +76,7 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    WIZCHIP_CRITICAL_EXIT();
 }
 /**
-@brief  This function reads the value from W5200 registers.
+@brief  This function reads the value from W5100 registers.
 */
 uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 {
@@ -116,7 +116,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 
 
 /**
-@brief  This function writes into W5200 memory(Buffer)
+@brief  This function writes into W5100 memory(Buffer)
 */ 
 void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
@@ -169,7 +169,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 }
 
 /**
-@brief  This function reads into W5200 memory(Buffer)
+@brief  This function reads into W5100 memory(Buffer)
 */ 
 
 void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)

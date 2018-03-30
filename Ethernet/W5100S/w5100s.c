@@ -1,12 +1,12 @@
 //*****************************************************************************
 //
-//! \file w5100.c
-//! \brief W5100 HAL Interface.
+//! \file w5100S.c
+//! \brief W5100S HAL Interface.
 //! \version 1.0.0
-//! \date 2013/10/21
+//! \date 2018/03/29
 //! \par  Revision history
-//!       <2013/10/21> 1st Release
-//! \author MidnightCow
+//!       <2018/03/29> 1st Release
+//! \author Peter
 //! 
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
@@ -42,7 +42,7 @@
 
 #if   (_WIZCHIP_ == W5100S)
 /**
-@brief  This function writes the data into W5200 registers.
+@brief  This function writes the data into W5100S registers.
 */
 void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
 {
@@ -78,7 +78,7 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    WIZCHIP_CRITICAL_EXIT();
 }
 /**
-@brief  This function reads the value from W5200 registers.
+@brief  This function reads the value from W5100S registers.
 */
 uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 {
@@ -109,7 +109,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    ret = WIZCHIP.IF.BUS._read_data(IDM_DR);
 
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!"   
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!"   
 #endif
 
    WIZCHIP.CS._deselect();
@@ -119,7 +119,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 
 
 /**
-@brief  This function writes into W5200 memory(Buffer)
+@brief  This function writes into W5100S memory(Buffer)
 */ 
 void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 {
@@ -167,7 +167,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    setMR(getMR() & ~MR_AI);   
 
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!!"
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!!"
 #endif
    
    WIZCHIP.CS._deselect();  //M20150601 : Moved here.
@@ -175,7 +175,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 }
 
 /**
-@brief  This function reads into W5200 memory(Buffer)
+@brief  This function reads into W5100S memory(Buffer)
 */ 
 
 void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
@@ -223,7 +223,7 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    setMR(getMR() & ~MR_AI); 
    
 #else
-   #error "Unknown _WIZCHIP_IO_MODE_ in W5100. !!!!"
+   #error "Unknown _WIZCHIP_IO_MODE_ in W5100S. !!!!"
 #endif
 
    WIZCHIP.CS._deselect();    //M20150601 : Moved Here.
@@ -274,7 +274,7 @@ uint32_t getSn_RxBASE(uint8_t sn)
 {
    int8_t  i;
 #if ( _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_)
-   uint32_t rxbase = _W5100_IO_BASE_ + _WIZCHIP_IO_RXBUF_;
+   uint32_t rxbase = _W5100S_IO_BASE_ + _WIZCHIP_IO_RXBUF_;
 #else   
    uint32_t rxbase = _WIZCHIP_IO_RXBUF_;
 #endif   
@@ -288,7 +288,7 @@ uint32_t getSn_TxBASE(uint8_t sn)
 {
    int8_t  i;
 #if ( _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_DIR_)
-   uint32_t txbase = _W5100_IO_BASE_ + _WIZCHIP_IO_TXBUF_;
+   uint32_t txbase = _W5100S_IO_BASE_ + _WIZCHIP_IO_TXBUF_;
 #else   
    uint32_t txbase = _WIZCHIP_IO_TXBUF_;
 #endif   
@@ -392,36 +392,23 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len)
   setSn_RX_RD(sn,ptr);
 }
 
-//todo comment needed
 void wiz_mdio_write(uint8_t PHYMDIO_regadr, uint16_t var)
 {
-	//set the address to write
-	setPHYRR(PHYMDIO_regadr);
-	//set the data to write
-	setPHYDIR(var);
-	//write command
-	setPHYACR(PHYACR_WRITE);
-
-	while(getPHYACR() != 0){} //wait until command executed.
+    WIZCHIP_WRITE(PHYRAR,PHYMDIO_regadr);
+    WIZCHIP_WRITE(PHYDIR, (uint8_t)(var >> 8));
+    WIZCHIP_WRITE(PHYDIR+1, (uint8_t)(var));
+    WIZCHIP_WRITE(PHYACR, PHYACR_WRITE);
+    while(WIZCHIP_READ(PHYACR));  //wait for command complete
 }
-
 
 uint16_t wiz_mdio_read(uint8_t PHYMDIO_regadr)
 {
-	setPHYRR(PHYMDIO_regadr);
-	setPHYACR(PHYACR_READ);
-	while(getPHYACR() != 0){
-		//Wait until command executed.
-	}
-	return getPHYDOR();
+    WIZCHIP_WRITE(PHYRAR,PHYMDIO_regadr);
+    WIZCHIP_WRITE(PHYACR, PHYACR_READ);
+    while(WIZCHIP_READ(PHYACR));  //wait for command complete
+    return ((uint16_t)WIZCHIP_READ(PHYDOR) << 8) | WIZCHIP_READ(PHYDOR+1);
 }
 
-
-/*
- * @brief	function for time delay
- * @param	milliseconds: specifies the delay time, in milliseconds.
- * @retval	None
- */
 void wiz_delay_ms(uint32_t milliseconds)
 {
 	uint32_t i;

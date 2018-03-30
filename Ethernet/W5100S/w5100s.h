@@ -1,11 +1,11 @@
 //* ****************************************************************************
-//! \file w5100.h
-//! \brief W5100 HAL Header File.
+//! \file w5100S.h
+//! \brief W5100S HAL Header File.
 //! \version 1.0.0
-//! \date 2013/10/21
+//! \date 2018/03/29
 //! \par  Revision history
-//!       <2013/10/21> 1st Release
-//! \author MidnightCow
+//!       <2018/03/29> 1st Release
+//! \author Peter
 //! \copyright
 //!
 //! Copyright (c)  2013, WIZnet Co., LTD.
@@ -84,30 +84,30 @@
 //-----------    defgroup --------------------------------
 
 /**
- * @defgroup W5100 W5100
- * @brief WHIZCHIP register defines and I/O functions of @b W5100.
+ * @defgroup W5100S W5100S
+ * @brief WHIZCHIP register defines and I/O functions of @b W5100S.
  *
- * - @ref WIZCHIP_register_W5100 : @ref Common_register_group_W5100S and @ref Socket_register_group_W5100S
- * - @ref WIZCHIP_IO_Functions_W5100 : @ref Basic_IO_function_W5100S, @ref Common_register_access_function_W5100S and @ref Socket_register_group_W5100S
+ * - @ref WIZCHIP_register_W5100S: @ref Common_register_group_W5100S and @ref Socket_register_group_W5100S
+ * - @ref WIZCHIP_IO_Functions_W5100S: @ref Basic_IO_function_W5100S, @ref Common_register_access_function_W5100S and @ref Special_function_W5100S
  */
 
  /**
- * @defgroup WIZCHIP_register_W5100 WIZCHIP register
- * @ingroup W5100
- * @brief WIZCHIP register defines register group of <b> W5100 </b>.
+ * @defgroup WIZCHIP_register_W5100S WIZCHIP register
+ * @ingroup W5100S
+ * @brief WIZCHIP register defines register group of <b> W5100S </b>.
  *
- * - \ref Common_register_group_W5100S : Common register group W5100
- * - \ref Socket_register_group_W5100S : \c SOCKET n register group W5100
+ * - \ref Common_register_group_W5100S : Common register group W5100S
+ * - \ref Socket_register_group_W5100S : \c SOCKET n register group W5100S
  */
 
 
 /**
- * @defgroup WIZCHIP_IO_Functions_W5100 WIZCHIP I/O functions
- * @ingroup W5100
- * @brief This supports the basic I/O functions for \ref WIZCHIP_register_W5100.
+ * @defgroup WIZCHIP_IO_Functions_W5100S WIZCHIP I/O functions
+ * @ingroup W5100S
+ * @brief This supports the basic I/O functions for \ref WIZCHIP_register_W5100S.
  *
  * - <b> Basic I/O function </b> \n
- *   WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF() \n\n
+ *   WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF(), wiz_recv_data(), wiz_recv_ignore(), wiz_send_data() \n\n
  *
  * - \ref Common_register_group_W5100S <b>access functions</b> \n
  * 	-# @b Mode \n
@@ -139,7 +139,7 @@
 
 /**
  * @defgroup Common_register_group_W5100S Common register
- * @ingroup WIZCHIP_register_W5100
+ * @ingroup WIZCHIP_register_W5100S
  * @brief Common register group\n
  * It set the basic for the networking\n
  * It set the configuration such as interrupt, network information, ICMP, etc.
@@ -154,7 +154,7 @@
 
  /**
  * @defgroup Socket_register_group_W5100S Socket register
- * @ingroup WIZCHIP_register_W5100
+ * @ingroup WIZCHIP_register_W5100S
  * @brief Socket register group\n
  * Socket register configures and control SOCKETn which is necessary to data communication.
  * @details
@@ -166,25 +166,31 @@
 
  /**
  * @defgroup Basic_IO_function_W5100S Basic I/O function
- * @ingroup WIZCHIP_IO_Functions_W5100
+ * @ingroup WIZCHIP_IO_Functions_W5100S
  * @brief These are basic input/output functions to read values from register or write values to register.
  */
 
 /**
  * @defgroup Common_register_access_function_W5100S Common register access functions
- * @ingroup WIZCHIP_IO_Functions_W5100
+ * @ingroup WIZCHIP_IO_Functions_W5100S
  * @brief These are functions to access <b>common registers</b>.
  */
 
 /**
  * @defgroup Socket_register_access_function_W5100S Socket register access functions
- * @ingroup WIZCHIP_IO_Functions_W5100
+ * @ingroup WIZCHIP_IO_Functions_W5100S
  * @brief These are functions to access <b>socket registers</b>.
+ */
+
+ /**
+ * @defgroup Special_function_W5100S Special functions
+ * @ingroup WIZCHIP_IO_Functions_W5100S
+ * @brief These are special functions to access to the PHY
  */
 
  //-----------------------------------------------------------------------------------
 
-//----------------------------- W5100 Common Registers IOMAP -----------------------------
+//----------------------------- W5100S Common Registers IOMAP -----------------------------
 /**
  * @ingroup Common_register_group_W5100S
  * @brief Mode Register address(R/W)\n
@@ -194,7 +200,7 @@
  * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
  * 		<tr>  <td>RST</td> <td>Reserved</td> <td>WOL</td> <td>PB</td> <td>PPPoE</td> <td>Reserved</td> <td>AI</td> <td>IND</td> </tr>
  * </table>
- * - \ref MR_RST		 	   : Reset
+ * - \ref MR_RST		 	: Reset
  * - \ref MR_PB         	: Ping block
  * - \ref MR_PPPOE      	: PPPoE mode
  * - \ref MR_AI         	: Address Auto-Increment in Indirect Bus Interface
@@ -269,9 +275,9 @@
  * @ingroup Common_register_group_W5100S
  * @brief Timeout register address( 1 is 100us )(R/W)
  * @details \ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of \ref _RTR_ is x07D0or 000
- * And so the default timeout period is 200ms(100us X 2000). During the time configured by \ref _RTR_, W5100 waits for the peer response
+ * And so the default timeout period is 200ms(100us X 2000). During the time configured by \ref _RTR_, W5100S waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
- * If the peer does not respond within the \ref _RTR_ time, W5100 retransmits the packet or issues timeout.
+ * If the peer does not respond within the \ref _RTR_ time, W5100S retransmits the packet or issues timeout.
  */
 #define _RTR_     			(_W5100S_IO_BASE_ + (0x0017)) // Retry Time
 
@@ -282,20 +288,63 @@
  * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
  */
 #define _RCR_				(_W5100S_IO_BASE_ + (0x0019)) // Retry Count
-#define RMSR				(_W5100S_IO_BASE_ + (0x001A)) // Receicve Memory Size
-#define TMSR				(_W5100S_IO_BASE_ + (0x001B)) // Trnasmit Memory Size
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
- * @brief IR2
- * @details \reg
+ * @brief Receive Memory Size Register
+ * @details \ref RMSR register configures RX bufffer Size of the SOCKET
+ * The sum of the RX buffers can not exceed 8kB.
+ * <table>
+ * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
+ * 		<tr>  <td>S3-1</td> <td>S3-0</td> <td>S2-1</td> <td>S2-0</td> <td>S1-1</td> <td>S1-0</td> <td>S0-1</td> <td>S0-0</td> </tr>
+ * </table>
+ * <table>
+ * 		<tr> <td>Memory Size</td><td>Sn-1</td><td>Sn-0</td> </tr>
+ * 		<tr> <td>1KB</td><td>0</td><td>0</td> </tr>
+ * 		<tr> <td>2KB</td><td>0</td><td>1</td> </tr>
+ * 		<tr> <td>4KB</td><td>1</td><td>0</td> </tr>
+ * 		<tr> <td>8KB</td><td>1</td><td>1</td> </tr>
+ * </table>
+ */
+#define RMSR				(_W5100S_IO_BASE_ + (0x001A)) // Receive Memory Size
+
+/**
+ * @ingroup Common_register_group_W5100S
+ * @brief Transmit Memory Size Register
+ * @details \ref TMSR register configures TX bufffer Size of the SOCKET
+ * The sum of the TX buffers can not exceed 8kB.
+ * <table>
+ * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
+ * 		<tr>  <td>S3-1</td> <td>S3-0</td> <td>S2-1</td> <td>S2-0</td> <td>S1-1</td> <td>S1-0</td> <td>S0-1</td> <td>S0-0</td> </tr>
+ * </table>
+ * <table>
+ * 		<tr> <td>Memory Size</td><td>Sn-1</td><td>Sn-0</td> </tr>
+ * 		<tr> <td>1KB</td><td>0</td><td>0</td> </tr>
+ * 		<tr> <td>2KB</td><td>0</td><td>1</td> </tr>
+ * 		<tr> <td>4KB</td><td>1</td><td>0</td> </tr>
+ * 		<tr> <td>8KB</td><td>1</td><td>1</td> </tr>
+ * </table>
+ */
+#define TMSR				(_W5100S_IO_BASE_ + (0x001B)) // Transmit Memory Size
+
+/**
+ * @ingroup Common_register_group_W5100S
+ * @brief Interrupt register 2
+ * @details \ref IR2 indicates the interrupt status.
+ * Each bit of IR2 will be still until the bit will be written to by the host.
+ * <table>
+ * 		<tr>  <td>7:1</td> <td>0</td>   </tr>
+ * 		<tr>  <td>Reserved</td> <td>WOL</td> </tr>
+ * </table>
+ * - \ref IR2_WOL : WOL MAGIC PACKET Interrupt Mask
  */
 #define IR2					(_W5100S_IO_BASE_ + (0x0020))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
- * @brief IMR2
- * @details \reg
+ * @brief Interrupt mask register 2
+ * @details \ref IMR2 Each bit of IMR2 corresponds to each bit of IR2.
+ * When a bit of IMR2 is and the corresponding bit of IR2 is set, Interrupt will be issued.
  */
 #define IMR2				(_W5100S_IO_BASE_ + (0x0021))
 
@@ -332,7 +381,7 @@
 
 /*------------------------------------------ Common registers ------------------------------------------*/
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief MR2 Mode register 2
  * @details \reg
@@ -340,21 +389,21 @@
 #define MR2					(_W5100S_IO_BASE_ + (0x0030))
 
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Destination Hardware address in PPPoE
  * @details \reg
  */
 #define PHAR				(_W5100S_IO_BASE_ + (0x0032))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Session ID in PPPoE
  * @details \reg
  */
 #define PSIDR				(_W5100S_IO_BASE_ + (0x0038))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Maximum receive Unit in PPPoE
  * @details \reg
@@ -364,69 +413,69 @@
 
 /*------------------------------------------ PHY registers ------------------------------------------*/
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY status register
  * @details \reg
  */
 #define PHYSR				(_W5100S_IO_BASE_ + (0x003C))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY status register(hidden)
  * @details \reg
  */
 #define PHYSR1				(_W5100S_IO_BASE_ + (0x003D))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Address value
  * @details \reg
  */
 #define PHYAR				(_W5100S_IO_BASE_ + (0x003E))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Register address
  * @details \reg
  */
-#define PHYRR				(_W5100S_IO_BASE_ + (0x003F))
+#define PHYRAR				(_W5100S_IO_BASE_ + (0x003F))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Data input register
  * @details \reg
  */
 #define PHYDIR				(_W5100S_IO_BASE_ + (0x0040))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY data output register
  * @details \reg
  */
 #define PHYDOR				(_W5100S_IO_BASE_ + (0x0042))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Action register
  * @details \reg
  */
 #define PHYACR				(_W5100S_IO_BASE_ + (0x0044))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Division register
  * @details \reg
  */
 #define PHYDIVR				(_W5100S_IO_BASE_ + (0x0045))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Control register 0
  * @details \reg
  */
 #define PHYCR0					(_W5100S_IO_BASE_ + (0x0046))
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Control register 1
  * @details \reg
@@ -435,14 +484,14 @@
 
 /*------------------------------------------ Socket Less registers ------------------------------------------*/
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less control register
  * @details \reg
  */
 #define SLCR				(_W5100S_IO_BASE_ + (0x004C))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less retry time register
  * @details \reg
@@ -450,63 +499,63 @@
 #define SLRTR				(_W5100S_IO_BASE_ + (0x004D))
 
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less retry count register
  * @details \reg
  */
 #define SLRCR				(_W5100S_IO_BASE_ + (0x004F))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less peer IP address register
  * @details \reg
  */
 #define SLPIPR				(_W5100S_IO_BASE_ + (0x0050))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less peer hardware address register
  * @details \reg
  */
 #define SLPHAR				(_W5100S_IO_BASE_ + (0x0054))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Ping sequence number register
  * @details \reg
  */
 #define PINGSEQR				(_W5100S_IO_BASE_ + (0x005A))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Ping ID register
  * @details \reg
  */
 #define PINGIDR				(_W5100S_IO_BASE_ + (0x005C))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Socket-less interrupt mask register
  * @details \reg
  */
 #define SLIMR				(_W5100S_IO_BASE_ + (0x005E))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief  Socket-less interrupt register
  * @details \reg
  */
 #define SLIR				(_W5100S_IO_BASE_ + (0x005F))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief DBGOUT(hidden)
  * @details \reg
  */
 #define DBGOUT				(_W5100S_IO_BASE_ + (0x0060))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief NICMAXCOLR(hidden)
  * @details \reg
@@ -514,49 +563,49 @@
 #define NICMAXCOLR			(_W5100S_IO_BASE_ + (0x0063))
 /*------------------------------------------ CFG registers ------------------------------------------*/
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Chip Configuration locking register
  * @details \reg
  */
 #define CHIPLCKR				(_W5100S_IO_BASE_ + (0x0070))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Network Configuration locking register
  * @details \reg
  */
 #define NETLCKR				(_W5100S_IO_BASE_ + (0x0071))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief PHY Configuration locking register
  * @details \reg
  */
 #define PHYLCKR				(_W5100S_IO_BASE_ + (0x0072))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief version register
  * @details \reg
  */
 #define VERR				(_W5100S_IO_BASE_ + (0x0080))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Core 100us Counter register
  * @details \reg
  */
 #define TCNTR				(_W5100S_IO_BASE_ + (0x0082))
 
-/*
+/**
  * @ingroup Common_register_group_W5100S
  * @brief Core 100us Counter clear register
  * @details \reg
  */
 #define TCNTCLKR			(_W5100S_IO_BASE_ + (0x0088))
 
-//----------------------------- W5100 Socket Registers -----------------------------
+//----------------------------- W5100S Socket Registers -----------------------------
 
 //--------------------------- For Backward Compatibility ---------------------------
 
@@ -599,7 +648,7 @@
  * @ingroup Socket_register_group_W5100S
  * @brief Socket command register(R/W)
  * @details This is used to set the command for Socket n such as OPEN, CLOSE, CONNECT, LISTEN, SEND, and RECEIVE.\n
- * After W5100 accepts the command, the \ref Sn_CR register is automatically cleared to 0x00.
+ * After W5100S accepts the command, the \ref Sn_CR register is automatically cleared to 0x00.
  * Even though \ref Sn_CR is cleared to 0x00, the command is still being processed.\n
  * To check whether the command is completed or not, please check the \ref Sn_IR or \ref Sn_SR.
  * - \ref Sn_CR_OPEN 		: Initialize or open socket.
@@ -745,7 +794,7 @@
 
 
 /**
- * @ingroup Socket_register_group
+ * @ingroup Socket_register_group_W5100S
  * @brief Receive memory size register(R/W)
  * @details @ref Sn_RXBUF_SIZE configures the RX buffer block size of Socket n.
  * Socket n RX Buffer Block size can be configured with 1,2,4 and 8Kbytes.
@@ -757,10 +806,10 @@
 #define Sn_RXBUF_SIZE(sn)   (_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x001E))
 
 /**
- * @ingroup Socket_register_group
+ * @ingroup Socket_register_group_W5100S
  * @brief Transmit memory size register(R/W)
  * @details @ref Sn_TXBUF_SIZE configures the TX buffer block size of Socket n. Socket n TX Buffer Block size can be configured with 1,2,4 and 8Kbytes.
- * If a different size is configured, the data can占퐐 be normally transmitted to a peer.
+ * If a different size is configured, the data cannot be normally transmitted to a peer.
  * Although Socket n TX Buffer Block size is initially configured to 2Kbytes,
  * user can be re-configure its size using @ref Sn_TXBUF_SIZE. The total sum of @ref Sn_TXBUF_SIZE can not be exceed 8Kbytes.
  * When exceeded, the data transmission error is occurred.
@@ -823,7 +872,7 @@
  * 3. After reading the received data, Update \ref Sn_RX_RD to the increased value as many as the reading size.
  * If the increment value exceeds the maximum value 0xFFFF, that is, is greater than 0x10000 and the carry bit occurs,
  * update with the lower 16bits value ignored the carry bit.\n
- * 4. Order RECV command is for notifying the updated \ref Sn_RX_RD to W5100.
+ * 4. Order RECV command is for notifying the updated \ref Sn_RX_RD to W5100S.
  */
 #define Sn_RX_RD(sn)		(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0028)) // Read point of Receive memory
 
@@ -838,18 +887,61 @@
 
 
 //todo
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket interrupt mask register
+ * @details Register address to configure the interrupt mask of the socket
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ *
+ */
 #define Sn_IMR(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x002C))
 
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket fragment field register
+ * @details Register to configure the Fragment field of IP Header
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
 #define Sn_FRAGR(sn)		(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x002D)) // and +1
 
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket Mode register 2
+ * @details Register to set mode 2
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
 #define Sn_MR2(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x002F))
 
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket n Keep Alive Timer Register
+ * @details Register to set the transmission period of keep alive packet.
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
 #define Sn_KPALVTR(sn)		(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0030))
 
-#define Sn_TSR(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0031))
+/** todo delete
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket n Timer Status Register
+ * @details
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
+//#define Sn_TSR(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0031))
 
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket n Retry Time-value Register
+ * @details Register to set the retry time value
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
 #define Sn_RTR(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0032))
 
+/**
+ * @ingroup Socket_register_group_W5100S
+ * @brief Socket n Retry Count-value Register
+ * @details Register to set the retry count value
+ * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b> expect <b>bit 4</b>.
+ */
 #define Sn_RCR(sn)			(_W5100S_IO_BASE_ + WIZCHIP_SREG_BLOCK(sn) + (0x0034))
 
 
@@ -883,7 +975,7 @@
  * @brief Address Auto-Increment in Indirect Bus Interface
  * @details 0 : Disable auto-increment \n
  * 1 : Enable auto-incremente \n
- * At the Indirect Bus Interface mode, if this bit is set as ��1��, the address will
+ * At the Indirect Bus Interface mode, if this bit is set as 占쎌쥙猷욑옙占쏙옙醫롫짗占쏙옙 the address will
  * be automatically increased by 1 whenever read and write are performed.
  */
 #define MR_AI				0x02 ///< auto-increment in indirect mode
@@ -892,7 +984,7 @@
  * @brief Indirect Bus Interface mode
  * @details 0 : Disable Indirect bus Interface mode \n
  * 1 : Enable Indirect bus Interface mode \n
- * If this bit is set as ��1��, Indirect Bus Interface mode is set.
+ * If this bit is set as 占쎌쥙猷욑옙占쏙옙醫롫짗占쏙옙 Indirect Bus Interface mode is set.
  */
 #define MR_IND				0x01 ///< enable indirect mode
 
@@ -1037,8 +1129,8 @@
  * @details 0 : disable MAC Filtering\n
  * 1 : enable MAC Filtering\n
  * This bit is applied only during MACRAW mode(P[3:0] = 100.\n
- * When set as  W5100 can only receive broadcasting packet or packet sent to itself.
- * When this bit is  W5100 can receive all packets on Ethernet.
+ * When set as  W5100S can only receive broadcasting packet or packet sent to itself.
+ * When this bit is  W5100S can receive all packets on Ethernet.
  * If user wants to implement Hybrid TCP/IP stack,
  * it is recommended that this bit is set as for reducing host overhead to process the all received packets.
  */
@@ -1333,54 +1425,69 @@ connection.
 
 /*----------------------------- W5100S !!Only!! Register values  -----------------------------*/
 
+//todo
 /* MODE2 register values */
 
 /**
- * @brief
- * @details
+ * @brief	Clock select bit
+ * @details	With this bit, system clock can be selected to be 25Mhz or 100Mhz
+ * 1: 25Mhz
+ * 0: 100Mhz (default)
  */
 #define MR2_CLKSEL				(1<<7)
 
 /**
- * @brief
- * @details
+ * @brief	Interrupt pin enable bit
+ * @details	This bit enables interrupt.
+ * 1: Enable interrupt
+ * 0: Disable interrupt
  */
 #define MR2_G_IEN				(1<<6)
 
 
 /**
- * @brief
- * @details
+ * @brief	No TCP Reset Packet send
+ * @details This bit prevents sending reset packet.
+ * 1: Block TCP reset packet send
+ * 0: TCP Reset packet send
  */
 #define MR2_NOTCPRST			(1<<5)
 
 /**
- * @brief
- * @details
+ * @brief	Unreachable Packet Send Block bit
+ * @details	This bit prevents sending Destination Port Unreachable Packet.
+ * 1: Block Destination Port Unreachable Packet Send
+ * 0: Destination Port Unreachable Packet Send
  */
 #define MR2_UDPURB				(1<<4)
 
 /**
- * @brief
- * @details
+ * @brief Wake On LAN
+ * @details This bit enables WOL packet to be received.
+ * 1: WOL packet can be received.
+ * 0: WOL packet cannot be received.
  */
 #define MR2_WOL					(1<<3)
 
-/**
- * @brief
+/**todo
+ * @brief MACRAW No Size Check
  * @details
  */
 #define MR2_MNOSCHK				(1<<2)
 
 /**
- * @brief
- * @details
+ * @brief	UDP force ARP
+ * @details This bit can enables to force ARP for each send command.
+ * 1: UDP Force ARP Enable
+ * 0: UDP Force ARP Disable.
+ *
  */
 #define MR2_UDPFARP				(1<<1)
 
-/**
- * @brief
- * @details
+/**todo
+ * @brief	Skip SRC Hardware Address
+ * @details	This bit can enables to receive without checking the hardware address of the peer.
+ * 1:
  */
 #define MR2_SSRCHA				(1<<0)
 
@@ -1388,19 +1495,19 @@ connection.
 
 /* Common interrupt register 2 values */
 
-/**
+/**todo
  * @brief magic packet
  * @details
  */
 #define IR2_MGC				(1<<1)
 
-/**
+/**todo
  * @brief Magic packet interrupt mask bit
  * @details If this bit is set, each socket interrupt is enabled.
  */
 #define IMR2_MGC			(1<<1)
 
-/**
+/**todo
  * @brief
  * @details
  */
@@ -1409,43 +1516,43 @@ connection.
 
 /* PHY status register 0 values */
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_CABOFF				(1<<7)
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_MD2				(1<<5)
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_MD1				(1<<4)
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_MD0				(1<<3)
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_DUP				(1<<2)
 
-/**
+/**todo
  * @brief
  * @details
  */
 #define PHYSR_SPD				(1<<1)
 
-/**
+/**todo
  * @brief LINKDONE register
  * @details If 1 Linked successfully, if 0 no link
  */
@@ -1455,19 +1562,19 @@ connection.
 /* PHY status register 10 values */
 
 /**
- * @brief
+ * @brieftodo
  * @details
  */
 #define PHYSR1_RXPG				(1<<2)
 
 /**
- * @brief
+ * @brieftodo
  * @details
  */
 #define PHYSR1_LPI				(1<<1)
 
 /**
- * @brief
+ * @brieftodo
  * @details
  */
 #define PHYSR1_CLDN				(1<<0)
@@ -1676,7 +1783,7 @@ connection.
 //M20150601 :  uint16_t AddrSel --> uint32_t AddrSel
 //
 /**
- * @ingroup Basic_IO_function_W5100S
+ * @ingroup Basic_IO_function_W5100S 
  * @brief It reads 1 byte value from a register.
  * @param AddrSel Register address
  * @return The value of register
@@ -1984,182 +2091,481 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 /*								W5100S only								*/
 /*----------------------------------------------------------------------*/
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref IR2 register
+ * @param (uint8_t)ir2 Value to set @ref IR2 register.
+ * @sa getIR2()
+ */
 #define setIR2(ir2) \
 		WIZCHIP_WRITE(IR2, ir2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref IR2 register
+ * @return uint8_t. Value of @ref IR2 register.
+ * @sa setIR2()
+ */
 #define getIR2() \
 		WIZCHIP_READ(IR2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref IMR2 register
+ * @param (uint8_t)imr2 Value to set @ref IMR2 register.
+ * @sa setIMR2()
+ */
 #define setIMR2(imr2) \
 		WIZCHIP_WRITE(IMR2,imr2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref IMR2 register
+ * @return uint8_t. Value of @ref IMR2 register.
+ * @sa getIMR2()
+ */
 #define getIMR2() \
 		WIZCHIP_READ(IMR2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref UIPR(Unreachable IP Address Register) registers
+ * @param (uint8_t*)uipr Value to set @ref UIPR registers.
+ * @sa setUIPR()
+ */
 #define setUIPR(uipr) \
 		WIZCHIP_WRITE_BUF(UIPR,uipr,4)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref UIPR(Unreachable IP Address Register) registers
+ * @param (uint8_t*)uipr Value to get @ref UIPR registers
+ * @sa setUIPR()
+ */
 #define getUIPR(uipr) \
 		WIZCHIP_READ_BUF(UIPR,uipr,4)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref UPORTR(Unreachable Port Address Register) register
+ * @param (uint16_t)uportr Value to set @ref UPORTR register.
+ * @sa getUPORTR()
+ */
 #define	setUPORTR(uportr) {\
 		WIZCHIP_WRITE(UPORTR, (uint8_t)(uportr >> 8)); \
 		WIZCHIP_WRITE(UPORTR+1, (uint8_t) uportr); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref UPORTR(Unreachable Port Address Register) register
+ * @return uint16_t. Value of @ref UPORTR register.
+ * @sa setUPORTR()
+ */
 #define getUPORTR() \
 		(((uint16_t)WIZCHIP_READ(UPORTR) << 8) + WIZCHIP_READ(UPORTR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref MR2 register
+ * @param (uint8_t)mr2 Value to set @ref MR2 registers.
+ * @sa getMR2()
+ */
 #define setMR2(mr2) \
 		WIZCHIP_WRITE(MR2,mr2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref MR2 register
+ * @return uint8_t. Value of @ref MR2 register.
+ * @sa setMR2()
+ */
 #define getMR2() \
 		WIZCHIP_READ(MR2)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHAR registers
+ * @param (uint8_t*)phar Value to set @ref PHAR registers.
+ * @sa getPHAR()
+ */
 #define setPHAR(phar) \
 		WIZCHIP_WRITE_BUF(PHAR,phar,6)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHAR registers
+ * @param (uint8_t*)phar Pointer variable to get @ref PHAR registers.
+ * @sa setPHAR()
+ */
 #define getPHAR(phar) \
 		WIZCHIP_READ_BUF(PHAR,phar,6)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PSIDR register
+ * @param (uint16_t)psidr Value to set @ref PSIDR register.
+ * @sa getPSIDR()
+ */
 #define setPSIDR(psidr) {\
 		WIZCHIP_WRITE(PSIDR, (uint8_t)(psidr >> 8)); \
 		WIZCHIP_WRITE(PSIDR+1, (uint8_t) psidr); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PSIDR register
+ * @return uint16_t. Value of @ref PSIDR register.
+ * @sa setPSIDR()
+ */
 #define getPSIDR() \
 		(((uint16_t)WIZCHIP_READ(PSIDR) << 8) + WIZCHIP_READ(PSIDR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PMRUR register
+ * @param (uint16_t)pmrur Value to set @ref PMRUR register.
+ * @sa getPMRUR()
+ */
 #define setPMRUR(pmrur) {\
 		WIZCHIP_WRITE(PMRUR, (uint8_t)(pmrur >> 8)); \
 		WIZCHIP_WRITE(PMRUR+1, (uint8_t) pmrur); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PMRUR register
+ * @return uint16_t. Value of @ref PMRUR register.
+ * @sa setPMRUR()
+ */
 #define getPMRUR() \
 		(((uint16_t)WIZCHIP_READ(PMRUR) << 8) + WIZCHIP_READ(PMRUR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYSR register
+ * @return uint8_t. Value of @ref PHYSR register.
+ * @sa setPHYSR()
+ */
 #define getPHYSR()	\
 		WIZCHIP_READ(PHYSR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYSR1 register
+ * @return uint8_t. Value of @ref PHYSR1 register.
+ * @sa setPHYSR1()
+ */
 #define getPHYSR1()	\
 		WIZCHIP_READ(PHYSR1)
 
-//The address of the PHY is fixed as "0x0A".
+/**
+ * For internal uses
+ * The address of the PHY is fixed as "0x0A".
+ */
 #define getPHYAR() \
 		WIZCHIP_READ(PHYAR)
 
-//read the value of the phy address register
-#define getPHYRR() \
-		WIZCHIP_READ(PHYRR)
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYRAR register
+ * @return uint8_t. Value of @ref PHYRAR register.
+ * @sa setPHYRAR()
+ */
+#define getPHYRAR() \
+		WIZCHIP_READ(PHYRAR)
 
-//write the value to the phy address register
-#define setPHYRR(phyrr) \
-		WIZCHIP_WRITE(PHYRR, phyrr)
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYRR register
+ * @param (uint8_t)phyrar Value to set @ref PHYRR register.
+ * @sa getPHYRR()
+ */
+#define setPHYRR(phyrar) \
+		WIZCHIP_WRITE(PHYRAR, phyrar)
 
-
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYDIR register
+ * @return uint16_t. Value of @ref PHYDIR register.
+ * @sa setPHYRAR()
+ */
 //read the value of the phy data input register
 #define getPHYDIR() \
 		(((uint16_t)WIZCHIP_READ(PHYDIR+1) << 8) + WIZCHIP_READ(PHYDIR))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYDIR register
+ * @param (uint16_t)phydir Value to set @ref PHYDIR register.
+ * @sa getPHYDIR()
+ */
 //write the value of the phy data input register
 #define setPHYDIR(phydir) {\
 		WIZCHIP_WRITE(PHYDIR+1, (uint8_t)(phydir >> 8)); \
 		WIZCHIP_WRITE(PHYDIR, (uint8_t) phydir); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYDOR register
+ * @return uint16_t. Value of @ref PHYDOR register.
+ * @sa setPHYDOR()
+ */
 //read the value of the phy data output register
 #define getPHYDOR()	\
 		(((uint16_t)WIZCHIP_READ(PHYDOR+1) << 8) + WIZCHIP_READ(PHYDOR))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYDOR register
+ * @param (uint16_t)phydor Value to set @ref PHYDOR register.
+ * @sa getPHYDOR()
+ */
 //write the value of the phy data output register
 #define setPHYDOR(phydor) {\
 		WIZCHIP_WRITE(PHYDOR, (uint8_t)(phydor >> 8)); \
 		WIZCHIP_WRITE(PHYDOR+1, (uint8_t) phydor); \
 	}
 
-//read the value of the phy action register ***meaningless because of this register will be cleared automatically***
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYACR register
+ * @return uint8_t. Value of @ref PHYACR register.
+ * @sa setPHYACR()
+ */
+//read the value of the phy action register ***This register will be cleared automatically***
 #define getPHYACR() \
 		WIZCHIP_READ(PHYACR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYACR register
+ * @param (uint8_t)phyacr Value to set @ref PHYACR register.
+ * @sa getPHYACR()
+ */
 //write the value of the phy action register
 #define setPHYACR(phyacr)	\
 		WIZCHIP_WRITE(PHYACR,phyacr)
 
-
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYDIVR register
+ * @param (uint8_t)phydivr Value to set @ref PHYDIVR register.
+ * @sa getPHYDIVR()
+ */
 #define setPHYDIVR(phydivr)	\
 		WIZCHIP_WRITE(PHYDIVR, phydivr)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYDIVR register
+ * @return uint8_t. Value of @ref PHYDIVR register.
+ * @sa setPHYDIVR()
+ */
 #define getPHYDIVR()	\
 		WIZCHIP_READ(PHYDIVR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYCR0 register
+ * @param (uint8_t)phych0 Value to set @ref PHYCR0 register.
+ * @sa getPHYCR0()
+ */
 #define setPHYCR0(phych0)		\
 		WIZCHIP_WRITE(PHYCR0,phych0)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYCR0 register
+ * @return uint8_t. Value of @ref PHYCR0 register.
+ * @sa setPHYCR0()
+ */
 #define getPHYCR0()	\
 		WIZCHIP_READ(PHYCR0)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PHYCR1 register
+ * @param (uint8_t)phycr1 Value to set @ref PHYCR1 register.
+ * @sa getPHYCR1()
+ */
 #define setPHYCR1(phycr1)	\
 		WIZCHIP_WRITE(PHYCR1,phycr1)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PHYCR1 register
+ * @return uint8_t. Value of @ref PHYCR1 register.
+ * @sa setPHYCR1()
+ */
 #define getPHYCR1() \
 		WIZCHIP_READ(PHYCR1)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLCR register
+ * @param (uint8_t)rqcr Value to set @ref SLCR register.
+ * @sa getSLCR()
+ */
 #define setSLCR(rqcr)	\
 		WIZCHIP_WRITE(SLCR, rqcr)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref RQCR register
+ * @return uint8_t. Value of @ref RQCR register.
+ * @sa setRQCR()
+ */
 #define getSLCR()	\
 		WIZCHIP_READ(RQCR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLRTR register
+ * @param (uint16_t)slrtr Value to set @ref SLRTR register.
+ * @sa getSLRTR()
+ */
 #define setSLRTR(slrtr)	\
 		WIZCHIP_WRITE(SLRTR, (uint8_t)(slrtr >> 8)); \
 		WIZCHIP_WRITE(SLRTR+1, (uint8_t) slrtr); \
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLRTR register
+ * @return uint16_t. Value of @ref SLRTR register.
+ * @sa setSLRTR()
+ */
 #define getSLRTR()	\
 		(((uint16_t)WIZCHIP_READ(SLRTR) << 8) + WIZCHIP_READ(SLRTR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLRCR register
+ * @param (uint8_t)slrcr Value to set @ref SLRCR register.
+ * @sa getSLRCR()
+ */
 #define setSLRCR(slrcr)	\
 		WIZCHIP_WRITE(SLRCR,slrcr)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLRCR register
+ * @return uint8_t. Value of @ref SLRCR register.
+ * @sa setSLRCR()
+ */
 #define getSLRCR()	\
 		WIZCHIP_READ(SLRCR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLPIPR registers
+ * @param (uint8_t*)slpipr Values to set @ref SLPIPR registers.
+ * @sa getSLPIPR()
+ */
 #define setSLPIPR(slpipr)	\
 		WIZCHIP_WRITE_BUF(SLPIPR,slpipr,4)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLPIPR registers
+ * @param (uint8_t*)slpipr Values to get @ref SLPIPR registers.
+ * @sa getSLPIPR()
+ */
 #define getSLPIPR(slpipr)	\
 		WIZCHIP_READ_BUF(SLPIPR,slpipr,4)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLPHAR registers
+ * @param (uint8_t*)slphar Values to set @ref SLPHAR registers.
+ * @sa getSLPHAR()
+ */
 #define setSLPHAR(slphar) \
 		WIZCHIP_WRITE_BUF(SLPHAR,slphar,6)
 
-#define getSLPHAR(rqphar) \
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLPHAR registers
+ * @param (uint8_t*)slphar Values to get @ref SLPHAR registers.
+ * @sa getSLPHAR()
+ */
+#define getSLPHAR(slphar) \
 		WIZCHIP_READ_BUF(SLPHAR,slphar,6)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PINGSEQR register
+ * @param (uint16_t)pingseqr Value to set @ref PINGSEQR register.
+ * @sa getPINGSEQR()
+ */
 #define setPINGSEQR(pingseqr) {\
 		WIZCHIP_WRITE(PINGSEQR, (uint8_t)(pingseqr >> 8)); \
 		WIZCHIP_WRITE(PINGSEQR+1, (uint8_t) pingseqr); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PINGSEQR register
+ * @return uint16_t. Value of @ref PINGSEQR register.
+ * @sa setPINGSEQR()
+ */
 #define getPINGSEQR() \
 		(((uint16_t)WIZCHIP_READ(PINGSEQR) << 8) + WIZCHIP_READ(PINGSEQR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref PINGIDR register
+ * @param (uint16_t)pingidr Value to set @ref PINGIDR register.
+ * @sa getPINGIDR()
+ */
 #define setPINGIDR(pingidr) {\
 		WIZCHIP_WRITE(PINGIDR, (uint8_t)(pingidr >> 8)); \
 		WIZCHIP_WRITE(PINGIDR+1, (uint8_t) pingidr); \
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref PINGIDR register
+ * @return uint16_t. Value of @ref PINGIDR register.
+ * @sa setPINGIDR()
+ */
 #define getPINGIDR()	\
 		(((uint16_t)WIZCHIP_READ(PINGIDR) << 8) + WIZCHIP_READ(PINGIDR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLIMR register
+ * @param (uint8_t)slimr Value to set @ref SLIMR register.
+ * @sa getSLIMR()
+ */
 #define setSLIMR(slimr)	\
 		WIZCHIP_WRITE(SLIMR, slimr)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLIMR register
+ * @return uint8_t. Value of @ref SLIMR register.
+ * @sa setSLIMR()
+ */
 #define getSLIMR()	\
 		WIZCHIP_READ(SLIMR)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref SLIR register
+ * @param (uint8_t)slir Value to set @ref SLIR register.
+ * @sa getSLIMR()
+ */
 #define setSLIR(slir)	\
 		WIZCHIP_WRITE(SLIR, slir)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref SLIMR register
+ * @return uint8_t. Value of @ref SLIMR register.
+ * @sa setSLIMR()
+ */
 #define getSLIR()	\
 		WIZCHIP_READ(SLIR)
 
@@ -2170,31 +2576,74 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(DBGOUT,(uint8_t)(dbgout));		\
 	}
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref NICMAXCOLR register
+ * @param (uint8_t)nicmaxcolr Value to set @ref NICMAXCOLR register.
+ * @sa getNICMAXCOLR()
+ */
 #define setNICMAXCOLR(nicmaxcolr)	\
 		WIZCHIP_WRITE(NICMAXCOLR,nicmaxcolr)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref NICMAXCOLR register
+ * @return uint8_t. Value of @ref NICMAXCOLR register.
+ * @sa setNICMAXCOLR()
+ */
 #define getNICMAXCOLR()	\
 		WIZCHIP_READ(NICMAXCOLR)
 
 /*Clock lock/unlock*/
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief LOCK Chip Information
+ * @sa CHIPULLOCK()
+ */
 #define CHIPLOCK()	\
 		WIZCHIP_WRITE(CHIPLCKR,0xff)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Unlock Chip Information
+ * @sa CHIPLOCK()
+ */
 #define CHIPUNLOCK()	\
 		WIZCHIP_WRITE(CHIPLCKR,0xCE)
 
+
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief LOCK Chip Information
+ * @sa CHIPULLOCK()
+ */
 /*Network information lock/unlock*/
 #define NETLOCK()	\
 		WIZCHIP_WRITE(NETLCKR,0x3A)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Unlock Chip Information
+ * @sa CHIPLOCK()
+ */
 #define NETUNLOCK()	\
 		WIZCHIP_WRITE(NETLCKR,0xC5)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Lock PHYCR0,CR1 Information
+ * @sa CHIPULLOCK()
+ */
 /*PHY CR0,CR1 lock/unlock*/
 #define PHYLOCK()	\
 		WIZCHIP_WRITE(PHYLCKR,0xff)
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Lock PHYCR0,CR1 Information
+ * @sa CHIPULLOCK()
+ */
 #define PHYUNLOCK()	\
 		WIZCHIP_WRITE(PHYLCKR,0x53)
 
@@ -2206,10 +2655,23 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 #define getVER() \
 		(WIZCHIP_READ(VERR))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Get \ref TCNTR register
+ * @return uint16_t. Value of @ref TCNTR register.
+ * @sa setNTCNTR()
+ */
 /*Get 100us internal counter*/
 #define getTCNTR()	\
 		(((uint16_t)WIZCHIP_READ(TCNTR) << 8) + WIZCHIP_READ(TCNTR+1))
 
+/**
+ * @ingroup Common_register_access_function_W5100S
+ * @brief Set \ref TCNTR register
+ * @param (uint8_t)
+  Value to set @ref TCNTR register.
+ * @sa getTCNTCLKR()
+ */
 /*Reset 100us internal counter(TCNTR)*/
 #define setTCNTCLKR(var)	\
 		WIZCHIP_WRITE(TCNTCLKR, var)
@@ -2818,11 +3280,30 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  */
 void wiz_recv_ignore(uint8_t sn, uint16_t len);
 
-//todo comment nedded
+/**
+ * @ingroup Special_function_W5100S
+ * @brief Write data to the PHY via MDC/MDIO interface.
+ * @details Write command data to the PHY via MDC/MDIO interface.
+ * @param (uint8_t)PHYMDIO_regadr Address of the PHY register. It should be PHYMDIO_BMCR or PHYMDIO_BMSR.
+ * @param (uint16_t)var Data to write to the PHY register. Please refer to the bit definitions of the BMCR and BMSR register.
+ */
 void wiz_mdio_write(uint8_t PHYMDIO_regadr, uint16_t var);
 
+/**
+ * @ingroup Special_function_W5100S
+ * @brief Read data from the PHY via MDC/MDIO interface.
+ * @details Read command or status data from the PHY via MDC/MDIO interface.
+ * @param (uint8_t)PHYMDIO_regadr Address of the PHY register. It should be PHYMDIO_BMCR or PHYMDIO_BMSR.
+ * @return The value of the PHY register
+ */
 uint16_t wiz_mdio_read(uint8_t PHYMDIO_regadr);
 
+/**
+ * @ingroup Special_function_W5100S
+ * @brief Delay function
+ * @details Delay function using internal 100us timer of the W5100S
+ * @param (uint32_t)ms Time to delay in milliseconds.
+ */
 void wiz_delay_ms(uint32_t ms);
 
 /// @cond DOXY_APPLY_CODE

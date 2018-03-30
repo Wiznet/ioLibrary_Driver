@@ -107,9 +107,9 @@
 * @brief Define interface mode.
 * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
 */
-	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
 	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
-	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
 
 //A20150601 : Define the unit of IO DATA.
    typedef   uint8_t   iodata_t;
