@@ -123,7 +123,6 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 	  case Sn_MR_IPRAW :
          break;
    #if ( _WIZCHIP_ < 5200 )
-      case Sn_MR_IPRAW :
       case Sn_MR_PPPoE :
          break;
    #endif
@@ -719,7 +718,7 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
 			else pack_len = sock_remained_size[sn];
 			wiz_recv_data(sn,buf,pack_len);
 		   break;
-//   #if ( _WIZCHIP_ < 5200 )
+   //#if ( _WIZCHIP_ < 5200 )
 		case Sn_MR_IPRAW:
 		   if(sock_remained_size[sn] == 0)
 		   {
@@ -743,7 +742,7 @@ int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16
 			else pack_len = sock_remained_size[sn];
    		wiz_recv_data(sn, buf, pack_len); // data copy.
 			break;
-   #endif
+   //#endif
       default:
          wiz_recv_ignore(sn, pack_len); // data copy.
          sock_remained_size[sn] = pack_len;
