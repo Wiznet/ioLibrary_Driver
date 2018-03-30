@@ -1517,7 +1517,7 @@ connection.
 /* PHY status register 0 values */
 
 /**todo
- * @brief
+ * @brief Ethernet CABLE OFF Signal
  * @details
  */
 #define PHYSR_CABOFF				(1<<7)
