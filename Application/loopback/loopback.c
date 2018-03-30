@@ -91,7 +91,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
    //	uint16_t destport = 	5000;
 
    // Port number for TCP client (will be increased)
-   uint16_t any_port = 	50000;
+   static uint16_t any_port = 	50000;
 
    // Socket Status Transitions
    // Check the W5500 Socket n status register (Sn_SR, The 'Sn_SR' controlled by Sn_CR command or Packet send/recv status)
@@ -151,7 +151,10 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 
       case SOCK_CLOSED:
     	  close(sn);
-    	  if((ret=socket(sn, Sn_MR_TCP, any_port++, 0x00)) != sn) return ret; // TCP socket open with 'any_port' port number
+    	  if((ret=socket(sn, Sn_MR_TCP, any_port++, 0x00)) != sn){
+         if(any_port == 0xffff) any_port = 50000;
+         return ret; // TCP socket open with 'any_port' port number
+        } 
 #ifdef _LOOPBACK_DEBUG_
     	 //printf("%d:TCP client loopback start\r\n",sn);
          //printf("%d:Socket opened\r\n",sn);
