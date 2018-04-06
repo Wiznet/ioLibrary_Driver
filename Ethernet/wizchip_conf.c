@@ -599,21 +599,16 @@ intr_kind wizchip_getinterruptmask(void)
 
 int8_t wizphy_getphylink(void)
 {
-   int8_t tmp;
+   int8_t tmp = PHY_LINK_OFF;
 #if _WIZCHIP_ == W5100S
    if(getPHYSR() & PHYSR_LNK)
 	   tmp = PHY_LINK_ON;
-   else
-	   tmp = PHY_LINK_OFF;
 #elif   _WIZCHIP_ == W5200
    if(getPHYSTATUS() & PHYSTATUS_LINK)
       tmp = PHY_LINK_ON;
-   else
-      tmp = PHY_LINK_OFF;
 #elif _WIZCHIP_ == W5500
    if(getPHYCFGR() & PHYCFGR_LNK_ON)
       tmp = PHY_LINK_ON;
-      tmp = PHY_LINK_OFF;
 #else
    tmp = -1;
 #endif
