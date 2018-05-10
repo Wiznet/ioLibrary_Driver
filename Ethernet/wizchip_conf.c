@@ -439,7 +439,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 
 		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
 		{
-		#if __WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
 			j = 0;
 			while(txsize[i] >> j != 1){j++;}
 			setSn_TXBUF_SIZE(i, j);
