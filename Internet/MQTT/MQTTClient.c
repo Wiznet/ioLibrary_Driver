@@ -295,14 +295,10 @@ int MQTTYield(MQTTClient* c, int timeout_ms)
     TimerInit(&timer);
     TimerCountdownMS(&timer, timeout_ms);
 
-	do
+    if (cycle(c, &timer) == FAILURE)
     {
-        if (cycle(c, &timer) == FAILURE)
-        {
-            rc = FAILURE;
-            break;
-        }
-	} while (!TimerIsExpired(&timer));
+        rc = FAILURE;
+    }
         
     return rc;
 }
