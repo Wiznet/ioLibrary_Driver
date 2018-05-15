@@ -1988,7 +1988,7 @@ uint8_t getRMSR(uint8_t sn);
  * @return uint16_t. Variable of @ref Sn_PORTR.
  * @sa setSn_PORTR()
  */
-#define getSn_PORTR(sn, port) \
+#define getSn_PORTR(sn) \
    WIZCHIP_READ(Sn_PORTR(sn))
 #define getSn_PORT(sn)   getSn_PORTR(sn)   ///< For compatible ioLibrary
 
