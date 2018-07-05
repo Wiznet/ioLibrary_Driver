@@ -913,7 +913,6 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 
 	// WIZchip Netinfo Clear
 	setSIPR(zeroip);
-	setSIPR(zeroip);
 	setGAR(zeroip);
 
 	reset_DHCP_timeout();
