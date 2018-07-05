@@ -910,7 +910,7 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
          *(uint8_t*) arg = getSn_SR(sn);
          break;
       case SO_REMAINSIZE:
-         if(getSn_MR(sn) == Sn_MR_TCP)
+         if(getSn_MR(sn) & Sn_MR_TCP)
             *(uint16_t*)arg = getSn_RX_RSR(sn);
          else
             *(uint16_t*)arg = sock_remained_size[sn];
