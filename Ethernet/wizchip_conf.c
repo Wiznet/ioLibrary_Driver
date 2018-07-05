@@ -441,7 +441,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		{
 		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
 			j = 0;
-			while(txsize[i] >> j != 1){j++;}
+			while((txsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
 			setSn_TXBUF_SIZE(i, j);
 		#else
 			setSn_TXBUF_SIZE(i, txsize[i]);
@@ -475,7 +475,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		{
 		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
 			j = 0;
-			while(rxsize[i] >> j != 1){j++;}
+			while((rxsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
 			setSn_RXBUF_SIZE(i, j);
 		#else
 			setSn_RXBUF_SIZE(i, txsize[i]);
