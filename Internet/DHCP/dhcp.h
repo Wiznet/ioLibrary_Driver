@@ -63,7 +63,7 @@
 #define DHCP_CLIENT_PORT         68	      ///< DHCP client port number
 
 
-#define MAGIC_COOKIE             0x63825363  ///< Any number. You can be modifyed it any number
+#define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
 
 #define DCHP_HOST_NAME           "WIZnet\0"
 
