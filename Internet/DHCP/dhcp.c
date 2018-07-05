@@ -228,7 +228,8 @@ void (*dhcp_ip_conflict)(void) = default_ip_conflict;   /* handler to be called 
 
 void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_conflict)(void));
 
-
+char NibbleToHex(uint8_t nibble);
+    
 /* send DISCOVER message to DHCP server */
 void     send_DHCP_DISCOVER(void);
 
@@ -478,10 +479,13 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = 0; // length of hostname
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
    	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
-	pDHCPMSG->OPT[k - (i+3+1)] = i+3; // length of hostname
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
 	
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x08;
@@ -970,6 +974,13 @@ uint32_t getDHCPLeasetime(void)
 	return dhcp_lease_time;
 }
 
-
+char NibbleToHex(uint8_t nibble)
+{
+  nibble &= 0x0F;
+  if (nibble <= 9)
+    return nibble + '0';
+  else 
+    return nibble + ('A'-0x0A);
+}
 
 
