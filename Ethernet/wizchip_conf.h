@@ -1,16 +1,3 @@
-/*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*********************************************************************************************************************************************************/
 //*****************************************************************************
 //
 //! \file wizchip_conf.h
@@ -18,6 +5,10 @@
 //! \version 1.0.0
 //! \date 2013/10/21
 //! \par  Revision history
+//!       <2015/02/05> Notice
+//!        The version history is not updated after this point.
+//!        Download the latest version directly from GitHub. Please visit the our GitHub repository for ioLibrary.
+//!        >> https://github.com/Wiznet/ioLibrary_Driver
 //!       <2013/10/21> 1st Release
 //! \author MidnightCow
 //! \copyright
@@ -66,10 +57,19 @@
 #include <stdint.h>
 /**
  * @brief Select WIZCHIP.
- * @todo You should select one, \b 5100, \b 5200 ,\b 5500 or etc. \n\n
- *       ex> <code> #define \_WIZCHIP_      7500 </code>
+ * @todo You should select one, \b W5100, \b W5100S, \b W5200, \b W5300, \b W5500 or etc. \n\n
+ *       ex> <code> #define \_WIZCHIP_      W5500 </code>
  */
-#define _WIZCHIP_                      7500 // 5500, 5100, 5200, 5500
+
+#define W5100						5100
+#define W5100S						5100+5
+#define W5200						5200
+#define W5300						5300
+#define W5500						5500
+
+#ifndef _WIZCHIP_
+#define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
+#endif
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
@@ -84,37 +84,59 @@
 
 #define _WIZCHIP_IO_MODE_SPI_VDM_      (_WIZCHIP_IO_MODE_SPI_ + 1) /**< SPI interface mode for variable length data*/
 #define _WIZCHIP_IO_MODE_SPI_FDM_      (_WIZCHIP_IO_MODE_SPI_ + 2) /**< SPI interface mode for fixed length data mode*/
+#define _WIZCHIP_IO_MODE_SPI_5500_     (_WIZCHIP_IO_MODE_SPI_ + 3) /**< SPI interface mode for fixed length data mode*/
 
-
-#if   (_WIZCHIP_ == 5100)
+#if   (_WIZCHIP_ == W5100)
    #define _WIZCHIP_ID_                "W5100\0"
 /**
  * @brief Define interface mode.
  * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
  */
+// 	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
+//	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+   	   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
 
-// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
-// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
-   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+//A20150601 : Define the unit of IO DATA.   
+   typedef   uint8_t   iodata_t;
+//A20150401 : Indclude W5100.h file
+   #include "W5100/w5100.h"
 
-#elif (_WIZCHIP_ == 5200)
+#elif (_WIZCHIP_ == W5100S)
+#define _WIZCHIP_ID_                "W5100S\0"
+/**
+* @brief Define interface mode.
+* @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
+*/
+	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
+	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+
+//A20150601 : Define the unit of IO DATA.
+   typedef   uint8_t   iodata_t;
+//A20150401 : Indclude W5100.h file
+	#include "W5100S/w5100s.h"
+#elif (_WIZCHIP_ == W5200)
    #define _WIZCHIP_ID_                "W5200\0"
 /**
  * @brief Define interface mode.
- * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
+ * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ or @ref \	_WIZCHIP_IO_MODE_BUS_INDIR_
  */
+#ifndef _WIZCHIP_IO_MODE_
 // #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
    #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+#endif
+//A20150601 : Define the unit of IO DATA.   
+   typedef   uint8_t   iodata_t;
    #include "W5200/w5200.h"
-#elif (_WIZCHIP_ == 5500)
+#elif (_WIZCHIP_ == W5500)
   #define _WIZCHIP_ID_                 "W5500\0"
   
 /**
  * @brief Define interface mode. \n
  * @todo Should select interface mode as chip. 
  *        - @ref \_WIZCHIP_IO_MODE_SPI_ \n
- *          -@ref \_WIZCHIP_IO_MODE_SPI_VDM_ : Valid only in @ref \_WIZCHIP_ == 5500 \n
- *          -@ref \_WIZCHIP_IO_MODE_SPI_FDM_ : Valid only in @ref \_WIZCHIP_ == 5500 \n
+ *          -@ref \_WIZCHIP_IO_MODE_SPI_VDM_ : Valid only in @ref \_WIZCHIP_ == W5500 \n
+ *          -@ref \_WIZCHIP_IO_MODE_SPI_FDM_ : Valid only in @ref \_WIZCHIP_ == W5500 \n
  *        - @ref \_WIZCHIP_IO_MODE_BUS_ \n
  *          - @ref \_WIZCHIP_IO_MODE_BUS_DIR_ \n
  *          - @ref \_WIZCHIP_IO_MODE_BUS_INDIR_ \n
@@ -122,23 +144,42 @@
  *        ex> <code> #define \_WIZCHIP_IO_MODE_ \_WIZCHIP_IO_MODE_SPI_VDM_ </code>
  *       
  */
+#ifndef _WIZCHIP_IO_MODE_
    //#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_FDM_
    #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+#endif
+//A20150601 : Define the unit of IO DATA.   
+   typedef   uint8_t   iodata_t;
    #include "W5500/w5500.h"
-#elif (_WIZCHIP_ == 7500)
-  #define _WIZCHIP_ID_                 "W7500\0"
-  
+#elif ( _WIZCHIP_ == W5300)
+   #define _WIZCHIP_ID_                 "W5300\0"
 /**
- * @brief Define interface mode. \n
- * @todo Should select interface mode as chip. 
- *        - @ref \_WIZCHIP_IO_MODE_BUS_ \n
- *        - @ref \_WIZCHIP_IO_MODE_BUS_DIR_ \n
- *       
+ * @brief Define interface mode.
+ * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
  */
-   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
-   //#include "W7500x_wztoe.h"
-	 #include "W7500x.h"
-#else 
+#ifndef _WIZCHIP_IO_MODE_
+//   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
+ #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+#endif
+
+//A20150601 : Define the unit and bus width of IO DATA. 
+   /**
+    * @brief Select the data width 8 or 16 bits.
+    * @todo you should select the bus width. Select one of 8 or 16.
+    */
+   #ifndef _WIZCHIP_IO_BUS_WIDTH_
+   #define _WIZCHIP_IO_BUS_WIDTH_       8  // 16
+   #endif
+   #if _WIZCHIP_IO_BUS_WIDTH_ == 8
+      typedef   uint8_t   iodata_t;
+   #elif _WIZCHIP_IO_BUS_WIDTH_ == 16
+      typedef   uint16_t   iodata_t;
+   #else
+      #error "Unknown _WIZCHIP_IO_BUS_WIDTH_. It should be 8 or 16."	
+   #endif
+//
+   #include "W5300/w5300.h"
+#else
    #error "Unknown defined _WIZCHIP_. You should define one of 5100, 5200, and 5500 !!!"
 #endif
 
@@ -152,15 +193,22 @@
  *       @ref \_WIZCHIP_IO_MODE_BUS_DIR_, @ref \_WIZCHIP_IO_MODE_BUS_INDIR_). \n\n
  *       ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
  */
-#define _WIZCHIP_IO_BASE_              0x00000000  // 
+#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
+//#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
 
-#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS
+#ifndef _WIZCHIP_IO_BASE_
+#define _WIZCHIP_IO_BASE_              0x00000000  // 0x8000
+#endif
+
+//M20150401 : Typing Error
+//#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS
+#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
    #ifndef _WIZCHIP_IO_BASE_
       #error "You should be define _WIZCHIP_IO_BASE to fit your system memory map."
    #endif
 #endif   
 
-#if _WIZCHIP_ > 5100
+#if _WIZCHIP_ >= W5200
    #define _WIZCHIP_SOCK_NUM_   8   ///< The count of independant socket of @b WIZCHIP
 #else
    #define _WIZCHIP_SOCK_NUM_   4   ///< The count of independant socket of @b WIZCHIP
@@ -187,7 +235,7 @@ typedef struct __WIZCHIP
       void (*_exit) (void);         ///< critial section exit  
    }CRIS;  
    /**
-    *  The set of @ref\_WIZCHIP_ select control callback func.
+    *  The set of @ref \_WIZCHIP_ select control callback func.
     */
    struct _CS
    {
@@ -201,12 +249,19 @@ typedef struct __WIZCHIP
    {	 
       /**
        * For BUS interface IO
-       */  
+       */
+      //M20156501 : Modify the function name for integrating with W5300
+      //struct
+      //{
+      //   uint8_t  (*_read_byte)  (uint32_t AddrSel);
+      //   void     (*_write_byte) (uint32_t AddrSel, uint8_t wb);
+      //}BUS;      
       struct
       {
-         uint8_t  (*_read_byte)  (uint32_t AddrSel);
-         void     (*_write_byte) (uint32_t AddrSel, uint8_t wb);
+         iodata_t  (*_read_data)   (uint32_t AddrSel);
+         void      (*_write_data)  (uint32_t AddrSel, iodata_t wb);
       }BUS;      
+
       /**
        * For SPI interface IO
        */
@@ -214,6 +269,8 @@ typedef struct __WIZCHIP
       {
          uint8_t (*_read_byte)   (void);
          void    (*_write_byte)  (uint8_t wb);
+         void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
+         void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
       }SPI;
       // To be added
       //
@@ -229,7 +286,7 @@ extern _WIZCHIP  WIZCHIP;
 typedef enum
 {
    CW_RESET_WIZCHIP,   ///< Resets WIZCHIP by softly
-   CW_INIT_WIZCHIP,    ///< Inializes to WIZCHIP with SOCKET buffer size 2 or 1 dimension array typed uint8_t.
+   CW_INIT_WIZCHIP,    ///< Initializes to WIZCHIP with SOCKET buffer size 2 or 1 dimension array typed uint8_t.
    CW_GET_INTERRUPT,   ///< Get Interrupt status of WIZCHIP
    CW_CLR_INTERRUPT,   ///< Clears interrupt
    CW_SET_INTRMASK,    ///< Masks interrupt
@@ -238,15 +295,19 @@ typedef enum
    CW_GET_INTRTIME,    ///< Set interval time between the current and next interrupt. 
    CW_GET_ID,          ///< Gets WIZCHIP name.
 
-#if _WIZCHIP_ ==  5500
-   CW_RESET_PHY,       ///< Resets internal PHY. Valid Only W5000
-   CW_SET_PHYCONF,     ///< When PHY configured by interal register, PHY operation mode (Manual/Auto, 10/100, Half/Full). Valid Only W5000 
-   CW_GET_PHYCONF,     ///< Get PHY operation mode in interal register. Valid Only W5000
-   CW_GET_PHYSTATUS,   ///< Get real PHY status on operating. Valid Only W5000
-   CW_SET_PHYPOWMODE,  ///< Set PHY power mode as noraml and down when PHYSTATUS.OPMD == 1. Valid Only W5000
-#endif
-   CW_GET_PHYPOWMODE,  ///< Get PHY Power mode as down or normal
-   CW_GET_PHYLINK      ///< Get PHY Link status
+//D20150601 : For no modification your application code
+//#if _WIZCHIP_ ==  W5500
+   CW_RESET_PHY,       ///< Resets internal PHY. Valid Only W5500
+   CW_SET_PHYCONF,     ///< When PHY configured by internal register, PHY operation mode (Manual/Auto, 10/100, Half/Full). Valid Only W5000
+   CW_GET_PHYCONF,     ///< Get PHY operation mode in internal register. Valid Only W5500
+   CW_GET_PHYSTATUS,   ///< Get real PHY status on operating. Valid Only W5500
+   CW_SET_PHYPOWMODE,  ///< Set PHY power mode as normal and down when PHYSTATUS.OPMD == 1. Valid Only W5500
+//#endif
+//D20150601 : For no modification your application code
+//#if _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
+   CW_GET_PHYPOWMODE,  ///< Get PHY Power mode as down or normal, Valid Only W5100, W5200
+   CW_GET_PHYLINK      ///< Get PHY Link status, Valid Only W5100, W5200
+//#endif
 }ctlwizchip_type;
 
 /**
@@ -271,14 +332,16 @@ typedef enum
  */
 typedef enum
 {
-#if _WIZCHIP_ > 5200
+#if   _WIZCHIP_ == W5500
    IK_WOL               = (1 << 4),   ///< Wake On Lan by receiving the magic packet. Valid in W500.
+#elif _WIZCHIP_ == W5300
+   IK_FMTU              = (1 << 4),   ///< Received a ICMP message (Fragment MTU)   
 #endif   
 
    IK_PPPOE_TERMINATED  = (1 << 5),   ///< PPPoE Disconnected
 
-#if _WIZCHIP_ != 5200
-   IK_DEST_UNREACH      = (1 << 6),   ///< Destination IP & Port Unreable, No use in W5200
+#if _WIZCHIP_ != W5200
+   IK_DEST_UNREACH      = (1 << 6),   ///< Destination IP & Port Unreachable, No use in W5200
 #endif   
 
    IK_IP_CONFLICT       = (1 << 7),   ///< IP conflict occurred
@@ -287,17 +350,17 @@ typedef enum
    IK_SOCK_1            = (1 << 9),   ///< Socket 1 interrupt
    IK_SOCK_2            = (1 << 10),  ///< Socket 2 interrupt
    IK_SOCK_3            = (1 << 11),  ///< Socket 3 interrupt
-#if _WIZCHIP_ > 5100   
+#if _WIZCHIP_ > W5100S
    IK_SOCK_4            = (1 << 12),  ///< Socket 4 interrupt, No use in 5100
    IK_SOCK_5            = (1 << 13),  ///< Socket 5 interrupt, No use in 5100
    IK_SOCK_6            = (1 << 14),  ///< Socket 6 interrupt, No use in 5100
    IK_SOCK_7            = (1 << 15),  ///< Socket 7 interrupt, No use in 5100
 #endif   
 
-#if _WIZCHIP_ > 5100
-   IK_SOCK_ALL          = (0xFF << 8) ///< All Socket interrpt
+#if _WIZCHIP_ > W5100S
+   IK_SOCK_ALL          = (0xFF << 8) ///< All Socket interrupt
 #else
-   IK_SOCK_ALL          = (0x0F << 8) ///< All Socket interrpt 
+   IK_SOCK_ALL          = (0x0F << 8) ///< All Socket interrupt
 #endif      
 }intr_kind;
 
@@ -315,7 +378,7 @@ typedef enum
 #define PHY_POWER_DOWN           1     ///< PHY power down mode 
 
 
-#if _WIZCHIP_ == 5500 
+#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500
 /**
  * @ingroup DATA_TYPE
  *  It configures PHY configuration when CW_SET PHYCONF or CW_GET_PHYCONF in W5500,  
@@ -363,7 +426,7 @@ typedef struct wiz_NetInfo_t
  */
 typedef enum
 {
-#if _WIZCHIP_ == 5500   
+#if _WIZCHIP_ == W5500
    NM_FORCEARP    = (1<<1),  ///< Force to APP send whenever udp data is sent. Valid only in W5500
 #endif   
    NM_WAKEONLAN   = (1<<5),  ///< Wake On Lan 
@@ -409,17 +472,29 @@ void reg_wizchip_cs_cbfunc(void(*cs_sel)(void), void(*cs_desel)(void));
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
-void reg_wizchip_bus_cbfunc(uint8_t (*bus_rb)(uint32_t addr), void (*bus_wb)(uint32_t addr, uint8_t wb));
+//M20150601 : For integrating with W5300
+//void reg_wizchip_bus_cbfunc(uint8_t (*bus_rb)(uint32_t addr), void (*bus_wb)(uint32_t addr, uint8_t wb));
+void reg_wizchip_bus_cbfunc(iodata_t (*bus_rb)(uint32_t addr), void (*bus_wb)(uint32_t addr, iodata_t wb));
 
 /**
  *@brief Registers call back function for SPI interface.
- *@param spi_rb : callback function to read byte usig SPI 
- *@param spi_wb : callback function to write byte usig SPI 
+ *@param spi_rb : callback function to read byte using SPI
+ *@param spi_wb : callback function to write byte using SPI
  *@todo Describe \ref wizchip_spi_readbyte and \ref wizchip_spi_writebyte function
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
 void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb));
+
+/**
+ *@brief Registers call back function for SPI interface.
+ *@param spi_rb : callback function to burst read using SPI
+ *@param spi_wb : callback function to burst write using SPI
+ *@todo Describe \ref wizchip_spi_readbyte and \ref wizchip_spi_writebyte function
+ *or register your functions.
+ *@note If you do not describe or register, null function is called.
+ */
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
 
 /**
  * @ingroup extra_functions
@@ -494,12 +569,13 @@ void wizchip_setinterruptmask(intr_kind intr);
  */
 intr_kind wizchip_getinterruptmask(void);
 
-#if _WIZCHIP_ > 5100
+//todo
+#if _WIZCHIP_ > W5100
    int8_t wizphy_getphylink(void);              ///< get the link status of phy in WIZCHIP. No use in W5100
    int8_t wizphy_getphypmode(void);             ///< get the power mode of PHY in WIZCHIP. No use in W5100
 #endif
 
-#if _WIZCHIP_ == 5500
+#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500
    void   wizphy_reset(void);                   ///< Reset phy. Vailid only in W5500
 /**
  * @ingroup extra_functions
@@ -557,17 +633,17 @@ netmode_type wizchip_getnetmode(void);
 
 /**
  * @ingroup extra_functions
- * @brief Set retry time value(@ref RTR) and retry count(@ref RCR).
- * @details @ref RTR configures the retransmission timeout period and @ref RCR configures the number of time of retransmission.  
- * @param nettime @ref RTR value and @ref RCR value. Refer to @ref wiz_NetTimeout. 
+ * @brief Set retry time value(@ref _RTR_) and retry count(@ref _RCR_).
+ * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
+ * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
  */
 void wizchip_settimeout(wiz_NetTimeout* nettime);
 
 /**
  * @ingroup extra_functions
- * @brief Get retry time value(@ref RTR) and retry count(@ref RCR).
- * @details @ref RTR configures the retransmission timeout period and @ref RCR configures the number of time of retransmission.  
- * @param nettime @ref RTR value and @ref RCR value. Refer to @ref wiz_NetTimeout. 
+ * @brief Get retry time value(@ref _RTR_) and retry count(@ref _RCR_).
+ * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
+ * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
  */
 void wizchip_gettimeout(wiz_NetTimeout* nettime);
 
