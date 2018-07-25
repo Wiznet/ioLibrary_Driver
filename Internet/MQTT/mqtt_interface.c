@@ -123,7 +123,7 @@ void NewNetwork(Network* n, int sn) {
  *         buffer : pointer to a read buffer.
  *         len : buffer length.
  */
-int w5x00_read(Network* n, unsigned char* buffer, int len)
+int w5x00_read(Network* n, unsigned char* buffer, int len, long time)
 {
 
 	if((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket)>0))
@@ -137,7 +137,7 @@ int w5x00_read(Network* n, unsigned char* buffer, int len)
  *         buffer : pointer to a read buffer.
  *         len : buffer length.
  */
-int w5x00_write(Network* n, unsigned char* buffer, int len)
+int w5x00_write(Network* n, unsigned char* buffer, int len, long time)
 {
 	if(getSn_SR(n->my_socket) == SOCK_ESTABLISHED)
 		return send(n->my_socket, buffer, len);
@@ -162,7 +162,7 @@ void w5x00_disconnect(Network* n)
  */
 int ConnectNetwork(Network* n, char* ip, int port)
 {
-	uint8_t myport = 12345;
+	uint16_t myport = 12345;
 
 	socket(n->my_socket,Sn_MR_TCP,myport,0);
 	connect(n->my_socket,ip,port);

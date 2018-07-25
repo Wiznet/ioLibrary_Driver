@@ -1,12 +1,12 @@
 /*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * Copyright ï¿½ï¿½I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ï¿½ï¿½ï¿½ï¿½Softwareï¿½ï¿½ï¿½ï¿½), 
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * THE SOFTWARE IS PROVIDED ï¿½ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -664,54 +664,60 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg)
 
 int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
 {
-    CHECK_SOCKNUM();
-    switch(sotype)
-    {
-        case SO_FLAG:
-            *(uint8_t*)arg = getSn_MR(sn) & 0xF0;
-            break;
-        case SO_TTL:
-            *(uint8_t*) arg = getSn_TTL(sn);
-            break;
-        case SO_TOS:
-            *(uint8_t*) arg = getSn_TOS(sn);
-            break;
-        case SO_MSS:   
-            *(uint8_t*) arg = getSn_MSSR(sn);
-            break; //M20160411
-        case SO_DESTIP:
-					  getSn_DIPR(sn, (uint8_t*)arg);
-            break;
-        case SO_DESTPORT:  
-            *(uint16_t*) arg = getSn_DPORT(sn);
-            break;
-#if _WIZCHIP_ > 5200   
-        case SO_KEEPALIVEAUTO:
-            CHECK_SOCKMODE(Sn_MR_TCP);
-            *(uint16_t*) arg = getSn_KPALVTR(sn);
-            break;
-#endif      
-        case SO_SENDBUF:
-            *(uint16_t*) arg = getSn_TX_FSR(sn);
-            break; //M20160411
-        case SO_RECVBUF:
-            *(uint16_t*) arg = getSn_RX_RSR(sn);
-            break; //M20160411
-        case SO_STATUS:
-            *(uint8_t*) arg = getSn_SR(sn);
-            break;
-        case SO_REMAINSIZE:
-            if(getSn_MR(sn) == Sn_MR_TCP)
-                *(uint16_t*)arg = getSn_RX_RSR(sn);
-            else
-                *(uint16_t*)arg = sock_remained_size[sn];
-            break;
-        case SO_PACKINFO:
-            CHECK_SOCKMODE(Sn_MR_TCP);
-            *(uint8_t*)arg = sock_pack_info[sn];
-            break;
-        default:
-            return SOCKERR_SOCKOPT;
-    }
-    return SOCK_OK;
+
+   CHECK_SOCKNUM();
+   switch(sotype)
+   {
+      case SO_FLAG:
+         *(uint8_t*)arg = getSn_MR(sn) & 0xF0;
+         break;
+      case SO_TTL:
+         *(uint8_t*) arg = getSn_TTL(sn);
+         break;
+      case SO_TOS:
+         *(uint8_t*) arg = getSn_TOS(sn);
+         break;
+      case SO_MSS:   
+         *(uint16_t*) arg = getSn_MSSR(sn);
+         break;
+      case SO_DESTIP:
+         getSn_DIPR(sn, (uint8_t*)arg);
+         break;
+      case SO_DESTPORT:  
+         *(uint16_t*) arg = getSn_DPORT(sn);
+         break;
+   #if _WIZCHIP_ > 5200   
+      case SO_KEEPALIVEAUTO:
+         CHECK_SOCKMODE(Sn_MR_TCP);
+         *(uint16_t*) arg = getSn_KPALVTR(sn);
+         break;
+   #endif      
+      case SO_SENDBUF:
+         *(uint16_t*) arg = getSn_TX_FSR(sn);
+         break;
+      case SO_RECVBUF:
+         *(uint16_t*) arg = getSn_RX_RSR(sn);
+         break;
+      case SO_STATUS:
+         *(uint8_t*) arg = getSn_SR(sn);
+         break;
+      case SO_REMAINSIZE:
+         if(getSn_MR(sn) & Sn_MR_TCP)
+            *(uint16_t*)arg = getSn_RX_RSR(sn);
+         else
+            *(uint16_t*)arg = sock_remained_size[sn];
+         break;
+      case SO_PACKINFO:
+         //CHECK_SOCKMODE(Sn_MR_TCP);
+#if _WIZCHIP_ != 5300
+         if((getSn_MR(sn) == Sn_MR_TCP))
+             return SOCKERR_SOCKMODE;
+#endif
+         *(uint8_t*)arg = sock_pack_info[sn];
+         break;
+      default:
+         return SOCKERR_SOCKOPT;
+   }
+   return SOCK_OK;
+
 }

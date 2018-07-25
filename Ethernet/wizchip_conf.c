@@ -1,12 +1,12 @@
 /*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * Copyright ï¿½ï¿½I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ï¿½ï¿½ï¿½ï¿½Softwareï¿½ï¿½ï¿½ï¿½), 
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * THE SOFTWARE IS PROVIDED ï¿½ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -325,20 +325,73 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
    if(txsize)
    {
       tmp = 0;
-      for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-         tmp += txsize[i];
-      if(tmp > 16) return -1;
-      for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-         setSn_TXBUF_SIZE(i, txsize[i]);
+
+   //M20150601 : For integrating with W5300
+   #if _WIZCHIP_ == W5300
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			if(txsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
+			tmp += txsize[i];
+			if(tmp > 128) return -1;
+		}
+		if(tmp % 8) return -1;
+   #else
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			tmp += txsize[i];
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+			if(tmp > 8) return -1;
+		#else
+			if(tmp > 16) return -1;
+		#endif
+		}
+
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+			j = 0;
+			while((txsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
+			setSn_TXBUF_SIZE(i, j);
+		#else
+			setSn_TXBUF_SIZE(i, txsize[i]);
+		#endif
+		}
+	#endif
+
    }
    if(rxsize)
    {
       tmp = 0;
       for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-         tmp += rxsize[i];
-      if(tmp > 16) return -1;
-      for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-         setSn_RXBUF_SIZE(i, rxsize[i]);
+		{
+			if(rxsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
+			tmp += rxsize[i];
+			if(tmp > 128) return -1;
+		}
+		if(tmp % 8) return -1;
+   #else
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			tmp += rxsize[i];
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+			if(tmp > 8) return -1;
+		#else
+			if(tmp > 16) return -1;
+		#endif
+		}
+
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+			j = 0;
+			while((rxsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
+			setSn_RXBUF_SIZE(i, j);
+		#else
+			setSn_RXBUF_SIZE(i, txsize[i]);
+		#endif
+		}
+	#endif
+
    }
    return 0;
 }
