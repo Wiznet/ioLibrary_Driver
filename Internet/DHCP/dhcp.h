@@ -44,9 +44,7 @@
 //*****************************************************************************
 #ifndef _DHCP_H_
 #define _DHCP_H_
-#include <stdint.h>
-#include "socket.h"
-#include "W7500x_wztoe.h"
+
 /*
  * @brief 
  * @details If you want to display debug & procssing message, Define _DHCP_DEBUG_ 
@@ -57,7 +55,7 @@
 
 /* Retry to processing DHCP */
 #define	MAX_DHCP_RETRY          2        ///< Maxium retry count
-#define	DHCP_WAIT_TIME          5       ///< Wait Time 10s
+#define	DHCP_WAIT_TIME          10       ///< Wait Time 10s
 
 
 /* UDP port numbers for DHCP */
