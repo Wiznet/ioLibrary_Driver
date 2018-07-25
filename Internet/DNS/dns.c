@@ -1,3 +1,16 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 //*****************************************************************************
 //
 //! \file dns.c
@@ -340,7 +353,7 @@ int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 	uint8_t * cp;
 
 	msg = pbuf;
-	memset(pdhdr, 0, sizeof(pdhdr));
+	memset(pdhdr, 0, sizeof(*pdhdr));
 
 	pdhdr->id = get16(&msg[0]);
 	tmp = get16(&msg[2]);
@@ -367,7 +380,7 @@ int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 	for (i = 0; i < pdhdr->qdcount; i++)
 	{
 		cp = dns_question(msg, cp);
-   #ifdef _DNS_DEUBG_
+   #ifdef _DNS_DEBUG_
       printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h"
    #endif
 		if(!cp) return -1;
@@ -377,7 +390,7 @@ int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 	for (i = 0; i < pdhdr->ancount; i++)
 	{
 		cp = dns_answer(msg, cp, ip_from_dns);
-   #ifdef _DNS_DEUBG_
+   #ifdef _DNS_DEBUG_
       printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h"
    #endif
 		if(!cp) return -1;
@@ -526,10 +539,10 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 		{
 			if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
 			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port);
-      #ifdef _DNS_DEBUG_
-	      printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
-      #endif
-         ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
+#ifdef _DNS_DEBUG_
+			printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
+#endif
+			ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
 			break;
 		}
 		// Check Timeout
