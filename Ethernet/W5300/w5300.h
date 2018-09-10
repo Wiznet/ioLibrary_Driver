@@ -1,5 +1,10 @@
 #ifndef	_W5300_H_
 #define	_W5300_H_
+
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
 //*****************************************************************************
 //
 //! \file w5300.h
@@ -2323,5 +2328,9 @@ void wiz_recv_ignore(uint8_t sn, uint32_t len);
 /// \cond DOXY_APPLY_CODE
 #endif
 /// \endcond
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif   // _W5300_H_

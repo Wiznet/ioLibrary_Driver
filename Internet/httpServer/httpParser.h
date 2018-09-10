@@ -8,6 +8,10 @@
 #ifndef	__HTTPPARSER_H__
 #define	__HTTPPARSER_H__
 
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
 //#define _HTTPPARSER_DEBUG_
 
 #define HTTP_SERVER_PORT		80		/**< HTTP server well-known port number */
@@ -146,5 +150,9 @@ uint8_t * get_http_uri_name(uint8_t * uri);
 uint16_t ATOI(uint8_t * str, uint8_t base);
 void mid(char* src, char* s1, char* s2, char* sub);
 void inet_addr_(uint8_t * addr, uint8_t * ip);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* end of __HTTPPARSER_H__ */

@@ -8,6 +8,10 @@
 #ifndef	__HTTPSERVER_H__
 #define	__HTTPSERVER_H__
 
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
 // HTTP Server debug message enable
 #define _HTTPSERVER_DEBUG_
 
@@ -99,5 +103,9 @@ uint8_t display_reg_webContent_list(void);
  */
 void httpServer_time_handler(void);
 uint32_t get_httpServer_timecount(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

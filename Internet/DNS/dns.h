@@ -51,6 +51,10 @@
 #ifndef	_DNS_H_
 #define	_DNS_H_
 
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
 #include <stdint.h>
 /*
  * @brief Define it for Debug & Monitor DNS processing.
@@ -97,5 +101,9 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns);
  * @note SHOULD BE register to your system 1s Tick timer handler 
  */
 void DNS_time_handler(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* _DNS_H_ */

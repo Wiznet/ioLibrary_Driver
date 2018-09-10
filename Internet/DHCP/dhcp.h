@@ -45,6 +45,10 @@
 #ifndef _DHCP_H_
 #define _DHCP_H_
 
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
 /*
  * @brief 
  * @details If you want to display debug & procssing message, Define _DHCP_DEBUG_ 
@@ -148,5 +152,9 @@ void getDNSfromDHCP(uint8_t* ip);
  * @retrun unit 1s
  */
 uint32_t getDHCPLeasetime(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* _DHCP_H_ */

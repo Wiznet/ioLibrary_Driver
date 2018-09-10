@@ -84,6 +84,9 @@
  */
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 #include "wizchip_conf.h"
 
@@ -478,5 +481,9 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
  *   This means the zero byte UDP data(UDP Header only) received.
   */
 int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif   // _SOCKET_H_

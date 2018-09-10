@@ -36,7 +36,9 @@
 //! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 //! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+//! INTERRUPTION) HOWEVER CAUSED AND#ifdef __cplusplus
+extern ¡°C¡± {
+#endif ON ANY THEORY OF LIABILITY, WHETHER IN 
 //! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 //! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
 //! THE POSSIBILITY OF SUCH DAMAGE.
@@ -53,6 +55,10 @@
 
 #ifndef  _WIZCHIP_CONF_H_
 #define  _WIZCHIP_CONF_H_
+
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
 
 #include <stdint.h>
 /**
@@ -646,5 +652,8 @@ void wizchip_settimeout(wiz_NetTimeout* nettime);
  * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
  */
 void wizchip_gettimeout(wiz_NetTimeout* nettime);
+#ifdef __cplusplus
+ }
+#endif
 
 #endif   // _WIZCHIP_CONF_H_

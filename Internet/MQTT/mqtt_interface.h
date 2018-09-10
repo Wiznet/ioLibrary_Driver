@@ -212,6 +212,11 @@ int main(void)
 #ifndef __MQTT_INTERFACE_H_
 #define __MQTT_INTERFACE_H_
 
+#ifdef __cplusplus
+extern ¡°C¡± {
+#endif
+
+
 /*
  * @brief MQTT MilliTimer handler
  * @note MUST BE register to your system 1m Tick timer handler
@@ -256,5 +261,9 @@ int w5x00_write(Network*, unsigned char*, int, long);
 void w5x00_disconnect(Network*);
 void NewNetwork(Network* n, int sn);
 int ConnectNetwork(Network*, char*, int);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__MQTT_INTERFACE_H_
