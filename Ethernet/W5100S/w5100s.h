@@ -43,7 +43,7 @@
 #define	_W5100S_H_
 
 #ifdef __cplusplus
-extern ��C�� {
+extern "C" {
 #endif
 
 #include <stdint.h>
@@ -979,7 +979,7 @@ extern ��C�� {
  * @brief Address Auto-Increment in Indirect Bus Interface
  * @details 0 : Disable auto-increment \n
  * 1 : Enable auto-incremente \n
- * At the Indirect Bus Interface mode, if this bit is set as 占쎌쥙猷욑옙占쏙옙醫롫짗占쏙옙 the address will
+ * At the Indirect Bus Interface mode, if this bit is set as å� ìŽŒì¥™çŒ·ìš‘ì˜™å� ì�™ì˜™é†«ë¡«ì§—å� ì�™ì˜™ the address will
  * be automatically increased by 1 whenever read and write are performed.
  */
 #define MR_AI				0x02 ///< auto-increment in indirect mode
@@ -988,7 +988,7 @@ extern ��C�� {
  * @brief Indirect Bus Interface mode
  * @details 0 : Disable Indirect bus Interface mode \n
  * 1 : Enable Indirect bus Interface mode \n
- * If this bit is set as 占쎌쥙猷욑옙占쏙옙醫롫짗占쏙옙 Indirect Bus Interface mode is set.
+ * If this bit is set as å� ìŽŒì¥™çŒ·ìš‘ì˜™å� ì�™ì˜™é†«ë¡«ì§—å� ì�™ì˜™ Indirect Bus Interface mode is set.
  */
 #define MR_IND				0x01 ///< enable indirect mode
 

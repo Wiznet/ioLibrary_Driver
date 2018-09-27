@@ -49,7 +49,7 @@
 #define  _W5500_H_
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 #include <stdint.h>

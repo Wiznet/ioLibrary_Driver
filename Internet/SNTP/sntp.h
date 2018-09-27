@@ -9,7 +9,7 @@
 #define SNTP_H_
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 #include <stdint.h>

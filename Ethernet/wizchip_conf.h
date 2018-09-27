@@ -36,9 +36,7 @@
 //! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 //! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND#ifdef __cplusplus
-extern ¡°C¡± {
-#endif ON ANY THEORY OF LIABILITY, WHETHER IN 
+//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 //! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 //! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
 //! THE POSSIBILITY OF SUCH DAMAGE.
@@ -57,7 +55,7 @@ extern ¡°C¡± {
 #define  _WIZCHIP_CONF_H_
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 #include <stdint.h>
@@ -74,7 +72,7 @@ extern ¡°C¡± {
 #define W5500						5500
 
 #ifndef _WIZCHIP_
-#define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
+#define _WIZCHIP_                      W5100S   // W5100, W5100S, W5200, W5300, W5500
 #endif
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
@@ -113,7 +111,7 @@ extern ¡°C¡± {
 * @brief Define interface mode.
 * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
 */
-	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+//	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
 	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
 	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
 
@@ -199,8 +197,11 @@ extern ¡°C¡± {
  *       @ref \_WIZCHIP_IO_MODE_BUS_DIR_, @ref \_WIZCHIP_IO_MODE_BUS_INDIR_). \n\n
  *       ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
  */
-#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
-//#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
+#if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
+	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
+#elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
+	#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
+#endif
 
 #ifndef _WIZCHIP_IO_BASE_
 #define _WIZCHIP_IO_BASE_              0x00000000  // 0x8000

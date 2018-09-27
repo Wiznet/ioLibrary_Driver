@@ -9,7 +9,7 @@
 #define	__HTTPSERVER_H__
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 // HTTP Server debug message enable

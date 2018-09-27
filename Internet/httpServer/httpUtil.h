@@ -13,7 +13,7 @@
 #define	__HTTPUTIL_H__
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 #include "httpServer.h"

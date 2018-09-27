@@ -29,7 +29,7 @@
 
 /* $Id: stdio_private.h,v 1.6 2003/01/07 22:17:24 joerg_wunsch Exp $ */
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 #include <stdint.h>
