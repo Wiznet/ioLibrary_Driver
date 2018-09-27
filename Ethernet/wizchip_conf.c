@@ -163,21 +163,33 @@ _WIZCHIP  WIZCHIP =
       };
 */      
 _WIZCHIP  WIZCHIP =
-      {
-      _WIZCHIP_IO_MODE_,
-      _WIZCHIP_ID_ ,
-      wizchip_cris_enter,
-      wizchip_cris_exit,
-      wizchip_cs_select,
-      wizchip_cs_deselect,
-      //M20150601 : Rename the function
-      //wizchip_bus_readbyte,
-      //wizchip_bus_writebyte
-      wizchip_bus_readdata,
-      wizchip_bus_writedata,
-//    wizchip_spi_readbyte,
-//    wizchip_spi_writebyte
-      };
+{
+    _WIZCHIP_IO_MODE_,
+    _WIZCHIP_ID_ ,
+    {
+        wizchip_cris_enter,
+        wizchip_cris_exit
+    },
+    {
+        wizchip_cs_select,
+        wizchip_cs_deselect
+    },
+    {
+        {
+            //M20150601 : Rename the function 
+            //wizchip_bus_readbyte,
+            //wizchip_bus_writebyte
+            wizchip_bus_readdata,
+            wizchip_bus_writedata
+        },
+        {
+            //wizchip_spi_readbyte,
+            //wizchip_spi_writebyte,
+            //wizchip_spi_readburst,
+            //wizchip_spi_writeburst
+        }
+    }
+};
 
 
 static uint8_t    _DNS_[4];      // DNS server ip address
@@ -441,11 +453,8 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		{
 		#if _WIZCHIP_ == W5100	//2016.10.28 peter add condition for w5100
 			j = 0;
-			while(txsize[i] >> j != 1){
-
-					j++;
-			}
-
+			while((txsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
+			setSn_TXBUF_SIZE(i, j);
 		#else
 			setSn_TXBUF_SIZE(i, txsize[i]);
 		#endif
@@ -480,9 +489,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		{
 		#if _WIZCHIP_ == W5100	// add condition for w5100
 			j = 0;
-			while(rxsize[i] >> j != 1){
-				j++;}
-
+			while((rxsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
 			setSn_RXBUF_SIZE(i, j);
 		#else
 			setSn_RXBUF_SIZE(i, rxsize[i]);
@@ -606,21 +613,17 @@ intr_kind wizchip_getinterruptmask(void)
 
 int8_t wizphy_getphylink(void)
 {
-   int8_t tmp;
+   int8_t tmp = PHY_LINK_OFF;
 #if _WIZCHIP_ == W5100S
    if(getPHYSR() & PHYSR_LNK)
 	   tmp = PHY_LINK_ON;
-   else
-	   tmp = PHY_LINK_OFF;
 #elif   _WIZCHIP_ == W5200
    if(getPHYSTATUS() & PHYSTATUS_LINK)
       tmp = PHY_LINK_ON;
-   else
-      tmp = PHY_LINK_OFF;
 #elif _WIZCHIP_ == W5500
    if(getPHYCFGR() & PHYCFGR_LNK_ON)
       tmp = PHY_LINK_ON;
-      tmp = PHY_LINK_OFF;
+
 #else
    tmp = -1;
 #endif
@@ -637,8 +640,8 @@ int8_t wizphy_getphypmode(void)
          tmp = PHY_POWER_DOWN;
       else          
          tmp = PHY_POWER_NORM;
-   #elif _WIZCHIP_ == W5500
-      if(getPHYCFGR() & PHYCFGR_OPMDC_PDOWN)
+   #elif _WIZCHIP_ == 5500
+      if((getPHYCFGR() & PHYCFGR_OPMDC_ALLA) == PHYCFGR_OPMDC_PDOWN)
          tmp = PHY_POWER_DOWN;
       else 
          tmp = PHY_POWER_NORM;
@@ -846,7 +849,6 @@ int8_t wizphy_setphypmode(uint8_t pmode)
 
 void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
 {
-	int i,j,k;
    setSHAR(pnetinfo->mac);
    setGAR(pnetinfo->gw);
    setSUBR(pnetinfo->sn);
