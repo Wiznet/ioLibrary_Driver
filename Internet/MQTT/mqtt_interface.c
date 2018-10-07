@@ -42,6 +42,7 @@
 
 #include "mqtt_interface.h"
 #include "wizchip_conf.h"
+#include "socket.h"
 
 unsigned long MilliTimer;
 
@@ -122,12 +123,15 @@ void NewNetwork(Network* n, int sn) {
  *         that contains the configuration information for the Network.
  *         buffer : pointer to a read buffer.
  *         len : buffer length.
+ * @retval received data length or SOCKERR code
  */
 int w5x00_read(Network* n, unsigned char* buffer, int len, long time)
 {
 
 	if((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket)>0))
 		return recv(n->my_socket, buffer, len);
+
+	return SOCK_ERROR;
 }
 
 /*
@@ -136,11 +140,14 @@ int w5x00_read(Network* n, unsigned char* buffer, int len, long time)
  *         that contains the configuration information for the Network.
  *         buffer : pointer to a read buffer.
  *         len : buffer length.
+ * @retval length of data sent or SOCKERR code
  */
 int w5x00_write(Network* n, unsigned char* buffer, int len, long time)
 {
 	if(getSn_SR(n->my_socket) == SOCK_ESTABLISHED)
 		return send(n->my_socket, buffer, len);
+
+	return SOCK_ERROR;
 }
 
 /*
@@ -160,7 +167,7 @@ void w5x00_disconnect(Network* n)
  *         ip : server iP.
  *         port : server port.
  */
-int ConnectNetwork(Network* n, char* ip, int port)
+void ConnectNetwork(Network* n, uint8_t* ip, uint16_t port)
 {
 	uint16_t myport = 12345;
 
