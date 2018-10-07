@@ -213,7 +213,7 @@ int main(void)
 #define __MQTT_INTERFACE_H_
 
 #ifdef __cplusplus
-extern ¡°C¡± {
+extern "C" {
 #endif
 
 
