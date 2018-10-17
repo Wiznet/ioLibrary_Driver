@@ -2,7 +2,7 @@
 //
 //! \file dhcp.c
 //! \brief DHCP APIs implement file.
-//! \details Processig DHCP protocol as DISCOVER, OFFER, REQUEST, ACK, NACK and DECLINE.
+//! \details Processing DHCP protocol as DISCOVER, OFFER, REQUEST, ACK, NACK and DECLINE.
 //! \version 1.1.0
 //! \date 2013/11/18
 //! \par  Revision history
@@ -52,7 +52,7 @@
 #include "socket.h"
 #include "dhcp.h"
 
-/* If you want to display debug & procssing message, Define _DHCP_DEBUG_ in dhcp.h */
+/* If you want to display debug & processing message, Define _DHCP_DEBUG_ in dhcp.h */
 
 #ifdef _DHCP_DEBUG_
    #include <stdio.h>
@@ -65,7 +65,7 @@
 #define STATE_DHCP_LEASED        3        ///< ReceiveD ACK and IP leased
 #define STATE_DHCP_REREQUEST     4        ///< send REQUEST for maintaining leased IP
 #define STATE_DHCP_RELEASE       5        ///< No use
-#define STATE_DHCP_STOP          6        ///< Stop procssing DHCP
+#define STATE_DHCP_STOP          6        ///< Stop processing DHCP
 
 #define DHCP_FLAGSBROADCAST      0x8000   ///< The broadcast value of flags in @ref RIP_MSG 
 #define DHCP_FLAGSUNICAST        0x0000   ///< The unicast   value of flags in @ref RIP_MSG
@@ -245,7 +245,7 @@ int8_t   check_DHCP_leasedIP(void);
 /* check the timeout in DHCP process */
 uint8_t  check_DHCP_timeout(void);
 
-/* Intialize to timeout process.  */
+/* Initialize to timeout process.  */
 void     reset_DHCP_timeout(void);
 
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
@@ -259,7 +259,7 @@ void default_ip_assign(void)
    setGAR (DHCP_allocated_gw);
 }
 
-/* The default handler of ip chaged */
+/* The default handler of ip changed */
 void default_ip_update(void)
 {
 	/* WIZchip Software Reset */
@@ -269,7 +269,7 @@ void default_ip_update(void)
    setSHAR(DHCP_CHADDR);
 }
 
-/* The default handler of ip chaged */
+/* The default handler of ip changed */
 void default_ip_conflict(void)
 {
 	// WIZchip Software Reset
@@ -357,7 +357,7 @@ void send_DHCP_DISCOVER(void)
    
    makeDHCPMSG();
 
-   k = 4;     // beacaue MAGIC_COOKIE already made by makeDHCPMSG()
+   k = 4;     // because MAGIC_COOKIE already made by makeDHCPMSG()
    
 	// Option Request Param
 	pDHCPMSG->OPT[k++] = dhcpMessageType;
@@ -440,7 +440,7 @@ void send_DHCP_REQUEST(void)
    	ip[3] = 255;   	   	   	
    }
    
-   k = 4;      // beacaue MAGIC_COOKIE already made by makeDHCPMSG()
+   k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
 	
 	// Option Request Param.
 	pDHCPMSG->OPT[k++] = dhcpMessageType;
@@ -518,7 +518,7 @@ void send_DHCP_DECLINE(void)
 	
 	makeDHCPMSG();
 
-   k = 4;      // beacaue MAGIC_COOKIE already made by makeDHCPMSG()
+   k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
    
 	*((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSUNICAST & 0xFF00)>> 8);
 	*((uint8_t*)(&pDHCPMSG->flags)+1) = (DHCP_FLAGSUNICAST & 0x00FF);
@@ -900,7 +900,7 @@ void DHCP_init(uint8_t s, uint8_t * buf)
    getSHAR(DHCP_CHADDR);
    if((DHCP_CHADDR[0] | DHCP_CHADDR[1]  | DHCP_CHADDR[2] | DHCP_CHADDR[3] | DHCP_CHADDR[4] | DHCP_CHADDR[5]) == 0x00)
    {
-      // assing temporary mac address, you should be set SHAR before call this function. 
+      // assigning temporary mac address, you should be set SHAR before call this function. 
       DHCP_CHADDR[0] = 0x00;
       DHCP_CHADDR[1] = 0x08;
       DHCP_CHADDR[2] = 0xdc;      
@@ -923,7 +923,7 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 }
 
 
-/* Rset the DHCP timeout count and retry count. */
+/* Reset the DHCP timeout count and retry count. */
 void reset_DHCP_timeout(void)
 {
 	dhcp_tick_1s = 0;
