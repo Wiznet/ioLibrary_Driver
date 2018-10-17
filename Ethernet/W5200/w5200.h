@@ -42,7 +42,7 @@
 #define	_W5200_H
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #include <stdint.h>
