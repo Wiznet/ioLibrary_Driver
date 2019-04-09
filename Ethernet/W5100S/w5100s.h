@@ -1932,7 +1932,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getIR()
  */
 #define setIR(ir) \
-		WIZCHIP_WRITE(IR, (ir & 0xE0)) //peter 2016.11.07 unreachable interrupt bit added
+		WIZCHIP_WRITE(IR, (ir)) 
 		//WIZCHIP_WRITE(IR, (ir & 0xA0))
 /**
  * @ingroup Common_register_access_function_W5100S
@@ -3087,7 +3087,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_RxMAX(sn) \
-		((uint16_t)(getSn_RXMEM_SIZE(sn)) << 10)
+		((uint16_t)(0x0001 << getSn_RXMEM_SIZE(sn)) << 10)
 
 
 /**
@@ -3097,7 +3097,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @return uint16_t. Max buffer size
  */
 #define getSn_TxMAX(sn) \
-		((uint16_t)(getSn_TXMEM_SIZE(sn)) << 10)
+		((uint16_t)(0x0001 << getSn_TXMEM_SIZE(sn)) << 10)
 
 /**
  * @ingroup Socket_register_access_function_W5100S
