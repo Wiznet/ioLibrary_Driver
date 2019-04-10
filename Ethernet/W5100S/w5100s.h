@@ -1932,7 +1932,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getIR()
  */
 #define setIR(ir) \
-		WIZCHIP_WRITE(IR, (ir)) 
+		WIZCHIP_WRITE(IR, (ir & 0xE0)) //peter 2016.11.07 unreachable interrupt bit added
 		//WIZCHIP_WRITE(IR, (ir & 0xA0))
 /**
  * @ingroup Common_register_access_function_W5100S
