@@ -905,16 +905,16 @@ extern "C" {
 
 
 /************************************/ 
-/* The bit of IR regsiter defintion */ 
+/* The bit of IR regsiter definition */ 
 /************************************/ 
-#define IR_IPCF            (1 << 15)             /**< IP conflict bit of \ref IR. To clear, Write the bit to '1'. */
-#define IR_DPUR            (1 << 14)             /**< Destination port unreachable bit of \ref IR. To clear, Write the bit to '1'. */
-#define IR_PPPT            (1 << 13)             /**< PPPoE terminate bit of \ref IR. To clear, Write the bit to '1'. */
-#define IR_FMTU            (1 << 12)             /**< Fragment MTU bit of IR. To clear, Write the bit to '1'. */
+#define IR_IPCF            (1 << 7)             /**< IP conflict bit of \ref IR. To clear, Write the bit to '1'. */
+#define IR_DPUR            (1 << 6)             /**< Destination port unreachable bit of \ref IR. To clear, Write the bit to '1'. */
+#define IR_PPPT            (1 << 5)             /**< PPPoE terminate bit of \ref IR. To clear, Write the bit to '1'. */
+#define IR_FMTU            (1 << 4)             /**< Fragment MTU bit of IR. To clear, Write the bit to '1'. */
 #define IR_SnINT(n)        (0x01 << n)          /**< SOCKETn interrupt occurrence bit of \ref IR. To clear, Clear \ref Sn_IR*/
 
 /*****************************************/ 
-/* The bit of Pn_BRDYR regsiter defintion*/ 
+/* The bit of Pn_BRDYR regsiter definition*/ 
 /*****************************************/ 
 #define Pn_PEN             (1 << 7)             /**< PIN 'BRDYn' enable bit of Pn_BRDYR. */
 #define Pn_MT              (1 << 6)             /**< PIN memory type bit of Pn_BRDYR. */
@@ -923,7 +923,7 @@ extern "C" {
 
 
 /***************************************/ 
-/* The bit of Sn_MR regsiter defintion */ 
+/* The bit of Sn_MR regsiter definition */ 
 /***************************************/ 
 /**
  * @brief Alignment bit of \ref Sn_MR. 
@@ -1020,7 +1020,7 @@ extern "C" {
 
 
 /******************************/ 
-/* The values of CR defintion */ 
+/* The values of CR definition */ 
 /******************************/
 /**
  * @brief Initialize or open a socket
@@ -1120,7 +1120,7 @@ extern "C" {
 
 
 /*********************************/ 
-/* The values of Sn_IR defintion */ 
+/* The values of Sn_IR definition */ 
 /*********************************/
 #define Sn_IR_PRECV        0x80                 /**< It is set in the case that option data which is not supported is received. Refer to \ref Sn_IR */
 #define Sn_IR_PFAIL        0x40                 /**< It is set in the case that PAP authentication is failed. Refer to \ref Sn_IR */
@@ -1132,7 +1132,7 @@ extern "C" {
 #define Sn_IR_CON          0x01                 /**< It is set one time when the connection is successful and then @ref Sn_SR is changed to @ref SOCK_ESTABLISHED. */
 
 /**********************************/ 
-/* The values of Sn_SSR defintion */ 
+/* The values of Sn_SSR definition */ 
 /**********************************/
 /**
  * @brief The state of SOCKET intialized or closed
@@ -2125,7 +2125,7 @@ uint8_t getRMSR(uint8_t sn);
  * @sa getSn_PROTOR()
  */
 #define setSn_PROTOR(sn, proto) \
-   WIZCHIP_WRITE(Sn_PROTOR(sn),(WIZCHIP_READ(Sn_PROTOR(sn) & 0xFF00) | (((uint16_t)proto) & 0x00FF))
+   WIZCHIP_WRITE(Sn_PROTOR(sn),(WIZCHIP_READ(Sn_PROTOR(sn)) & 0xFF00) | (((uint16_t)proto) & 0x00FF))
 #define setSn_PROTO(sn,proto)    setSn_PROTOR(sn,proto)  ///< For compatible ioLibrary   
 
 /**
@@ -2247,7 +2247,7 @@ uint32_t getSn_RX_RSR(uint8_t sn);
  * @sa getSn_FRAGR()
  */
 #define setSn_FRAGR(sn, frag) \
-   WIZCHIP_WRITE(Sn_FRAGR(sn),  (uint16_t)(frag >>8))
+   WIZCHIP_WRITE(Sn_FRAGR(sn),  ((uint16_t)frag) & 0x00FF)
 #define setSn_FRAG(sn,frag)   setSn_FRAGR(sn,flag)
 
 /**
@@ -2258,7 +2258,7 @@ uint32_t getSn_RX_RSR(uint8_t sn);
  * @sa setSn_FRAGR()
  */
 #define getSn_FRAGR(sn) \
-   (WIZCHIP_READ(Sn_FRAG(sn)) << 8)
+   (WIZCHIP_READ(Sn_FRAG(sn)))
 #define getSn_FRAG(sn)    getSn_FRAGR(sn)
 
 
