@@ -132,7 +132,7 @@ void get_seconds_from_ntp_server(uint8_t *buf, uint16_t idx)
 	case 20:
 		seconds -=  1*3600;
 		break;
-	case 21:                            //�?
+	case 21:                            //ï¼?
 	case 22:
 		break;
 	case 23:
@@ -253,6 +253,11 @@ int8_t SNTP_run(datetime *time)
 	uint32_t destip = 0;
 	uint16_t destport;
 	uint16_t startindex = 40; //last 8-byte of data_buf[size is 48 byte] is xmt, so the startindex should be 40
+	
+	if (getSn_SR(NTP_SOCKET) != SOCK_UDP)
+	{
+		socket(NTP_SOCKET, Sn_MR_UDP, ntp_port, 0x00);
+	}
 
 	switch(getSn_SR(NTP_SOCKET))
 	{
