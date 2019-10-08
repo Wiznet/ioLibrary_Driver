@@ -3,9 +3,10 @@
 //! \file dhcp.h
 //! \brief DHCP APIs Header file.
 //! \details Processig DHCP protocol as DISCOVER, OFFER, REQUEST, ACK, NACK and DECLINE.
-//! \version 1.1.0
-//! \date 2013/11/18
+//! \version 1.1.1
+//! \date 2019/10/08
 //! \par  Revision history
+//!       <2019/10/08> compare DHCP server ip address
 //!       <2013/11/18> 1st Release
 //!       <2012/12/20> V1.1.0
 //!         1. Move unreferenced DEFINE to dhcp.c

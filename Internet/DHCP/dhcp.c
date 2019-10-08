@@ -3,9 +3,10 @@
 //! \file dhcp.c
 //! \brief DHCP APIs implement file.
 //! \details Processing DHCP protocol as DISCOVER, OFFER, REQUEST, ACK, NACK and DECLINE.
-//! \version 1.1.0
-//! \date 2013/11/18
+//! \version 1.1.1
+//! \date 2019/10/08
 //! \par  Revision history
+//!       <2019/10/08> compare DHCP server ip address
 //!       <2013/11/18> 1st Release
 //!       <2012/12/20> V1.1.0
 //!         1. Optimize code
@@ -192,6 +193,7 @@ typedef struct {
 uint8_t DHCP_SOCKET;                      // Socket number for DHCP
 
 uint8_t DHCP_SIP[4];                      // DHCP Server IP address
+uint8_t DHCP_REAL_SIP[4];                 // For extract my DHCP server in a few DHCP server
 
 // Network information from DHCP Server
 uint8_t OLD_allocated_ip[4]   = {0, };    // Previous IP address
@@ -356,6 +358,14 @@ void send_DHCP_DISCOVER(void)
 	uint16_t k = 0;
    
    makeDHCPMSG();
+   DHCP_SIP[0]=0;
+   DHCP_SIP[1]=0;
+   DHCP_SIP[2]=0;
+   DHCP_SIP[3]=0;
+   DHCP_REAL_SIP[0]=0;
+   DHCP_REAL_SIP[1]=0;
+   DHCP_REAL_SIP[2]=0;
+   DHCP_REAL_SIP[3]=0;
 
    k = 4;     // because MAGIC_COOKIE already made by makeDHCPMSG()
    
@@ -597,7 +607,23 @@ int8_t parseDHCPMSG(void)
 		if ( (pDHCPMSG->chaddr[0] != DHCP_CHADDR[0]) || (pDHCPMSG->chaddr[1] != DHCP_CHADDR[1]) ||
 		     (pDHCPMSG->chaddr[2] != DHCP_CHADDR[2]) || (pDHCPMSG->chaddr[3] != DHCP_CHADDR[3]) ||
 		     (pDHCPMSG->chaddr[4] != DHCP_CHADDR[4]) || (pDHCPMSG->chaddr[5] != DHCP_CHADDR[5])   )
+		{
+#ifdef _DHCP_DEBUG_
+            printf("No My DHCP Message. This message is ignored.\r\n");
+#endif
          return 0;
+		}
+        //compare DHCP server ip address
+        if((DHCP_SIP[0]!=0) || (DHCP_SIP[1]!=0) || (DHCP_SIP[2]!=0) || (DHCP_SIP[3]!=0)){
+            if( ((svr_addr[0]!=DHCP_SIP[0])|| (svr_addr[1]!=DHCP_SIP[1])|| (svr_addr[2]!=DHCP_SIP[2])|| (svr_addr[3]!=DHCP_SIP[3])) &&
+                ((svr_addr[0]!=DHCP_REAL_SIP[0])|| (svr_addr[1]!=DHCP_REAL_SIP[1])|| (svr_addr[2]!=DHCP_REAL_SIP[2])|| (svr_addr[3]!=DHCP_REAL_SIP[3]))  )
+            {
+#ifdef _DHCP_DEBUG_
+                printf("Another DHCP sever send a response message. This is ignored.\r\n");
+#endif
+                return 0;
+            }
+        }
 		p = (uint8_t *)(&pDHCPMSG->op);
 		p = p + 240;      // 240 = sizeof(RIP_MSG) + MAGIC_COOKIE size in RIP_MSG.opt - sizeof(RIP_MSG.opt)
 		e = p + (len - 240);
@@ -661,6 +687,10 @@ int8_t parseDHCPMSG(void)
    				DHCP_SIP[1] = *p++;
    				DHCP_SIP[2] = *p++;
    				DHCP_SIP[3] = *p++;
+                DHCP_REAL_SIP[0]=svr_addr[0];
+                DHCP_REAL_SIP[1]=svr_addr[1];
+                DHCP_REAL_SIP[2]=svr_addr[2];
+                DHCP_REAL_SIP[3]=svr_addr[3];
    				break;
    			default :
    				p++;
