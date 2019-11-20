@@ -21,21 +21,19 @@ extern "C" {
 //#define F_FILESYSTEM // If your target support a file system, you have to activate this feature and implement.
 
 #if defined(F_FILESYSTEM)
-#include "ff.h"
+//#include "ff.h"
 #endif
 
 #define F_APP_FTP
 #define _FTP_DEBUG_
 
 
-#define LINELEN		100
+#define _FTP_FILENAME_LEN_		100
 //#define DATA_BUF_SIZE	100
 #if !defined(F_FILESYSTEM)
-#define _MAX_SS		512
+#define _MAX_SS 		512
 #endif
-
-#define CTRL_SOCK	2
-#define DATA_SOCK	3
+#define SOCK_MAX_NUM 4
 
 #define	IPPORT_FTPD	20	/* FTP Data port */
 #define	IPPORT_FTP	21	/* FTP Control port */
@@ -79,43 +77,18 @@ enum ftp_cmd {
 	NO_CMD,
 };
 
-enum ftp_type {
-	ASCII_TYPE,
-	IMAGE_TYPE,
-	LOGICAL_TYPE
-};
-
-enum ftp_state {
-	FTPS_NOT_LOGIN,
-	FTPS_LOGIN
-};
-
-enum datasock_state{
-	DATASOCK_IDLE,
-	DATASOCK_READY,
-	DATASOCK_START
-};
-
-enum datasock_mode{
-	PASSIVE_MODE,
-	ACTIVE_MODE
-};
 
 struct ftpd {
-	uint8_t control;			/* Control stream */
-	uint8_t data;			/* Data stream */
-
-	enum ftp_type type;		/* Transfer type */
-	enum ftp_state state;
-
-	enum ftp_cmd current_cmd;
-
-	enum datasock_state dsock_state;
-	enum datasock_mode dsock_mode;
-
-	char username[LINELEN];		/* Arg to USER command */
-	char workingdir[LINELEN];
-	char filename[LINELEN];
+	uint8_t ctrl_sock;			/* Control Socket */
+	uint8_t data_sock;			/* Data Socket */
+	char user[20];				/* FTP Server user */
+	char pass[20];				/* FTP Server password */
+	char username[_FTP_FILENAME_LEN_];		/* Arg to USER command */
+	char workingdir[_FTP_FILENAME_LEN_];
+	char filename[_FTP_FILENAME_LEN_];
+	uint8_t     is_login;		/* Login 1: login, 0: Not login */
+	uint8_t     is_ascii;       /* Transfer Type 1 : ASCII, 0 : Binary */
+	uint8_t     is_active;      /* FTP Mode 1 : Active, 0: Passive */
 
 #if defined(F_FILESYSTEM)
 	FIL fil;	// FatFs File objects
@@ -124,18 +97,8 @@ struct ftpd {
 
 };
 
-#ifndef un_I2cval
-typedef union _un_l2cval {
-	uint32_t	lVal;
-	uint8_t		cVal[4];
-}un_l2cval;
-#endif
-
-void ftpd_init(uint8_t * src_ip);
+void ftpd_init(char* user, char*pass);
 uint8_t ftpd_run(uint8_t * dbuf);
-char proc_ftpd(char * buf);
-char ftplogin(char * pass);
-int pport(char * arg);
 
 int sendit(char * command);
 int recvit(char * command);
