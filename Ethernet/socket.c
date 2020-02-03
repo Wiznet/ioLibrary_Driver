@@ -117,6 +117,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
             uint32_t taddr;
             getSIPR((uint8_t*)&taddr);
             if(taddr == 0) return SOCKERR_SOCKINIT;
+	    break;
          }
       case Sn_MR_UDP :
       case Sn_MR_MACRAW :
