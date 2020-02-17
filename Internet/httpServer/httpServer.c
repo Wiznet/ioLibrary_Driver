@@ -169,7 +169,7 @@ void httpServer_run(uint8_t seqnum)
 
 						gettime = get_httpServer_timecount();
 						// Check the TX socket buffer for End of HTTP response sends
-						while(getSn_TX_FSR(s) != (getSn_TXBUF_SIZE(s)*1024))
+						while(getSn_TX_FSR(s) != (getSn_TxMAX(s)))
 						{
 							if((get_httpServer_timecount() - gettime) > 3)
 							{
