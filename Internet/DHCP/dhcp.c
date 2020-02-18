@@ -946,7 +946,12 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 	DHCP_SOCKET = s; // SOCK_DHCP
 	pDHCPMSG = (RIP_MSG*)buf;
 	DHCP_XID = 0x12345678;
-
+	{
+		DHCP_XID += DHCP_CHADDR[3];
+		DHCP_XID += DHCP_CHADDR[4];
+		DHCP_XID += DHCP_CHADDR[5];
+		DHCP_XID += (DHCP_CHADDR[3] ^ DHCP_CHADDR[4] ^ DHCP_CHADDR[5]);
+	}
 	// WIZchip Netinfo Clear
 	setSIPR(zeroip);
 	setGAR(zeroip);
