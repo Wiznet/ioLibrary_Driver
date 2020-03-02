@@ -521,7 +521,12 @@ void wizchip_clrinterrupt(intr_kind intr)
    setIR( ((((uint16_t)ir) << 8) | (((uint16_t)sir) & 0x00FF)) );
 #else
    setIR(ir);
-   setSIR(sir);
+//M20200227 : For clear
+   //setSIR(sir);
+   for(ir=0; ir<8; ir++){
+       if(sir & (0x01 <<ir) ) setSn_IR(ir, 0xff);
+   }
+
 #endif   
 }
 
