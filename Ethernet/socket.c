@@ -82,7 +82,7 @@ uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 
 #define CHECK_SOCKNUM()   \
    do{                    \
-      if(sn > _WIZCHIP_SOCK_NUM_) return SOCKERR_SOCKNUM;   \
+      if(sn >= _WIZCHIP_SOCK_NUM_) return SOCKERR_SOCKNUM;   \
    }while(0);             \
 
 #define CHECK_SOCKMODE(mode)  \
@@ -804,6 +804,9 @@ int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg)
       case CS_GET_INTERRUPT:
          *((uint8_t*)arg) = getSn_IR(sn);
          break;
+      case CS_GET_NREAD:
+         *((uint16_t*)arg) = getSn_RX_RSR(sn);
+    	 break;
    #if _WIZCHIP_ != 5100
       case CS_SET_INTMASK:  
          if( (*(uint8_t*)arg) > SIK_ALL) return SOCKERR_ARG;

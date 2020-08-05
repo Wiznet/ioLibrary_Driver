@@ -369,6 +369,7 @@ typedef enum
    CS_GET_MAXRXBUF,        ///< get the size of socket buffer allocated in RX memory
    CS_CLR_INTERRUPT,       ///< clear the interrupt of socket with @ref sockint_kind
    CS_GET_INTERRUPT,       ///< get the socket interrupt. refer to @ref sockint_kind
+   CS_GET_NREAD,           ///< get the number of bytes that are immediately available for reading
 #if _WIZCHIP_ > 5100
    CS_SET_INTMASK,         ///< set the interrupt mask of socket with @ref sockint_kind, Not supported in W5100
    CS_GET_INTMASK          ///< get the masked interrupt of socket. refer to @ref sockint_kind, Not supported in W5100
@@ -413,7 +414,8 @@ typedef enum
  *                  <tr> <td> @b cstype </td> <td> @b data type</td><td>@b value</td></tr>
  *                  <tr> <td> @ref CS_SET_IOMODE \n @ref CS_GET_IOMODE </td> <td> uint8_t </td><td>@ref SOCK_IO_BLOCK @ref SOCK_IO_NONBLOCK</td></tr>
  *                  <tr> <td> @ref CS_GET_MAXTXBUF \n @ref CS_GET_MAXRXBUF </td> <td> uint16_t </td><td> 0 ~ 16K </td></tr>
- *                  <tr> <td> @ref CS_CLR_INTERRUPT \n @ref CS_GET_INTERRUPT \n @ref CS_SET_INTMASK \n @ref CS_GET_INTMASK </td> <td> @ref sockint_kind </td><td> @ref SIK_CONNECTED, etc.  </td></tr> 
+ *                  <tr> <td> @ref CS_CLR_INTERRUPT \n @ref CS_GET_INTERRUPT \n @ref CS_SET_INTMASK \n @ref CS_GET_INTMASK </td> <td> @ref sockint_kind </td><td> @ref SIK_CONNECTED, etc.  </td></tr>
+ *                  <tr> <td> @ref CS_GET_NREAD \n @ref CS_GET_NREAD </td> <td> uint16_t </td><td> 0 ~ 16K </td></tr>
  *             </table>
  *  @return @b Success @ref SOCK_OK \n
  *          @b fail    @ref SOCKERR_ARG         - Invalid argument\n
