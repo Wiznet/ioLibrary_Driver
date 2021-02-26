@@ -151,7 +151,7 @@
  * @details Initializes the socket with 'sn' passed as parameter and open.
  *
  * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
- * @param protocol Protocol type to operate such as TCP, UDP and MACRAW.
+ * @param protocol Protocol type to operate, such as @ref SOCK_STREAM, @ref SOCK_DGRAM or @ref SOCK_RAW.
  * @param port Port number to be bined.
  * @param flag Socket flags as \ref SF_ETHER_OWN, \ref SF_IGMP_VER2, \ref SF_TCP_NODELAY, \ref SF_MULTI_ENABLE, \ref SF_IO_NONBLOCK and so on.\n
  *             Valid flags only in W5500 : @ref SF_BROAD_BLOCK, @ref SF_MULTI_BLOCK, @ref SF_IPv6_BLOCK, and @ref SF_UNI_BLOCK.

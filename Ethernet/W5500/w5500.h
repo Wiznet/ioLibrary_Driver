@@ -915,14 +915,22 @@ extern "C" {
 
 /* Sn_MR alternate values */
 /**
- * @brief For Berkeley Socket API
+ * @brief Reliable connection-oriented byte stream communication (TCP).
+ * @details For Berkeley Socket API compatibility.
  */
 #define SOCK_STREAM                  Sn_MR_TCP
 
 /**
- * @brief For Berkeley Socket API
+ * @brief Unreliable connectionless datagram communication (UDP).
+ * @details For Berkeley Socket API compatibility.
  */
 #define SOCK_DGRAM                   Sn_MR_UDP
+
+/**
+ * @brief Raw access to the transport protocol.
+ * @details For Berkeley Socket API compatibility.
+ */
+#define SOCK_RAW                     Sn_MR_IPRAW
 
 
 /* Sn_CR values */

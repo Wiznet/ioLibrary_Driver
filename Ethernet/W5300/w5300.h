@@ -1014,9 +1014,24 @@ extern "C" {
  */                
 #define Sn_MR_PPPoE        0x05                 /**< Protocol bits of \ref Sn_MR. */
 
-#define SOCK_STREAM        Sn_MR_TCP            /**< For Berkeley Socket API, Refer to @ref Sn_MR_TCP */
-#define SOCK_DGRAM         Sn_MR_UDP            /**< For Berkeley Socket API, Refer to @ref Sn_MR_UDP */
+/* Sn_MR alternate values */
+/**
+ * @brief Reliable connection-oriented byte stream communication (TCP).
+ * @details For Berkeley Socket API compatibility.
+ */
+#define SOCK_STREAM                  Sn_MR_TCP
 
+/**
+ * @brief Unreliable connectionless datagram communication (UDP).
+ * @details For Berkeley Socket API compatibility.
+ */
+#define SOCK_DGRAM                   Sn_MR_UDP
+
+/**
+ * @brief Raw access to the transport protocol.
+ * @details For Berkeley Socket API compatibility.
+ */
+#define SOCK_RAW                     Sn_MR_IPRAW
 
 
 /******************************/ 
