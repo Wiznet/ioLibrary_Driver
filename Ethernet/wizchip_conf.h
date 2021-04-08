@@ -72,7 +72,7 @@ extern "C" {
 #define W5500						5500
 
 #ifndef _WIZCHIP_
-#define _WIZCHIP_                      W5100S   // W5100, W5100S, W5200, W5300, W5500
+#define _WIZCHIP_                      W5300   // W5100, W5100S, W5200, W5300, W5500
 #endif
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
@@ -162,8 +162,8 @@ extern "C" {
  * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
  */
 #ifndef _WIZCHIP_IO_MODE_
-//   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
- #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
 #endif
 
 //A20150601 : Define the unit and bus width of IO DATA. 
@@ -172,7 +172,7 @@ extern "C" {
     * @todo you should select the bus width. Select one of 8 or 16.
     */
    #ifndef _WIZCHIP_IO_BUS_WIDTH_
-   #define _WIZCHIP_IO_BUS_WIDTH_       8  // 16
+   #define _WIZCHIP_IO_BUS_WIDTH_       16  // 8
    #endif
    #if _WIZCHIP_IO_BUS_WIDTH_ == 8
       typedef   uint8_t   iodata_t;
@@ -198,7 +198,8 @@ extern "C" {
  *       ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
  */
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
-	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
+//	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
+	#define _WIZCHIP_IO_BASE_				0x68000000	// for W5300
 #elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
 	#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
 #endif
