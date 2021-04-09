@@ -2006,8 +2006,8 @@ uint8_t getRMSR(uint8_t sn);
  */
 #define setSn_DHAR(sn, dhar) { \
       WIZCHIP_WRITE(Sn_DHAR(sn),                       (((uint16_t)((dhar)[0])) << 8) + (((uint16_t)((dhar)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DHAR(sn),2), (((uint16_t)((dhar)[0])) << 8) + (((uint16_t)((dhar)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DHAR(sn),4), (((uint16_t)((dhar)[0])) << 8) + (((uint16_t)((dhar)[1])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DHAR(sn),2), (((uint16_t)((dhar)[2])) << 8) + (((uint16_t)((dhar)[3])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DHAR(sn),4), (((uint16_t)((dhar)[4])) << 8) + (((uint16_t)((dhar)[5])) & 0x00FF)); \
    }      
 
 /**
