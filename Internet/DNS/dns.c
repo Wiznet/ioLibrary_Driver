@@ -1,16 +1,3 @@
-/*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*********************************************************************************************************************************************************/
 //*****************************************************************************
 //
 //! \file dns.c
@@ -34,30 +21,30 @@
 //!
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
-//! 
-//! Redistribution and use in source and binary forms, with or without 
-//! modification, are permitted provided that the following conditions 
-//! are met: 
-//! 
-//!     * Redistributions of source code must retain the above copyright 
-//! notice, this list of conditions and the following disclaimer. 
+//!
+//! Redistribution and use in source and binary forms, with or without
+//! modification, are permitted provided that the following conditions
+//! are met:
+//!
+//!     * Redistributions of source code must retain the above copyright
+//! notice, this list of conditions and the following disclaimer.
 //!     * Redistributions in binary form must reproduce the above copyright
 //! notice, this list of conditions and the following disclaimer in the
-//! documentation and/or other materials provided with the distribution. 
-//!     * Neither the name of the <ORGANIZATION> nor the names of its 
-//! contributors may be used to endorse or promote products derived 
-//! from this software without specific prior written permission. 
-//! 
+//! documentation and/or other materials provided with the distribution.
+//!     * Neither the name of the <ORGANIZATION> nor the names of its
+//! contributors may be used to endorse or promote products derived
+//! from this software without specific prior written permission.
+//!
 //! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 //! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //! THE POSSIBILITY OF SUCH DAMAGE.
 //
 //*****************************************************************************
@@ -341,9 +328,9 @@ uint8_t * dns_answer(uint8_t * msg, uint8_t * cp, uint8_t * ip_from_dns)
  * Arguments   : dhdr - is a pointer to the header for DNS message
  *               buf  - is a pointer to the reply message.
  *               len  - is the size of reply message.
- * Returns     : -1 - Domain name lenght is too big 
+ * Returns     : -1 - Domain name lenght is too big
  *                0 - Fail (Timout or parse error)
- *                1 - Success, 
+ *                1 - Success,
  */
 int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 {
@@ -380,8 +367,8 @@ int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 	for (i = 0; i < pdhdr->qdcount; i++)
 	{
 		cp = dns_question(msg, cp);
-   #ifdef _DNS_DEBUG_
-      printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h"
+   #ifdef _DNS_DEUBG_
+      printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h");
    #endif
 		if(!cp) return -1;
 	}
@@ -390,8 +377,8 @@ int8_t parseDNSMSG(struct dhdr * pdhdr, uint8_t * pbuf, uint8_t * ip_from_dns)
 	for (i = 0; i < pdhdr->ancount; i++)
 	{
 		cp = dns_answer(msg, cp, ip_from_dns);
-   #ifdef _DNS_DEBUG_
-      printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h"
+   #ifdef _DNS_DEUBG_
+      printf("MAX_DOMAIN_NAME is too small, it should be redfine in dns.h");
    #endif
 		if(!cp) return -1;
 	}
@@ -522,14 +509,14 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 
 	retry_count = 0;
 	dns_1s_tick = 0;
-   
+
    // Socket open
    socket(DNS_SOCKET, Sn_MR_UDP, 0, 0);
 
 #ifdef _DNS_DEBUG_
 	printf("> DNS Query to DNS Server : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
 #endif
-   
+
 	len = dns_makequery(0, (char *)name, pDNSMSG, MAX_DNS_BUF_SIZE);
 	sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN);
 
@@ -539,10 +526,10 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 		{
 			if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
 			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port);
-#ifdef _DNS_DEBUG_
-			printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
-#endif
-			ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
+      #ifdef _DNS_DEBUG_
+	      printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
+      #endif
+         ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
 			break;
 		}
 		// Check Timeout
@@ -552,6 +539,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 #ifdef _DNS_DEBUG_
 			printf("> DNS Server is not responding : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
 #endif
+			wizchip_close(DNS_SOCKET);
 			return 0; // timeout occurred
 		}
 		else if (ret_check_timeout == 0) {
@@ -574,6 +562,3 @@ void DNS_time_handler(void)
 {
 	dns_1s_tick++;
 }
-
-
-

@@ -28,6 +28,9 @@
 */
 
 /* $Id: stdio_private.h,v 1.6 2003/01/07 22:17:24 joerg_wunsch Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include <stdio.h>
@@ -65,3 +68,7 @@ struct __file {
 #define SCANF_MIN 1
 #define SCANF_STD 2
 #define SCANF_FLT 3
+
+#ifdef __cplusplus
+}
+#endif

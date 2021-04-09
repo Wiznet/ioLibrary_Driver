@@ -1,6 +1,10 @@
 #ifndef _FTPC_H_
 #define _FTPC_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -115,5 +119,9 @@ uint8_t ftpc_run(uint8_t * dbuf);
 char proc_ftpc(char * buf);
 int pportc(char * arg);
 uint8_t* User_Keyboard_MSG();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _FTPC_H_

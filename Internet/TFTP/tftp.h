@@ -7,6 +7,10 @@
 #ifndef __TFTP_H__
 #define __TFTP_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #define F_APP_TFTP
@@ -89,5 +93,9 @@ void TFTP_exit(void);
 int TFTP_run(void);
 void TFTP_read_request(uint32_t server_ip, uint8_t *filename);
 void tftp_timeout_handler(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/*__TFTP_H__ */

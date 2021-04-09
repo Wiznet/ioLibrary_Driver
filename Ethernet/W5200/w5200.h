@@ -40,6 +40,11 @@
 
 #ifndef	_W5200_H
 #define	_W5200_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include "wizchip_conf.h"
 
@@ -2094,6 +2099,10 @@ void wiz_recv_ignore(uint8_t sn, uint16_t len);
 /// \cond DOXY_APPLY_CODE
 #endif
 /// \endcond
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_W5200_H_
 

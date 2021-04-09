@@ -2,6 +2,10 @@
 #ifndef __NETUTIL_H__
 #define __NETUTIL_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #define SYSTEM_LITTLE_ENDIAN
@@ -15,5 +19,9 @@ uint16_t htons(uint16_t hostshort);
 uint32_t htonl(uint32_t hostlong);
 uint32_t ntohs(uint16_t netshort);
 uint32_t ntohl(uint32_t netlong);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

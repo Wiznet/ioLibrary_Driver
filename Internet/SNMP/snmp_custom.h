@@ -1,6 +1,10 @@
 #ifndef _SNMP_CUSTOM_H_
 #define _SNMP_CUSTOM_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -29,5 +33,9 @@ void initTable();
 #endif
 /* SNMP Trap: warmStart(1) */
 void initial_Trap(uint8_t * managerIP, uint8_t * agentIP);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

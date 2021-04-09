@@ -1,6 +1,10 @@
 #ifndef _SNMP_H_
 #define _SNMP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // SNMP Debug Message (dump) Enable
 #define _SNMP_DEBUG_
 
@@ -110,5 +114,9 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
 void SNMP_time_handler(void);
 uint32_t getSNMPTimeTick(void);
 void currentUptime(void *ptr, uint8_t *len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

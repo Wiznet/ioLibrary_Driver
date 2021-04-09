@@ -1,16 +1,3 @@
-/*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*********************************************************************************************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -21,7 +8,6 @@
 #include "httpServer.h"
 #include "httpParser.h"
 #include "httpUtil.h"
-
 
 #ifdef	_USE_SDCARD_
 #include "ff.h" 	// header file for FatFs library (FAT file system)
@@ -183,7 +169,7 @@ void httpServer_run(uint8_t seqnum)
 
 						gettime = get_httpServer_timecount();
 						// Check the TX socket buffer for End of HTTP response sends
-						while(getSn_TX_FSR(s) != (getSn_TXBUF_SIZE(s)*1024))
+						while(getSn_TX_FSR(s) != (getSn_TxMAX(s)))
 						{
 							if((get_httpServer_timecount() - gettime) > 3)
 							{
@@ -368,13 +354,13 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 #endif
 		}
 #ifdef _USE_FLASH_
-		if(HTTPSock_Status[get_seqnum].storage_type == DATAFLASH) addr = start_addr;
+		if(HTTPSock_Status[get_seqnum]->storage_type == DATAFLASH) addr = start_addr;
 #endif
 	}
 	else // remained parts
 	{
 #ifdef _USE_FLASH_
-		if(HTTPSock_Status[get_seqnum].storage_type == DATAFLASH)
+		if(HTTPSock_Status[get_seqnum]->storage_type == DATAFLASH)
 		{
 			addr = HTTPSock_Status[get_seqnum].file_start + HTTPSock_Status[get_seqnum].file_offset;
 		}
@@ -431,7 +417,7 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 #endif
 
 #ifdef _USE_FLASH_
-	else if(HTTPSock_Status[get_seqnum].storage_type == DATAFLASH)
+	else if(HTTPSock_Status[get_seqnum]->storage_type == DATAFLASH)
 	{
 		// Data read from external data flash memory
 		read_from_flashbuf(addr, &buf[0], send_len);
@@ -558,9 +544,6 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 				// Find the User registered index for web content
 				if(find_userReg_webContent(uri_buf, &content_num, &file_len))
 				{
-					
-					
-					
 					content_found = 1; // Web content found in code flash memory
 					content_addr = (uint32_t)content_num;
 					HTTPSock_Status[get_seqnum].storage_type = CODEFLASH;
@@ -584,7 +567,6 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 					content_found = 1;
 					HTTPSock_Status[get_seqnum]->storage_type = DATAFLASH;
 					; // To do
-					printf("file len : %d\r\n", file_len);
 				}
 #endif
 				else
@@ -693,11 +675,7 @@ void reg_httpServer_webContent(uint8_t * content_name, uint8_t * content)
 	name_len = strlen((char *)content_name);
 	content_len = strlen((char *)content);
 
-	
-	
-	
-	
-	//web_content[total_content_cnt].content_name = malloc(name_len+1);
+	web_content[total_content_cnt].content_name = malloc(name_len+1);
 	strcpy((char *)web_content[total_content_cnt].content_name, (const char *)content_name);
 	web_content[total_content_cnt].content_len = content_len;
 	web_content[total_content_cnt].content = content;

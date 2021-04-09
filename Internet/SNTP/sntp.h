@@ -8,6 +8,10 @@
 #ifndef SNTP_H_
 #define SNTP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 /*
@@ -64,5 +68,9 @@ void SNTP_init(uint8_t s, uint8_t *ntp_server, uint8_t tz, uint8_t *buf);
 int8_t SNTP_run(datetime *time);
 tstamp changedatetime_to_seconds(void);
 void calcdatetime(tstamp seconds);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNTP_H_ */

@@ -19,14 +19,14 @@
 #define MQTTSUBSCRIBE_H_
 
 #if !defined(DLLImport)
-  #define DLLImport 
+  #define DLLImport
 #endif
 #if !defined(DLLExport)
   #define DLLExport
 #endif
 
 DLLExport int MQTTSerialize_subscribe(unsigned char* buf, int buflen, unsigned char dup, unsigned short packetid,
-		int count, MQTTString topicFilters[], int requestedQoSs[]);
+		int count, MQTTString topicFilters[], char requestedQoSs[]);
 
 DLLExport int MQTTDeserialize_subscribe(unsigned char* dup, unsigned short* packetid,
 		int maxcount, int* count, MQTTString topicFilters[], int requestedQoSs[], unsigned char* buf, int len);

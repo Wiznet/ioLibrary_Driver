@@ -1,6 +1,10 @@
 #ifndef _FTPD_H_
 #define _FTPD_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 * Wiznet.
 * (c) Copyright 2002, Wiznet.
@@ -142,4 +146,9 @@ long recvfile(uint8_t s);
 #if defined(F_FILESYSTEM)
 void print_filedsc(FIL *fil);
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // _FTPD_H_
