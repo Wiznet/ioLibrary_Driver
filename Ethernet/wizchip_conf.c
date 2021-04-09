@@ -287,6 +287,7 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
    uint8_t tmp = 0;
 #endif
    uint8_t* ptmp[2] = {0,0};
+   uint8_t i;
    switch(cwtype)
    {
       case CW_RESET_WIZCHIP:
@@ -298,6 +299,18 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
             ptmp[0] = (uint8_t*)arg;
             ptmp[1] = ptmp[0] + _WIZCHIP_SOCK_NUM_;
          }
+         printf("tx mem: ");
+         for(i=0; i<_WIZCHIP_SOCK_NUM_; i++)
+         {
+        	 printf("%d,", ptmp[0][i]);
+         }
+         printf("\r\n");
+         printf("rx mem: ");
+         for(i=0; i<_WIZCHIP_SOCK_NUM_; i++)
+         {
+        	 printf("%d,", ptmp[1][i]);
+         }
+         printf("\r\n");
          return wizchip_init(ptmp[0], ptmp[1]);
       case CW_CLR_INTERRUPT:
          wizchip_clrinterrupt(*((intr_kind*)arg));
@@ -402,7 +415,9 @@ void wizchip_sw_reset(void)
 #endif
 //
    getSHAR(mac);
-   getGAR(gw);  getSUBR(sn);  getSIPR(sip);
+   getSIPR(sip);
+   getGAR(gw);
+   getSUBR(sn);
    setMR(MR_RST);
    getMR(); // for delay
 //A2015051 : For indirect bus mode 
@@ -447,6 +462,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 			if(tmp > 16) return -1;
 		#endif
 		}
+	#endif
 		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
 		{
 		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100
@@ -458,7 +474,6 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		#endif
 		}
 
-	#endif
    }
 
    if(rxsize)
@@ -482,6 +497,7 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 			if(tmp > 16) return -1;
 		#endif
 		}
+	#endif
 
 		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
 		{
@@ -493,7 +509,6 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 			setSn_RXBUF_SIZE(i, rxsize[i]);
 		#endif
 		}
-	#endif
    }
    return 0;
 }

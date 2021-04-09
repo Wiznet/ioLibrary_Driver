@@ -199,7 +199,7 @@ extern "C" {
  */
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
 //	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
-	#define _WIZCHIP_IO_BASE_				0x68000000	// for W5300
+	#define _WIZCHIP_IO_BASE_				0x34000000	// for W5300
 #elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
 	#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
 #endif
