@@ -1,5 +1,11 @@
 //*****************************************************************************
 //
+//
+// 							THIS FILE HAS BEEN MODIFIED FOR Mahda System.
+//
+//
+//*****************************************************************************
+//
 //! \file dhcp.c
 //! \brief DHCP APIs implement file.
 //! \details Processing DHCP protocol as DISCOVER, OFFER, REQUEST, ACK, NACK and DECLINE.
@@ -11,7 +17,7 @@
 //!       <2012/12/20> V1.1.0
 //!         1. Optimize code
 //!         2. Add reg_dhcp_cbfunc()
-//!         3. Add DHCP_stop() 
+//!         3. Add DHCP_stop()
 //!         4. Integrate check_DHCP_state() & DHCP_run() to DHCP_run()
 //!         5. Don't care system endian
 //!         6. Add comments
@@ -22,30 +28,30 @@
 //!
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
-//! 
-//! Redistribution and use in source and binary forms, with or without 
-//! modification, are permitted provided that the following conditions 
-//! are met: 
-//! 
-//!     * Redistributions of source code must retain the above copyright 
-//! notice, this list of conditions and the following disclaimer. 
+//!
+//! Redistribution and use in source and binary forms, with or without
+//! modification, are permitted provided that the following conditions
+//! are met:
+//!
+//!     * Redistributions of source code must retain the above copyright
+//! notice, this list of conditions and the following disclaimer.
 //!     * Redistributions in binary form must reproduce the above copyright
 //! notice, this list of conditions and the following disclaimer in the
-//! documentation and/or other materials provided with the distribution. 
-//!     * Neither the name of the <ORGANIZATION> nor the names of its 
-//! contributors may be used to endorse or promote products derived 
-//! from this software without specific prior written permission. 
-//! 
+//! documentation and/or other materials provided with the distribution.
+//!     * Neither the name of the <ORGANIZATION> nor the names of its
+//! contributors may be used to endorse or promote products derived
+//! from this software without specific prior written permission.
+//!
 //! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 //! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //! THE POSSIBILITY OF SUCH DAMAGE.
 //
 //*****************************************************************************
@@ -56,8 +62,8 @@
 /* If you want to display debug & processing message, Define _DHCP_DEBUG_ in dhcp.h */
 
 #ifdef _DHCP_DEBUG_
-   #include <stdio.h>
-#endif   
+#include <stdio.h>
+#endif
 
 /* DHCP state machine. */
 #define STATE_DHCP_INIT          0        ///< Initialize
@@ -169,7 +175,7 @@ enum
 
 /*
  * @brief DHCP message format
- */ 
+ */
 typedef struct {
 	uint8_t  op;            ///< @ref DHCP_BOOTREQUEST or @ref DHCP_BOOTREPLY
 	uint8_t  htype;         ///< @ref DHCP_HTYPE10MB or @ref DHCP_HTYPE100MB
@@ -200,8 +206,12 @@ uint8_t OLD_allocated_ip[4]   = {0, };    // Previous IP address
 uint8_t DHCP_allocated_ip[4]  = {0, };    // IP address from DHCP
 uint8_t DHCP_allocated_gw[4]  = {0, };    // Gateway address from DHCP
 uint8_t DHCP_allocated_sn[4]  = {0, };    // Subnet mask from DHCP
-uint8_t DHCP_allocated_dns[4] = {0, };    // DNS address from DHCP
+uint8_t DHCP_allocated_dns[MAX_DNS_SERVER_ADDRESS][4] = {0, }; // DNS address from DHCP
+uint8_t DHCP_allocated_ntp[MAX_DNS_SERVER_ADDRESS][4] = {0, }; // NTP address from DHCP
+int32_t DHCP_allocated_to = 0; // Time offset from DHCP
 
+uint8_t DHCP_allocated_dns_counter = 0;
+uint8_t DHCP_allocated_ntp_counter = 0;
 
 int8_t   dhcp_state        = STATE_DHCP_INIT;   // DHCP state
 int8_t   dhcp_retry_count  = 0;                 
@@ -214,7 +224,7 @@ uint32_t DHCP_XID;      // Any number
 
 RIP_MSG* pDHCPMSG;      // Buffer pointer for DHCP processing
 
-uint8_t HOST_NAME[] = DCHP_HOST_NAME;  
+uint8_t HOST_NAME[MAX_SIZE_OF_DCHP_HOST_NAME] = DEFAULT_DCHP_HOST_NAME;
 
 uint8_t DHCP_CHADDR[6]; // DHCP Client MAC address.
 
@@ -256,19 +266,19 @@ int8_t   parseDHCPCMSG(void);
 /* The default handler of ip assign first */
 void default_ip_assign(void)
 {
-   setSIPR(DHCP_allocated_ip);
-   setSUBR(DHCP_allocated_sn);
-   setGAR (DHCP_allocated_gw);
+	setSIPR(DHCP_allocated_ip);
+	setSUBR(DHCP_allocated_sn);
+	setGAR (DHCP_allocated_gw);
 }
 
 /* The default handler of ip changed */
 void default_ip_update(void)
 {
 	/* WIZchip Software Reset */
-   setMR(MR_RST);
-   getMR(); // for delay
-   default_ip_assign();
-   setSHAR(DHCP_CHADDR);
+	setMR(MR_RST);
+	getMR(); // for delay
+	default_ip_assign();
+	setSHAR(DHCP_CHADDR);
 }
 
 /* The default handler of ip changed */
@@ -356,7 +366,7 @@ void send_DHCP_DISCOVER(void)
 	uint16_t i;
 	uint8_t ip[4];
 	uint16_t k = 0;
-   
+
    makeDHCPMSG();
    DHCP_SIP[0]=0;
    DHCP_SIP[1]=0;
@@ -368,12 +378,12 @@ void send_DHCP_DISCOVER(void)
    DHCP_REAL_SIP[3]=0;
 
    k = 4;     // because MAGIC_COOKIE already made by makeDHCPMSG()
-   
+
 	// Option Request Param
 	pDHCPMSG->OPT[k++] = dhcpMessageType;
 	pDHCPMSG->OPT[k++] = 0x01;
 	pDHCPMSG->OPT[k++] = DHCP_DISCOVER;
-	
+
 	// Client identifier
 	pDHCPMSG->OPT[k++] = dhcpClientIdentifier;
 	pDHCPMSG->OPT[k++] = 0x07;
@@ -384,18 +394,18 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
-	
+
 	// host name
 	pDHCPMSG->OPT[k++] = hostName;
 	pDHCPMSG->OPT[k++] = 0;          // fill zero length of hostname 
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
-   	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+		pDHCPMSG->OPT[k++] = HOST_NAME[i];
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
 	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
 
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
@@ -406,6 +416,8 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = domainName;
 	pDHCPMSG->OPT[k++] = dhcpT1value;
 	pDHCPMSG->OPT[k++] = dhcpT2value;
+	pDHCPMSG->OPT[k++] = timerOffset;
+	pDHCPMSG->OPT[k++] = ntpServers;
 	pDHCPMSG->OPT[k++] = endOption;
 
 	for (i = k; i < OPT_SIZE; i++) pDHCPMSG->OPT[i] = 0;
@@ -430,31 +442,31 @@ void send_DHCP_REQUEST(void)
 	uint8_t ip[4];
 	uint16_t k = 0;
 
-   makeDHCPMSG();
+	makeDHCPMSG();
 
    if(dhcp_state == STATE_DHCP_LEASED || dhcp_state == STATE_DHCP_REREQUEST)
    {
-   	*((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSUNICAST & 0xFF00)>> 8);
-   	*((uint8_t*)(&pDHCPMSG->flags)+1) = (DHCP_FLAGSUNICAST & 0x00FF);
-   	pDHCPMSG->ciaddr[0] = DHCP_allocated_ip[0];
-   	pDHCPMSG->ciaddr[1] = DHCP_allocated_ip[1];
-   	pDHCPMSG->ciaddr[2] = DHCP_allocated_ip[2];
-   	pDHCPMSG->ciaddr[3] = DHCP_allocated_ip[3];
-   	ip[0] = DHCP_SIP[0];
-   	ip[1] = DHCP_SIP[1];
-   	ip[2] = DHCP_SIP[2];
-   	ip[3] = DHCP_SIP[3];   	   	   	
-   }
-   else
-   {
-   	ip[0] = 255;
-   	ip[1] = 255;
-   	ip[2] = 255;
-   	ip[3] = 255;   	   	   	
-   }
-   
-   k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
-	
+   	  *((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSUNICAST & 0xFF00)>> 8);
+   	  *((uint8_t*)(&pDHCPMSG->flags)+1) = (DHCP_FLAGSUNICAST & 0x00FF);
+	  pDHCPMSG->ciaddr[0] = DHCP_allocated_ip[0];
+	  pDHCPMSG->ciaddr[1] = DHCP_allocated_ip[1];
+	  pDHCPMSG->ciaddr[2] = DHCP_allocated_ip[2];
+	  pDHCPMSG->ciaddr[3] = DHCP_allocated_ip[3];
+	  ip[0] = DHCP_SIP[0];
+	  ip[1] = DHCP_SIP[1];
+	  ip[2] = DHCP_SIP[2];
+	  ip[3] = DHCP_SIP[3];
+	}
+	else
+	{
+	  ip[0] = 255;
+	  ip[1] = 255;
+	  ip[2] = 255;
+	  ip[3] = 255;
+	}
+
+	k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
+
 	// Option Request Param.
 	pDHCPMSG->OPT[k++] = dhcpMessageType;
 	pDHCPMSG->OPT[k++] = 0x01;
@@ -470,15 +482,15 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
 
-   if(ip[3] == 255)  // if(dchp_state == STATE_DHCP_LEASED || dchp_state == DHCP_REREQUEST_STATE)
-   {
+	if(ip[3] == 255)  // if(dchp_state == STATE_DHCP_LEASED || dchp_state == DHCP_REREQUEST_STATE)
+	{
 		pDHCPMSG->OPT[k++] = dhcpRequestedIPaddr;
 		pDHCPMSG->OPT[k++] = 0x04;
 		pDHCPMSG->OPT[k++] = DHCP_allocated_ip[0];
 		pDHCPMSG->OPT[k++] = DHCP_allocated_ip[1];
 		pDHCPMSG->OPT[k++] = DHCP_allocated_ip[2];
 		pDHCPMSG->OPT[k++] = DHCP_allocated_ip[3];
-	
+
 		pDHCPMSG->OPT[k++] = dhcpServerIdentifier;
 		pDHCPMSG->OPT[k++] = 0x04;
 		pDHCPMSG->OPT[k++] = DHCP_SIP[0];
@@ -491,23 +503,25 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = hostName;
 	pDHCPMSG->OPT[k++] = 0; // length of hostname
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
-   	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+		pDHCPMSG->OPT[k++] = HOST_NAME[i];
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4);
+	//	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
 	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
-	
+
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
-	pDHCPMSG->OPT[k++] = 0x08;
+	pDHCPMSG->OPT[k++] = 0x08 + 0x02;
 	pDHCPMSG->OPT[k++] = subnetMask;
 	pDHCPMSG->OPT[k++] = routersOnSubnet;
 	pDHCPMSG->OPT[k++] = dns;
 	pDHCPMSG->OPT[k++] = domainName;
 	pDHCPMSG->OPT[k++] = dhcpT1value;
 	pDHCPMSG->OPT[k++] = dhcpT2value;
+	pDHCPMSG->OPT[k++] = timerOffset;
+	pDHCPMSG->OPT[k++] = ntpServers;
 	pDHCPMSG->OPT[k++] = performRouterDiscovery;
 	pDHCPMSG->OPT[k++] = staticRoute;
 	pDHCPMSG->OPT[k++] = endOption;
@@ -517,7 +531,7 @@ void send_DHCP_REQUEST(void)
 #ifdef _DHCP_DEBUG_
 	printf("> Send DHCP_REQUEST\r\n");
 #endif
-	
+
 	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
 
 }
@@ -528,11 +542,11 @@ void send_DHCP_DECLINE(void)
 	int i;
 	uint8_t ip[4];
 	uint16_t k = 0;
-	
+
 	makeDHCPMSG();
 
-   k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
-   
+	k = 4;      // because MAGIC_COOKIE already made by makeDHCPMSG()
+
 	*((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSUNICAST & 0xFF00)>> 8);
 	*((uint8_t*)(&pDHCPMSG->flags)+1) = (DHCP_FLAGSUNICAST & 0x00FF);
 
@@ -593,37 +607,37 @@ int8_t parseDHCPMSG(void)
 	uint8_t * e;
 	uint8_t type = 0;
 	uint8_t opt_len;
-   
-   if((len = getSn_RX_RSR(DHCP_SOCKET)) > 0)
-   {
-   	len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port);
-   #ifdef _DHCP_DEBUG_   
-      printf("DHCP message : %d.%d.%d.%d(%d) %d received. \r\n",svr_addr[0],svr_addr[1],svr_addr[2], svr_addr[3],svr_port, len);
-   #endif   
-   }
-   else return 0;
+
+	if((len = getSn_RX_RSR(DHCP_SOCKET)) > 0)
+	{
+		len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port);
+#ifdef _DHCP_DEBUG_
+		printf("DHCP message : %d.%d.%d.%d(%d) %d received. \r\n",svr_addr[0],svr_addr[1],svr_addr[2], svr_addr[3],svr_port, len);
+#endif
+	}
+	else return 0;
 	if (svr_port == DHCP_SERVER_PORT) {
-      // compare mac address
+		// compare mac address
 		if ( (pDHCPMSG->chaddr[0] != DHCP_CHADDR[0]) || (pDHCPMSG->chaddr[1] != DHCP_CHADDR[1]) ||
-		     (pDHCPMSG->chaddr[2] != DHCP_CHADDR[2]) || (pDHCPMSG->chaddr[3] != DHCP_CHADDR[3]) ||
-		     (pDHCPMSG->chaddr[4] != DHCP_CHADDR[4]) || (pDHCPMSG->chaddr[5] != DHCP_CHADDR[5])   )
+			(pDHCPMSG->chaddr[2] != DHCP_CHADDR[2]) || (pDHCPMSG->chaddr[3] != DHCP_CHADDR[3]) ||
+			(pDHCPMSG->chaddr[4] != DHCP_CHADDR[4]) || (pDHCPMSG->chaddr[5] != DHCP_CHADDR[5])   )
 		{
 #ifdef _DHCP_DEBUG_
-            printf("No My DHCP Message. This message is ignored.\r\n");
+			printf("No My DHCP Message. This message is ignored.\r\n");
 #endif
-         return 0;
+			return 0;
 		}
-        //compare DHCP server ip address
-        if((DHCP_SIP[0]!=0) || (DHCP_SIP[1]!=0) || (DHCP_SIP[2]!=0) || (DHCP_SIP[3]!=0)){
+		//compare DHCP server ip address
+		if((DHCP_SIP[0]!=0) || (DHCP_SIP[1]!=0) || (DHCP_SIP[2]!=0) || (DHCP_SIP[3]!=0)){
             if( ((svr_addr[0]!=DHCP_SIP[0])|| (svr_addr[1]!=DHCP_SIP[1])|| (svr_addr[2]!=DHCP_SIP[2])|| (svr_addr[3]!=DHCP_SIP[3])) &&
                 ((svr_addr[0]!=DHCP_REAL_SIP[0])|| (svr_addr[1]!=DHCP_REAL_SIP[1])|| (svr_addr[2]!=DHCP_REAL_SIP[2])|| (svr_addr[3]!=DHCP_REAL_SIP[3]))  )
-            {
+			{
 #ifdef _DHCP_DEBUG_
-                printf("Another DHCP sever send a response message. This is ignored.\r\n");
+				printf("Another DHCP sever send a response message. This is ignored.\r\n");
 #endif
-                return 0;
-            }
-        }
+				return 0;
+			}
+		}
 		p = (uint8_t *)(&pDHCPMSG->op);
 		p = p + 240;      // 240 = sizeof(RIP_MSG) + MAGIC_COOKIE size in RIP_MSG.opt - sizeof(RIP_MSG.opt)
 		e = p + (len - 240);
@@ -632,71 +646,104 @@ int8_t parseDHCPMSG(void)
 
 			switch ( *p ) {
 
-   			case endOption :
-   			   p = e;   // for break while(p < e)
-   				break;
-            case padOption :
-   				p++;
-   				break;
-   			case dhcpMessageType :
-   				p++;
-   				p++;
-   				type = *p++;
-   				break;
-   			case subnetMask :
-   				p++;
-   				p++;
-   				DHCP_allocated_sn[0] = *p++;
-   				DHCP_allocated_sn[1] = *p++;
-   				DHCP_allocated_sn[2] = *p++;
-   				DHCP_allocated_sn[3] = *p++;
-   				break;
-   			case routersOnSubnet :
-   				p++;
-   				opt_len = *p++;       
-   				DHCP_allocated_gw[0] = *p++;
-   				DHCP_allocated_gw[1] = *p++;
-   				DHCP_allocated_gw[2] = *p++;
-   				DHCP_allocated_gw[3] = *p++;
-   				p = p + (opt_len - 4);
-   				break;
-   			case dns :
-   				p++;                  
-   				opt_len = *p++;       
-   				DHCP_allocated_dns[0] = *p++;
-   				DHCP_allocated_dns[1] = *p++;
-   				DHCP_allocated_dns[2] = *p++;
-   				DHCP_allocated_dns[3] = *p++;
-   				p = p + (opt_len - 4);
-   				break;
-   			case dhcpIPaddrLeaseTime :
-   				p++;
-   				opt_len = *p++;
-   				dhcp_lease_time  = *p++;
-   				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
-   				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
-   				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
-            #ifdef _DHCP_DEBUG_  
-               dhcp_lease_time = 10;
- 				#endif
-   				break;
-   			case dhcpServerIdentifier :
-   				p++;
-   				opt_len = *p++;
-   				DHCP_SIP[0] = *p++;
-   				DHCP_SIP[1] = *p++;
-   				DHCP_SIP[2] = *p++;
-   				DHCP_SIP[3] = *p++;
-                DHCP_REAL_SIP[0]=svr_addr[0];
-                DHCP_REAL_SIP[1]=svr_addr[1];
-                DHCP_REAL_SIP[2]=svr_addr[2];
-                DHCP_REAL_SIP[3]=svr_addr[3];
-   				break;
-   			default :
-   				p++;
-   				opt_len = *p++;
-   				p += opt_len;
-   				break;
+			case endOption :
+				p = e;   // for break while(p < e)
+				break;
+			case padOption :
+				p++;
+				break;
+			case dhcpMessageType :
+				p++;
+				p++;
+				type = *p++;
+				break;
+			case subnetMask :
+				p++;
+				p++;
+				DHCP_allocated_sn[0] = *p++;
+				DHCP_allocated_sn[1] = *p++;
+				DHCP_allocated_sn[2] = *p++;
+				DHCP_allocated_sn[3] = *p++;
+				break;
+			case routersOnSubnet :
+				p++;
+				opt_len = *p++;
+				DHCP_allocated_gw[0] = *p++;
+				DHCP_allocated_gw[1] = *p++;
+				DHCP_allocated_gw[2] = *p++;
+				DHCP_allocated_gw[3] = *p++;
+				p = p + (opt_len - 4);
+				break;
+			case dns :
+				p++;
+				opt_len = *p++;
+				DHCP_allocated_dns_counter = opt_len / 4;
+				for (uint8_t CC = 0; CC < DHCP_allocated_dns_counter; CC++) {
+					if (CC < MAX_DNS_SERVER_ADDRESS) {
+						DHCP_allocated_dns[CC][0] = *p++;
+						DHCP_allocated_dns[CC][1] = *p++;
+						DHCP_allocated_dns[CC][2] = *p++;
+						DHCP_allocated_dns[CC][3] = *p++;
+					}
+					else
+						p += 4;
+				}
+				p = p + (opt_len - DHCP_allocated_dns_counter * 4); // It can be removed
+				break;
+			case dhcpIPaddrLeaseTime :
+				p++;
+				opt_len = *p++;
+				dhcp_lease_time  = *p++;
+				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
+				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
+				dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
+				//            #ifdef _DHCP_DEBUG_
+				//               dhcp_lease_time = 10;
+				// 				#endif
+				break;
+			case dhcpServerIdentifier :
+				p++;
+				opt_len = *p++;
+				DHCP_SIP[0] = *p++;
+				DHCP_SIP[1] = *p++;
+				DHCP_SIP[2] = *p++;
+				DHCP_SIP[3] = *p++;
+				DHCP_REAL_SIP[0]=svr_addr[0];
+				DHCP_REAL_SIP[1]=svr_addr[1];
+				DHCP_REAL_SIP[2]=svr_addr[2];
+				DHCP_REAL_SIP[3]=svr_addr[3];
+				break;
+			case timerOffset:
+				p++;
+				opt_len = *p++;
+				DHCP_allocated_to = (*p++ << 24);
+				DHCP_allocated_to |= (*p++ << 16);
+				DHCP_allocated_to |= (*p++ << 8);
+				DHCP_allocated_to |= (*p++ << 0);
+				//				printf("TO : %d\r\n",DHCP_allocated_to);
+				p = p + (opt_len - 4);
+				break;
+			case ntpServers:
+				p++;
+				opt_len = *p++;
+				DHCP_allocated_ntp_counter = opt_len / 4;
+				for (uint8_t CC = 0; CC < DHCP_allocated_ntp_counter; CC++) {
+					if (CC < MAX_NTP_SERVER_ADDRESS) {
+						DHCP_allocated_ntp[CC][0] = *p++;
+						DHCP_allocated_ntp[CC][1] = *p++;
+						DHCP_allocated_ntp[CC][2] = *p++;
+						DHCP_allocated_ntp[CC][3] = *p++;
+					}
+					else
+						p += 4;
+				}
+				p = p + (opt_len - DHCP_allocated_ntp_counter * 4); // It can be removed
+				break;
+			default:
+				p++;
+				opt_len = *p++;
+				p += opt_len;
+				break;
 			} // switch
 		} // while
 	} // if
@@ -711,123 +758,123 @@ uint8_t DHCP_run(void)
 	if(dhcp_state == STATE_DHCP_STOP) return DHCP_STOPPED;
 
 	if(getSn_SR(DHCP_SOCKET) != SOCK_UDP)
-	   socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
+		socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
 
 	ret = DHCP_RUNNING;
 	type = parseDHCPMSG();
 
 	switch ( dhcp_state ) {
-	   case STATE_DHCP_INIT     :
-         DHCP_allocated_ip[0] = 0;
-         DHCP_allocated_ip[1] = 0;
-         DHCP_allocated_ip[2] = 0;
-         DHCP_allocated_ip[3] = 0;
-   		send_DHCP_DISCOVER();
-   		dhcp_state = STATE_DHCP_DISCOVER;
-   		break;
-		case STATE_DHCP_DISCOVER :
-			if (type == DHCP_OFFER){
+	case STATE_DHCP_INIT     :
+		DHCP_allocated_ip[0] = 0;
+		DHCP_allocated_ip[1] = 0;
+		DHCP_allocated_ip[2] = 0;
+		DHCP_allocated_ip[3] = 0;
+		send_DHCP_DISCOVER();
+		dhcp_state = STATE_DHCP_DISCOVER;
+		break;
+	case STATE_DHCP_DISCOVER :
+		if (type == DHCP_OFFER){
 #ifdef _DHCP_DEBUG_
-				printf("> Receive DHCP_OFFER\r\n");
+			printf("> Receive DHCP_OFFER\r\n");
 #endif
-            DHCP_allocated_ip[0] = pDHCPMSG->yiaddr[0];
-            DHCP_allocated_ip[1] = pDHCPMSG->yiaddr[1];
-            DHCP_allocated_ip[2] = pDHCPMSG->yiaddr[2];
-            DHCP_allocated_ip[3] = pDHCPMSG->yiaddr[3];
+			DHCP_allocated_ip[0] = pDHCPMSG->yiaddr[0];
+			DHCP_allocated_ip[1] = pDHCPMSG->yiaddr[1];
+			DHCP_allocated_ip[2] = pDHCPMSG->yiaddr[2];
+			DHCP_allocated_ip[3] = pDHCPMSG->yiaddr[3];
 
-				send_DHCP_REQUEST();
-				dhcp_state = STATE_DHCP_REQUEST;
-			} else ret = check_DHCP_timeout();
-         break;
-
-		case STATE_DHCP_REQUEST :
-			if (type == DHCP_ACK) {
-
-#ifdef _DHCP_DEBUG_
-				printf("> Receive DHCP_ACK\r\n");
-#endif
-				if (check_DHCP_leasedIP()) {
-					// Network info assignment from DHCP
-					dhcp_ip_assign();
-					reset_DHCP_timeout();
-
-					dhcp_state = STATE_DHCP_LEASED;
-				} else {
-					// IP address conflict occurred
-					reset_DHCP_timeout();
-					dhcp_ip_conflict();
-				    dhcp_state = STATE_DHCP_INIT;
-				}
-			} else if (type == DHCP_NAK) {
-
-#ifdef _DHCP_DEBUG_
-				printf("> Receive DHCP_NACK\r\n");
-#endif
-
-				reset_DHCP_timeout();
-
-				dhcp_state = STATE_DHCP_DISCOVER;
-			} else ret = check_DHCP_timeout();
+			send_DHCP_REQUEST();
+			dhcp_state = STATE_DHCP_REQUEST;
+		} else ret = check_DHCP_timeout();
 		break;
 
-		case STATE_DHCP_LEASED :
-		   ret = DHCP_IP_LEASED;
-			if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time/2) < dhcp_tick_1s)) {
-				
+	case STATE_DHCP_REQUEST :
+		if (type == DHCP_ACK) {
+
 #ifdef _DHCP_DEBUG_
- 				printf("> Maintains the IP address \r\n");
+			printf("> Receive DHCP_ACK\r\n");
 #endif
-
-				type = 0;
-				OLD_allocated_ip[0] = DHCP_allocated_ip[0];
-				OLD_allocated_ip[1] = DHCP_allocated_ip[1];
-				OLD_allocated_ip[2] = DHCP_allocated_ip[2];
-				OLD_allocated_ip[3] = DHCP_allocated_ip[3];
-				
-				DHCP_XID++;
-
-				send_DHCP_REQUEST();
-
+			if (check_DHCP_leasedIP()) {
+				// Network info assignment from DHCP
+				dhcp_ip_assign();
 				reset_DHCP_timeout();
 
-				dhcp_state = STATE_DHCP_REREQUEST;
-			}
-		break;
-
-		case STATE_DHCP_REREQUEST :
-		   ret = DHCP_IP_LEASED;
-			if (type == DHCP_ACK) {
-				dhcp_retry_count = 0;
-				if (OLD_allocated_ip[0] != DHCP_allocated_ip[0] || 
-				    OLD_allocated_ip[1] != DHCP_allocated_ip[1] ||
-				    OLD_allocated_ip[2] != DHCP_allocated_ip[2] ||
-				    OLD_allocated_ip[3] != DHCP_allocated_ip[3]) 
-				{
-					ret = DHCP_IP_CHANGED;
-					dhcp_ip_update();
-               #ifdef _DHCP_DEBUG_
-                  printf(">IP changed.\r\n");
-               #endif
-					
-				}
-         #ifdef _DHCP_DEBUG_
-            else printf(">IP is continued.\r\n");
-         #endif            				
-				reset_DHCP_timeout();
 				dhcp_state = STATE_DHCP_LEASED;
-			} else if (type == DHCP_NAK) {
+			} else {
+				// IP address conflict occurred
+				reset_DHCP_timeout();
+				dhcp_ip_conflict();
+				dhcp_state = STATE_DHCP_INIT;
+			}
+		} else if (type == DHCP_NAK) {
 
 #ifdef _DHCP_DEBUG_
-				printf("> Receive DHCP_NACK, Failed to maintain ip\r\n");
+			printf("> Receive DHCP_NACK\r\n");
 #endif
 
-				reset_DHCP_timeout();
+			reset_DHCP_timeout();
 
-				dhcp_state = STATE_DHCP_DISCOVER;
-			} else ret = check_DHCP_timeout();
-	   	break;
-		default :
-   		break;
+			dhcp_state = STATE_DHCP_DISCOVER;
+		} else ret = check_DHCP_timeout();
+		break;
+
+	case STATE_DHCP_LEASED :
+		ret = DHCP_IP_LEASED;
+		if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time/2) < dhcp_tick_1s)) {
+
+#ifdef _DHCP_DEBUG_
+			printf("> Maintains the IP address \r\n");
+#endif
+
+			type = 0;
+			OLD_allocated_ip[0] = DHCP_allocated_ip[0];
+			OLD_allocated_ip[1] = DHCP_allocated_ip[1];
+			OLD_allocated_ip[2] = DHCP_allocated_ip[2];
+			OLD_allocated_ip[3] = DHCP_allocated_ip[3];
+
+			DHCP_XID++;
+
+			send_DHCP_REQUEST();
+
+			reset_DHCP_timeout();
+
+			dhcp_state = STATE_DHCP_REREQUEST;
+		}
+		break;
+
+	case STATE_DHCP_REREQUEST :
+		ret = DHCP_IP_LEASED;
+		if (type == DHCP_ACK) {
+			dhcp_retry_count = 0;
+			if (OLD_allocated_ip[0] != DHCP_allocated_ip[0] ||
+				OLD_allocated_ip[1] != DHCP_allocated_ip[1] ||
+				OLD_allocated_ip[2] != DHCP_allocated_ip[2] ||
+				OLD_allocated_ip[3] != DHCP_allocated_ip[3])
+			{
+				ret = DHCP_IP_CHANGED;
+				dhcp_ip_update();
+#ifdef _DHCP_DEBUG_
+				printf(">IP changed.\r\n");
+#endif
+
+			}
+#ifdef _DHCP_DEBUG_
+			else printf(">IP is continued.\r\n");
+#endif
+			reset_DHCP_timeout();
+			dhcp_state = STATE_DHCP_LEASED;
+		} else if (type == DHCP_NAK) {
+
+#ifdef _DHCP_DEBUG_
+			printf("> Receive DHCP_NACK, Failed to maintain ip\r\n");
+#endif
+
+			reset_DHCP_timeout();
+
+			dhcp_state = STATE_DHCP_DISCOVER;
+		} else ret = check_DHCP_timeout();
+		break;
+	default :
+		break;
 	}
 
 	return ret;
@@ -835,36 +882,36 @@ uint8_t DHCP_run(void)
 
 void    DHCP_stop(void)
 {
-   close(DHCP_SOCKET);
-   dhcp_state = STATE_DHCP_STOP;
+	close(DHCP_SOCKET);
+	dhcp_state = STATE_DHCP_STOP;
 }
 
 uint8_t check_DHCP_timeout(void)
 {
 	uint8_t ret = DHCP_RUNNING;
-	
+
 	if (dhcp_retry_count < MAX_DHCP_RETRY) {
 		if (dhcp_tick_next < dhcp_tick_1s) {
 
 			switch ( dhcp_state ) {
-				case STATE_DHCP_DISCOVER :
-//					printf("<<timeout>> state : STATE_DHCP_DISCOVER\r\n");
-					send_DHCP_DISCOVER();
-				break;
-		
-				case STATE_DHCP_REQUEST :
-//					printf("<<timeout>> state : STATE_DHCP_REQUEST\r\n");
-
-					send_DHCP_REQUEST();
+			case STATE_DHCP_DISCOVER :
+				//					printf("<<timeout>> state : STATE_DHCP_DISCOVER\r\n");
+				send_DHCP_DISCOVER();
 				break;
 
-				case STATE_DHCP_REREQUEST :
-//					printf("<<timeout>> state : STATE_DHCP_REREQUEST\r\n");
-					
-					send_DHCP_REQUEST();
+			case STATE_DHCP_REQUEST :
+				//					printf("<<timeout>> state : STATE_DHCP_REQUEST\r\n");
+
+				send_DHCP_REQUEST();
 				break;
-		
-				default :
+
+			case STATE_DHCP_REREQUEST :
+				//					printf("<<timeout>> state : STATE_DHCP_REREQUEST\r\n");
+
+				send_DHCP_REQUEST();
+				break;
+
+			default :
 				break;
 			}
 
@@ -874,7 +921,7 @@ uint8_t check_DHCP_timeout(void)
 		}
 	} else { // timeout occurred
 
-		switch(dhcp_state) {
+	    switch(dhcp_state) {
 			case STATE_DHCP_DISCOVER:
 				dhcp_state = STATE_DHCP_INIT;
 				ret = DHCP_FAILED;
@@ -925,23 +972,23 @@ int8_t check_DHCP_leasedIP(void)
 
 		return 0;
 	}
-}	
+}
 
-void DHCP_init(uint8_t s, uint8_t * buf)
+void DHCP_init(uint8_t s, uint8_t * buf, const char *HostName)
 {
-   uint8_t zeroip[4] = {0,0,0,0};
-   getSHAR(DHCP_CHADDR);
-   if((DHCP_CHADDR[0] | DHCP_CHADDR[1]  | DHCP_CHADDR[2] | DHCP_CHADDR[3] | DHCP_CHADDR[4] | DHCP_CHADDR[5]) == 0x00)
-   {
-      // assigning temporary mac address, you should be set SHAR before call this function. 
-      DHCP_CHADDR[0] = 0x00;
-      DHCP_CHADDR[1] = 0x08;
-      DHCP_CHADDR[2] = 0xdc;      
-      DHCP_CHADDR[3] = 0x00;
-      DHCP_CHADDR[4] = 0x00;
-      DHCP_CHADDR[5] = 0x00; 
-      setSHAR(DHCP_CHADDR);     
-   }
+	uint8_t zeroip[4] = {0,0,0,0};
+	getSHAR(DHCP_CHADDR);
+	if((DHCP_CHADDR[0] | DHCP_CHADDR[1]  | DHCP_CHADDR[2] | DHCP_CHADDR[3] | DHCP_CHADDR[4] | DHCP_CHADDR[5]) == 0x00)
+	{
+		// assigning temporary mac address, you should be set SHAR before call this function.
+		DHCP_CHADDR[0] = 0x00;
+		DHCP_CHADDR[1] = 0x08;
+		DHCP_CHADDR[2] = 0xdc;
+		DHCP_CHADDR[3] = 0x00;
+		DHCP_CHADDR[4] = 0x00;
+		DHCP_CHADDR[5] = 0x00;
+		setSHAR(DHCP_CHADDR);
+	}
 
 	DHCP_SOCKET = s; // SOCK_DHCP
 	pDHCPMSG = (RIP_MSG*)buf;
@@ -958,8 +1005,17 @@ void DHCP_init(uint8_t s, uint8_t * buf)
 
 	reset_DHCP_timeout();
 	dhcp_state = STATE_DHCP_INIT;
-}
 
+	if (strlen(HostName) < MAX_SIZE_OF_DCHP_HOST_NAME) {
+		for (uint8_t ContrChar = 0; HostName[ContrChar] != 0; ContrChar++) {
+			HOST_NAME[ContrChar] = HostName[ContrChar];
+		}
+	}
+#ifdef _DHCP_DEBUG_
+	else
+		printf("> Max Size of Hostname Reached! Uses default Hostname : %s\r\n", DEFAULT_DCHP_HOST_NAME);
+#endif
+}
 
 /* Reset the DHCP timeout count and retry count. */
 void reset_DHCP_timeout(void)
@@ -978,7 +1034,7 @@ void getIPfromDHCP(uint8_t* ip)
 {
 	ip[0] = DHCP_allocated_ip[0];
 	ip[1] = DHCP_allocated_ip[1];
-	ip[2] = DHCP_allocated_ip[2];	
+	ip[2] = DHCP_allocated_ip[2];
 	ip[3] = DHCP_allocated_ip[3];
 }
 
@@ -987,23 +1043,50 @@ void getGWfromDHCP(uint8_t* ip)
 	ip[0] =DHCP_allocated_gw[0];
 	ip[1] =DHCP_allocated_gw[1];
 	ip[2] =DHCP_allocated_gw[2];
-	ip[3] =DHCP_allocated_gw[3];			
+	ip[3] =DHCP_allocated_gw[3];
 }
 
 void getSNfromDHCP(uint8_t* ip)
 {
-   ip[0] = DHCP_allocated_sn[0];
-   ip[1] = DHCP_allocated_sn[1];
-   ip[2] = DHCP_allocated_sn[2];
-   ip[3] = DHCP_allocated_sn[3];         
+	ip[0] = DHCP_allocated_sn[0];
+	ip[1] = DHCP_allocated_sn[1];
+	ip[2] = DHCP_allocated_sn[2];
+	ip[3] = DHCP_allocated_sn[3];
 }
 
-void getDNSfromDHCP(uint8_t* ip)
+uint8_t getNTPfromDHCP(uint8_t* ip)
 {
-   ip[0] = DHCP_allocated_dns[0];
-   ip[1] = DHCP_allocated_dns[1];
-   ip[2] = DHCP_allocated_dns[2];
-   ip[3] = DHCP_allocated_dns[3];         
+	if (!ip)
+		return DHCP_allocated_ntp_counter;
+	for (uint8_t CC = 0; CC < DHCP_allocated_ntp_counter; CC++)
+	{
+		ip[0 + 4 * CC] = DHCP_allocated_ntp[CC][0];
+		ip[1 + 4 * CC] = DHCP_allocated_ntp[CC][1];
+		ip[2 + 4 * CC] = DHCP_allocated_ntp[CC][2];
+		ip[3 + 4 * CC] = DHCP_allocated_ntp[CC][3];
+		//	 printf("NTP OUT : %d.%d.%d.%d\r\n",ip[0 + 4 * CC],ip[1 + 4 * CC],ip[2 + 4 * CC],ip[3 + 4 * CC]);
+	}
+	return DHCP_allocated_ntp_counter;
+}
+
+void getTOfromDHCP(int32_t *to)
+{
+	*to = DHCP_allocated_to;
+}
+
+uint8_t getDNSfromDHCP(uint8_t *ip)
+{
+	if (!ip)
+		return DHCP_allocated_dns_counter;
+	for (uint8_t CC = 0; CC < DHCP_allocated_dns_counter; CC++)
+	{
+		ip[0 + 4 * CC] = DHCP_allocated_dns[CC][0];
+		ip[1 + 4 * CC] = DHCP_allocated_dns[CC][1];
+		ip[2 + 4 * CC] = DHCP_allocated_dns[CC][2];
+		ip[3 + 4 * CC] = DHCP_allocated_dns[CC][3];
+		//	 printf("DNS OUT : %d.%d.%d.%d\r\n",ip[0 + 4 * CC],ip[1 + 4 * CC],ip[2 + 4 * CC],ip[3 + 4 * CC]);
+	}
+	return DHCP_allocated_dns_counter;
 }
 
 uint32_t getDHCPLeasetime(void)
@@ -1013,11 +1096,11 @@ uint32_t getDHCPLeasetime(void)
 
 char NibbleToHex(uint8_t nibble)
 {
-  nibble &= 0x0F;
-  if (nibble <= 9)
-    return nibble + '0';
-  else 
-    return nibble + ('A'-0x0A);
+	nibble &= 0x0F;
+	if (nibble <= 9)
+		return nibble + '0';
+	else
+		return nibble + ('A'-0x0A);
 }
 
 
