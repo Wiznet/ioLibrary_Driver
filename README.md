@@ -20,6 +20,7 @@ This driver provides the Berkeley Socket type APIs.
   - HTTP server
   - MQTT Client
   - Others will be added.
+- Security/SSLTLS : Tls over tcp driver using mbedtls. example : https://github.com/WIZnet-ioLibrary/W5x00-TLS
 
 ## How to add an ioLibrary in project through github site.
   - Example, refer to https://www.youtube.com/watch?v=mt815RBGdsA
