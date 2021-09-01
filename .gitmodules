@@ -1,3 +1,0 @@
-[submodule "Security/SSLTLS/mbedtls"]
-	path = Security/SSLTLS/mbedtls
-	url = https://github.com/ARMmbed/mbedtls.git
