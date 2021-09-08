@@ -233,7 +233,7 @@ extern "C" {
 typedef struct __WIZCHIP
 {
    uint16_t  if_mode;               ///< host interface mode
-   uint8_t   id[7];                 ///< @b WIZCHIP ID such as @b 5100, @b 5200, @b 5500, and so on.
+   uint8_t   id[8];                 ///< @b WIZCHIP ID such as @b 5100, @b 5100S, @b 5200, @b 5500, and so on.
    /**
     * The set of critical section callback func.
     */
