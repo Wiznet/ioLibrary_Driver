@@ -166,11 +166,17 @@ void w5x00_disconnect(Network* n)
  *         that contains the configuration information for the Network.
  *         ip : server iP.
  *         port : server port.
+ * @retval SOCKOK code or SOCKERR code
  */
-void ConnectNetwork(Network* n, uint8_t* ip, uint16_t port)
+int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port)
 {
 	uint16_t myport = 12345;
 
-	socket(n->my_socket,Sn_MR_TCP,myport,0);
-	connect(n->my_socket,ip,port);
+	if(socket(n->my_socket, Sn_MR_TCP, myport, 0) != n->my_socket)
+		return SOCK_ERROR;
+
+	if(connect(n->my_socket, ip, port) != SOCK_OK)
+		return SOCK_ERROR;
+
+	return SOCK_OK;
 }

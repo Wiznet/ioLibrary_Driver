@@ -262,7 +262,7 @@ int w5x00_read(Network*, unsigned char*, int, long);
 int w5x00_write(Network*, unsigned char*, int, long);
 void w5x00_disconnect(Network*);
 void NewNetwork(Network* n, int sn);
-void ConnectNetwork(Network* n, uint8_t* ip, uint16_t port);
+int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port);
 
 #ifdef __cplusplus
 }
