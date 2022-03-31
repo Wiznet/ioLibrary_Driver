@@ -716,7 +716,7 @@ int32_t parseSNMPMessage()
 
 void ipToByteArray(int8_t *ip, uint8_t *pDes)
 {
-	uint32_t i, ip1=0, ip2=0, ip3=0, ip4=0;
+	uint8_t i, ip1=0, ip2=0, ip3=0, ip4=0;
 	int8_t buff[32];
 	uint32_t len = (uint32_t)strlen((char const*)ip);
 	strcpy((char *)buff, (char const*)ip);
@@ -726,7 +726,7 @@ void ipToByteArray(int8_t *ip, uint8_t *pDes)
 		if ( buff[i]=='.' )		buff[i] = ' ';
 	}
 
-	sscanf((char const*)buff, "%u %u %u %u", &ip1, &ip2, &ip3, &ip4);
+	sscanf((char const*)buff, "%hhu %hhu %hhu %hhu", &ip1, &ip2, &ip3, &ip4);
 	pDes[0] = ip1; pDes[1] = ip2; pDes[2] = ip3; pDes[3] = ip4;
 }
 

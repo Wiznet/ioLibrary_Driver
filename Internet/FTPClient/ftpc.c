@@ -1,9 +1,9 @@
 #include "ftpc.h"
 
-un_l2cval remote_ip;
-uint16_t  remote_port;
-un_l2cval local_ip;
-uint16_t  local_port;
+un_l2cval FTP_remote_ip;
+uint16_t  FTP_remote_port;
+un_l2cval FTP_local_ip;
+uint16_t  FTP_local_port;
 uint8_t connect_state_control_ftpc = 0;
 uint8_t connect_state_data_ftpc = 0;
 uint8_t gModeActivePassiveflag = 0;
@@ -21,11 +21,11 @@ void ftpc_init(uint8_t * src_ip)
 {
 	ftpc.dsock_mode = ACTIVE_MODE;
 
-	local_ip.cVal[0] = src_ip[0];
-	local_ip.cVal[1] = src_ip[1];
-	local_ip.cVal[2] = src_ip[2];
-	local_ip.cVal[3] = src_ip[3];
-	local_port = 35000;
+	FTP_local_ip.cVal[0] = src_ip[0];
+	FTP_local_ip.cVal[1] = src_ip[1];
+	FTP_local_ip.cVal[2] = src_ip[2];
+	FTP_local_ip.cVal[3] = src_ip[3];
+	FTP_local_port = 35000;
 	strcpy(ftpc.workingdir, "/");
 	socket(CTRL_SOCK, Sn_MR_TCP, FTP_destport, 0x0);
 }
@@ -77,7 +77,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						else{
 							wiz_NetInfo gWIZNETINFO;
 							ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
-							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(local_port>>8), (uint8_t)(local_port&0x00ff));
+							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(FTP_local_port>>8), (uint8_t)(FTP_local_port&0x00ff));
 							send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
 							Command.First = f_dir;
 
@@ -96,7 +96,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						else{
 							wiz_NetInfo gWIZNETINFO;
 							ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
-							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(local_port>>8), (uint8_t)(local_port&0x00ff));
+							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(FTP_local_port>>8), (uint8_t)(FTP_local_port&0x00ff));
 							send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
 							Command.First = f_put;
 
@@ -114,7 +114,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 						else{
 							wiz_NetInfo gWIZNETINFO;
 							ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
-							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(local_port>>8), (uint8_t)(local_port&0x00ff));
+							sprintf(dat,"PORT %d,%d,%d,%d,%d,%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], (uint8_t)(FTP_local_port>>8), (uint8_t)(FTP_local_port&0x00ff));
 							send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
 							Command.First = f_get;
 
@@ -416,25 +416,25 @@ uint8_t ftpc_run(uint8_t * dbuf)
    		case SOCK_CLOSED :
    			if(ftpc.dsock_state == DATASOCK_READY){
    				if(ftpc.dsock_mode == PASSIVE_MODE){
-   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, local_port);
-   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, local_port, 0x0)) != DATA_SOCK){
+   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, FTP_local_port);
+   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, FTP_local_port, 0x0)) != DATA_SOCK){
    						printf("%d:socket() error:%ld\r\n", DATA_SOCK, ret);
    						close(DATA_SOCK);
    						return ret;
    					}
-   					local_port++;
-   					if(local_port > 50000)
-   						local_port = 35000;
+   					FTP_local_port++;
+   					if(FTP_local_port > 50000)
+   						FTP_local_port = 35000;
    				}else{
-   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, local_port);
-   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, local_port, 0x0)) != DATA_SOCK){
+   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, FTP_local_port);
+   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, FTP_local_port, 0x0)) != DATA_SOCK){
    						printf("%d:socket() error:%ld\r\n", DATA_SOCK, ret);
    						close(DATA_SOCK);
    						return ret;
    					}
-   					local_port++;
-   					if(local_port > 50000)
-   						local_port = 35000;
+   					FTP_local_port++;
+   					if(FTP_local_port > 50000)
+   						FTP_local_port = 35000;
    				}
    				ftpc.dsock_state = DATASOCK_START;
    			}
@@ -450,7 +450,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
    				gDataSockReady = 1;
    				printf("%d:Listen ok\r\n",DATA_SOCK);
    			}else{
-   				if((ret = connect(DATA_SOCK, remote_ip.cVal, remote_port)) != SOCK_OK){
+   				if((ret = connect(DATA_SOCK, FTP_remote_ip.cVal, FTP_remote_port)) != SOCK_OK){
    					printf("%d:Connect error\r\n", DATA_SOCK);
    					return ret;
    				}
@@ -468,7 +468,7 @@ uint8_t ftpc_run(uint8_t * dbuf)
 char proc_ftpc(char * buf)
 {
 	uint16_t Responses;
-	uint8_t dat[30]={0,};
+	char dat[30]={0,};
 
 	Responses =(buf[0]-'0')*100+(buf[1]-'0')*10+(buf[2]-'0');
 
@@ -553,23 +553,23 @@ int pportc(char * arg)
 	{
 		if(i==0) tok = strtok(NULL,",\r\n");
 		else	 tok = strtok(NULL,",");
-		remote_ip.cVal[i] = (uint8_t)atoi(tok);
+		FTP_remote_ip.cVal[i] = (uint8_t)atoi(tok);
 		if (!tok){
 			printf("bad pport : %s\r\n", arg);
 			return -1;
 		}
 	}
-	remote_port = 0;
+	FTP_remote_port = 0;
 	for (i = 0; i < 2; i++){
 		tok = strtok(NULL,",\r\n");
-		remote_port <<= 8;
-		remote_port += atoi(tok);
+		FTP_remote_port <<= 8;
+		FTP_remote_port += atoi(tok);
 		if (!tok){
 			printf("bad pport : %s\r\n", arg);
 			return -1;
 		}
 	}
-	printf("ip : %d.%d.%d.%d, port : %d\r\n", remote_ip.cVal[0], remote_ip.cVal[1], remote_ip.cVal[2], remote_ip.cVal[3], remote_port);
+	printf("ip : %d.%d.%d.%d, port : %d\r\n", FTP_remote_ip.cVal[0], FTP_remote_ip.cVal[1], FTP_remote_ip.cVal[2], FTP_remote_ip.cVal[3], FTP_remote_port);
 	return 0;
 }
 uint8_t* User_Keyboard_MSG()

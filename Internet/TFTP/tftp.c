@@ -6,7 +6,9 @@
  */
 
 /* Includes -----------------------------------------------------*/
+#include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include "tftp.h"
 #include "socket.h"
 #include "netutil.h"
@@ -529,7 +531,7 @@ static void recv_tftp_packet(uint8_t *packet, uint32_t packet_len, uint32_t from
 	if(from_ip != get_server_ip()) {
 #ifdef __TFTP_DEBUG__
 		DBG_PRINT(ERROR_DBG, "[%s] Server IP faults\r\n", __func__);
-		DBG_PRINT(ERROR_DBG, "from IP : %08x, Server IP : %08x\r\n", from_ip, get_server_ip());
+		DBG_PRINT(ERROR_DBG, "from IP : %08"PRIx32", Server IP : %08"PRIx32"\r\n", from_ip, get_server_ip());
 #endif
 		return;
 	}
@@ -646,7 +648,7 @@ void TFTP_read_request(uint32_t server_ip, uint8_t *filename)
 {
 	set_server_ip(server_ip);
 #ifdef __TFTP_DEBUG__
-	DBG_PRINT(INFO_DBG, "[%s] Set Tftp Server : %x\r\n", __func__, server_ip);
+	DBG_PRINT(INFO_DBG, "[%s] Set Tftp Server : %"PRIx32"\r\n", __func__, server_ip);
 #endif
 
 	g_progress_state = TFTP_PROGRESS;
