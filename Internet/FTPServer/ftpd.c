@@ -10,7 +10,7 @@
 */
 
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <ctype.h> 
 #include <string.h>
 #include <limits.h>
@@ -92,10 +92,10 @@ char syst[] = "215 %s Type: L%d Version: %s\r\n";
 char sizefail[] = "550 File not found\r\n";
 #endif
 
-un_l2cval remote_ip;
-uint16_t  remote_port;
-un_l2cval local_ip;
-uint16_t  local_port;
+un_l2cval FTPD_remote_ip;
+uint16_t  FTPD_remote_port;
+un_l2cval FTPD_local_ip;
+uint16_t  FTPD_local_port;
 uint8_t connect_state_control = 0;
 uint8_t connect_state_data = 0;
 
@@ -108,10 +108,10 @@ int current_hour = 10;
 int current_min = 10;
 int current_sec = 30;
 
+/*
 int fsprintf(uint8_t s, const char *format, ...)
 {
 	int i;
-/*
 	char buf[LINELEN];
 	FILE f;
 	va_list ap;
@@ -125,9 +125,9 @@ int fsprintf(uint8_t s, const char *format, ...)
 	buf[f.len] = 0;
 
 	send(s, (uint8_t *)buf, strlen(buf));
-*/
 	return i;
 }
+*/
 
 void ftpd_init(uint8_t * src_ip)
 {
@@ -135,11 +135,11 @@ void ftpd_init(uint8_t * src_ip)
 	ftp.current_cmd = NO_CMD;
 	ftp.dsock_mode = ACTIVE_MODE;
 
-	local_ip.cVal[0] = src_ip[0];
-	local_ip.cVal[1] = src_ip[1];
-	local_ip.cVal[2] = src_ip[2];
-	local_ip.cVal[3] = src_ip[3];
-	local_port = 35000;
+	FTPD_local_ip.cVal[0] = src_ip[0];
+	FTPD_local_ip.cVal[1] = src_ip[1];
+	FTPD_local_ip.cVal[2] = src_ip[2];
+	FTPD_local_ip.cVal[3] = src_ip[3];
+	FTPD_local_port = 35000;
 	
 	strcpy(ftp.workingdir, "/");
 
@@ -148,13 +148,14 @@ void ftpd_init(uint8_t * src_ip)
 
 uint8_t ftpd_run(uint8_t * dbuf)
 {
-	uint16_t size = 0, i;
+	uint16_t size = 0;
 	long ret = 0;
-	uint32_t blocklen, send_byte, recv_byte;
+	uint32_t blocklen, recv_byte;
 	uint32_t remain_filesize;
 	uint32_t remain_datasize;
 #if defined(F_FILESYSTEM)
 	//FILINFO fno;
+	uint32_t send_byte;
 #endif
 
 	//memset(dbuf, 0, sizeof(_MAX_SS));
@@ -288,17 +289,17 @@ uint8_t ftpd_run(uint8_t * dbuf)
 #endif
 #if defined(_FTP_DEBUG_)
     				printf("returned size: %d\r\n", size);
-    				printf("%s\r\n", dbuf);
+    				printf("%s\r\n", (char *)dbuf);
 #endif
 #if !defined(F_FILESYSTEM)
     				if (strncmp(ftp.workingdir, "/$Recycle.Bin", sizeof("/$Recycle.Bin")) != 0)
-    					size = sprintf(dbuf, "drwxr-xr-x 1 ftp ftp 0 Dec 31 2014 $Recycle.Bin\r\n-rwxr-xr-x 1 ftp ftp 512 Dec 31 2014 test.txt\r\n");
+    					size = sprintf((char *)dbuf, "drwxr-xr-x 1 ftp ftp 0 Dec 31 2014 $Recycle.Bin\r\n-rwxr-xr-x 1 ftp ftp 512 Dec 31 2014 test.txt\r\n");
 #endif
-    				size = strlen(dbuf);
+    				size = strlen((char *)dbuf);
     				send(DATA_SOCK, dbuf, size);
     				ftp.current_cmd = NO_CMD;
     				disconnect(DATA_SOCK);
-    				size = sprintf(dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.workingdir);
+    				size = sprintf((char *)dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.workingdir);
     				send(CTRL_SOCK, dbuf, size);
     				break;
 
@@ -351,9 +352,9 @@ uint8_t ftpd_run(uint8_t * dbuf)
 					do{
 						memset(dbuf, 0, _MAX_SS);
 
-						blocklen = sprintf(dbuf, "%s", ftp.filename);
+						blocklen = sprintf((char *)dbuf, "%s", ftp.filename);
 
-						printf("########## dbuf:%s\r\n", dbuf);
+						printf("########## dbuf:%s\r\n", (char *)dbuf);
 
 						send(DATA_SOCK, dbuf, blocklen);
 						remain_filesize -= blocklen;
@@ -362,7 +363,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
 #endif
     				ftp.current_cmd = NO_CMD;
     				disconnect(DATA_SOCK);
-    				size = sprintf(dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.filename);
+    				size = sprintf((char *)dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.filename);
     				send(CTRL_SOCK, dbuf, size);
     				break;
 
@@ -465,7 +466,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
 #endif
     				ftp.current_cmd = NO_CMD;
     				disconnect(DATA_SOCK);
-    				size = sprintf(dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.filename);
+    				size = sprintf((char *)dbuf, "226 Successfully transferred \"%s\"\r\n", ftp.filename);
     				send(CTRL_SOCK, dbuf, size);
     				break;
 
@@ -490,9 +491,9 @@ uint8_t ftpd_run(uint8_t * dbuf)
    			{
    				if(ftp.dsock_mode == PASSIVE_MODE){
 #if defined(_FTP_DEBUG_)
-   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, local_port);
+   					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, FTPD_local_port);
 #endif
-   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, local_port, 0x0)) != DATA_SOCK)
+   					if((ret=socket(DATA_SOCK, Sn_MR_TCP, FTPD_local_port, 0x0)) != DATA_SOCK)
    					{
 #if defined(_FTP_DEBUG_)
    						printf("%d:socket() error:%ld\r\n", DATA_SOCK, ret);
@@ -501,9 +502,9 @@ uint8_t ftpd_run(uint8_t * dbuf)
    						return ret;
    					}
 
-   					local_port++;
-   					if(local_port > 50000)
-   						local_port = 35000;
+   					FTPD_local_port++;
+   					if(FTPD_local_port > 50000)
+   						FTPD_local_port = 35000;
    				}else{
 #if defined(_FTP_DEBUG_)
    					printf("%d:FTPDataStart, port : %d\r\n",DATA_SOCK, IPPORT_FTPD);
@@ -539,7 +540,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
    				printf("%d:Listen ok\r\n",DATA_SOCK);
 #endif
    			}else{
-   				if((ret = connect(DATA_SOCK, remote_ip.cVal, remote_port)) != SOCK_OK){
+   				if((ret = connect(DATA_SOCK, FTPD_remote_ip.cVal, FTPD_remote_port)) != SOCK_OK){
 #if defined(_FTP_DEBUG_)
    					printf("%d:Connect error\r\n", DATA_SOCK);
 #endif
@@ -690,10 +691,10 @@ char proc_ftpd(char * buf)
 			printf("RETR_CMD\r\n");
 #endif
 			if(strlen(ftp.workingdir) == 1)
-				sprintf(ftp.filename, "/%s", arg);
+				snprintf(ftp.filename, sizeof(ftp.filename), "/%s", arg);
 			else
-				sprintf(ftp.filename, "%s/%s", ftp.workingdir, arg);
-			slen = sprintf(sendbuf, "150 Opening data channel for file downloand from server of \"%s\"\r\n", ftp.filename);
+				snprintf(ftp.filename, sizeof(ftp.filename), "%s/%s", ftp.workingdir, arg);
+			slen = sprintf(sendbuf, "150 Opening data channel for file download from server of \"%s\"\r\n", ftp.filename);
 			send(CTRL_SOCK, (uint8_t *)sendbuf, slen);
 			ftp.current_cmd = RETR_CMD;
 			break;
@@ -707,13 +708,13 @@ char proc_ftpd(char * buf)
 			printf("STOR_CMD\r\n");
 #endif
 			if(strlen(ftp.workingdir) == 1)
-				sprintf(ftp.filename, "/%s", arg);
+				snprintf(ftp.filename, sizeof(ftp.filename), "/%s", arg);
 			else
-				sprintf(ftp.filename, "%s/%s", ftp.workingdir, arg);
+				snprintf(ftp.filename, sizeof(ftp.filename), "%s/%s", ftp.workingdir, arg);
 			slen = sprintf(sendbuf, "150 Opening data channel for file upload to server of \"%s\"\r\n", ftp.filename);
 			send(CTRL_SOCK, (uint8_t *)sendbuf, slen);
 			ftp.current_cmd = STOR_CMD;
-			if((ret = connect(DATA_SOCK, remote_ip.cVal, remote_port)) != SOCK_OK){
+			if((ret = connect(DATA_SOCK, FTPD_remote_ip.cVal, FTPD_remote_port)) != SOCK_OK){
 #if defined(_FTP_DEBUG_)
 				printf("%d:Connect error\r\n", DATA_SOCK);
 #endif
@@ -775,13 +776,13 @@ char proc_ftpd(char * buf)
 			break;
 
 		case PASV_CMD:
-			slen = sprintf(sendbuf, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)\r\n", local_ip.cVal[0], local_ip.cVal[1], local_ip.cVal[2], local_ip.cVal[3], local_port >> 8, local_port & 0x00ff);
+			slen = sprintf(sendbuf, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)\r\n", FTPD_local_ip.cVal[0], FTPD_local_ip.cVal[1], FTPD_local_ip.cVal[2], FTPD_local_ip.cVal[3], FTPD_local_port >> 8, FTPD_local_port & 0x00ff);
 			send(CTRL_SOCK, (uint8_t *)sendbuf, slen);
 			disconnect(DATA_SOCK);
 			ftp.dsock_mode = PASSIVE_MODE;
 			ftp.dsock_state = DATASOCK_READY;
 #if defined(_FTP_DEBUG_)
-			printf("PASV port: %d\r\n", local_port);
+			printf("PASV port: %d\r\n", FTPD_local_port);
 #endif
 		break;
 
@@ -933,7 +934,7 @@ int pport(char * arg)
 	{
 		if(i==0) tok = strtok(arg,",\r\n");
 		else	 tok = strtok(NULL,",");
-		remote_ip.cVal[i] = (uint8_t)atoi(tok);
+		FTPD_remote_ip.cVal[i] = (uint8_t)atoi(tok);
 		if (!tok)
 		{
 #if defined(_FTP_DEBUG_)
@@ -942,12 +943,12 @@ int pport(char * arg)
 			return -1;
 		}
 	}
-	remote_port = 0;
+	FTPD_remote_port = 0;
 	for (i = 0; i < 2; i++)
 	{
 		tok = strtok(NULL,",\r\n");
-		remote_port <<= 8;
-		remote_port += atoi(tok);
+		FTPD_remote_port <<= 8;
+		FTPD_remote_port += atoi(tok);
 		if (!tok)
 		{
 #if defined(_FTP_DEBUG_)
@@ -957,7 +958,7 @@ int pport(char * arg)
 		}
 	}
 #if defined(_FTP_DEBUG_)
-	printf("ip : %d.%d.%d.%d, port : %d\r\n", remote_ip.cVal[0], remote_ip.cVal[1], remote_ip.cVal[2], remote_ip.cVal[3], remote_port);
+	printf("ip : %d.%d.%d.%d, port : %d\r\n", FTPD_remote_ip.cVal[0], FTPD_remote_ip.cVal[1], FTPD_remote_ip.cVal[2], FTPD_remote_ip.cVal[3], FTPD_remote_port);
 #endif
 
 	return 0;

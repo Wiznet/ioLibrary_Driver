@@ -127,7 +127,6 @@ void NewNetwork(Network* n, int sn) {
  */
 int w5x00_read(Network* n, unsigned char* buffer, int len, long time)
 {
-
 	if((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket)>0))
 		return recv(n->my_socket, buffer, len);
 
