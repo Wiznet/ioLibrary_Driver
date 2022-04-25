@@ -41,6 +41,23 @@
 #include "w5200.h"
 
 #if   (_WIZCHIP_ == 5200)
+
+#if WIZCHIP_USE_MAX_BUFFER
+// This option is intended to be used when MACRAW mode is enabled, to allow
+// the single raw socket to use all the available buffer space.
+#undef getSn_TxMASK
+#define getSn_TxMASK(sn) (16 * 1024 - 1) /* tx buffer mask */
+
+#undef getSn_TxMAX
+#define getSn_TxMAX(sn) (16 * 1024) /* max tx buffer size */
+
+#undef getSn_RxMASK
+#define getSn_RxMASK(sn) (16 * 1024 - 1) /* rx buffer mask */
+
+#undef getSn_RxMAX
+#define getSn_RxMAX(sn) (16 * 1024) /* max rx buffer size */
+#endif
+
 /**
 @brief  This function writes the data into W5200 registers.
 */
