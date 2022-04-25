@@ -294,7 +294,7 @@ typedef struct __WIZCHIP
          uint8_t (*_read_byte)   (void);
          void    (*_write_byte)  (uint8_t wb);
          void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
-         void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
+         void    (*_write_burst) (const uint8_t* pBuf, uint16_t len);
       }SPI;
       // To be added
       //
@@ -518,7 +518,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
-void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(const uint8_t* pBuf, uint16_t len));
 
 /**
  * @ingroup extra_functions
