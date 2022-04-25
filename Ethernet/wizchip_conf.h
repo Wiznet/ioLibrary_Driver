@@ -625,6 +625,10 @@ void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
  */
 void wizchip_getnetinfo(wiz_NetInfo* pnetinfo);
 
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+uint8_t *wizchip_getsubn(void);
+#endif
+
 /**
  * @ingroup extra_functions
  * @brief Set the network mode such WOL, PPPoE, Ping Block, and etc. 

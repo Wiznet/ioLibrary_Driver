@@ -187,6 +187,10 @@ _WIZCHIP  WIZCHIP =
 };
 
 
+
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+static uint8_t    _SUBN_[4];     // subnet
+#endif
 static uint8_t    _DNS_[4];      // DNS server ip address
 static dhcp_mode  _DHCP_;        // DHCP mode
 
@@ -857,6 +861,12 @@ void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
    setGAR(pnetinfo->gw);
    setSUBR(pnetinfo->sn);
    setSIPR(pnetinfo->ip);
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+   _SUBN_[0] = pnetinfo->sn[0];
+   _SUBN_[1] = pnetinfo->sn[1];
+   _SUBN_[2] = pnetinfo->sn[2];
+   _SUBN_[3] = pnetinfo->sn[3];
+#endif
    _DNS_[0] = pnetinfo->dns[0];
    _DNS_[1] = pnetinfo->dns[1];
    _DNS_[2] = pnetinfo->dns[2];
@@ -870,12 +880,24 @@ void wizchip_getnetinfo(wiz_NetInfo* pnetinfo)
    getGAR(pnetinfo->gw);
    getSUBR(pnetinfo->sn);
    getSIPR(pnetinfo->ip);
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+   pnetinfo->sn[0] = _SUBN_[0];
+   pnetinfo->sn[1] = _SUBN_[1];
+   pnetinfo->sn[2] = _SUBN_[2];
+   pnetinfo->sn[3] = _SUBN_[3];
+#endif
    pnetinfo->dns[0]= _DNS_[0];
    pnetinfo->dns[1]= _DNS_[1];
    pnetinfo->dns[2]= _DNS_[2];
    pnetinfo->dns[3]= _DNS_[3];
    pnetinfo->dhcp  = _DHCP_;
 }
+
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+uint8_t *wizchip_getsubn(void) {
+    return _SUBN_;
+}
+#endif
 
 int8_t wizchip_setnetmode(netmode_type netmode)
 {
