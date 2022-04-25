@@ -53,6 +53,7 @@
 //
 
 #include "wizchip_conf.h"
+#include "socket.h"
 
 /////////////
 //M20150401 : Remove ; in the default callback function such as wizchip_cris_enter(), wizchip_cs_select() and etc.
@@ -500,6 +501,9 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		}
 	#endif
    }
+
+   WIZCHIP_EXPORT(socket_reset)();
+
    return 0;
 }
 

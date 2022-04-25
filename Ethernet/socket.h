@@ -143,7 +143,9 @@
 #define PACK_COMPLETED           0x00              ///< In Non-TCP packet, It indicates to complete to receive a packet. (When W5300, This flag can be applied)
 //A20150601 : For Integrating with W5300
 #define PACK_FIFOBYTE            0x02              ///< Valid only W5300, It indicate to have read already the Sn_RX_FIFOR.
-//
+
+// resets all global state associated with the socket interface
+void WIZCHIP_EXPORT(socket_reset)(void);
 
 /**
  * @ingroup WIZnet_socket_APIs
