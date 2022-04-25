@@ -75,6 +75,15 @@ extern "C" {
 #define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
 #endif
 
+#if WIZCHIP_PREFIXED_EXPORTS
+// If enabled, all exported function names wll be prepended with
+// "wizchip_" to avoid global namespace clashes on functions, eg.
+// "close()" becomes "wiznet_close()"
+#define WIZCHIP_EXPORT(name) wizchip_ ## name
+#else
+#define WIZCHIP_EXPORT(name) name
+#endif
+
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
 #define _WIZCHIP_IO_MODE_SPI_          0x0200 /**< SPI interface mode */
