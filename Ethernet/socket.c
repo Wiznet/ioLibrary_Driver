@@ -55,6 +55,7 @@
 //*****************************************************************************
 #include <string.h>
 #include "socket.h"
+#include "wizchip_conf.h"
 
 //M20150401 : Typing Error
 //#define SOCK_ANY_PORT_NUM  0xC000;
@@ -65,6 +66,7 @@ static uint16_t sock_io_mode = 0;
 static uint16_t sock_is_sending = 0;
 
 static uint16_t sock_remained_size[_WIZCHIP_SOCK_NUM_] = {0,0,};
+
 
 //M20150601 : For extern decleation
 //static uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
@@ -310,6 +312,8 @@ int8_t WIZCHIP_EXPORT(connect)(uint8_t sn, uint8_t * addr, uint16_t port)
             #endif
             return SOCKERR_SOCKCLOSED;
         }
+
+        WIZCHIP_YIELD();
 	}
     #if _WIZCHIP_ == 5200   // for w5200 ARP errata 
     setSUBR((uint8_t*)"\x00\x00\x00\x00");
@@ -386,6 +390,7 @@ int32_t WIZCHIP_EXPORT(send)(uint8_t sn, uint8_t * buf, uint16_t len)
       }
       if( (sock_io_mode & (1<<sn)) && (len > freesize) ) return SOCK_BUSY;
       if(len <= freesize) break;
+      WIZCHIP_YIELD();
    }
    wiz_send_data(sn, buf, len);
    #if _WIZCHIP_ == 5200
@@ -458,6 +463,7 @@ int32_t WIZCHIP_EXPORT(recv)(uint8_t sn, uint8_t * buf, uint16_t len)
          }
          if((sock_io_mode & (1<<sn)) && (recvsize == 0)) return SOCK_BUSY;
          if(recvsize != 0) break;
+         WIZCHIP_YIELD();
       };
 #if _WIZCHIP_ == 5300
    }
@@ -566,6 +572,7 @@ int32_t WIZCHIP_EXPORT(sendto)(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t 
       if(getSn_SR(sn) == SOCK_CLOSED) return SOCKERR_SOCKCLOSED;
       if( (sock_io_mode & (1<<sn)) && (len > freesize) ) return SOCK_BUSY;
       if(len <= freesize) break;
+      WIZCHIP_YIELD();
    };
 	wiz_send_data(sn, buf, len);
 
@@ -609,6 +616,7 @@ int32_t WIZCHIP_EXPORT(sendto)(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t 
          return SOCKERR_TIMEOUT;
       }
       ////////////
+      WIZCHIP_YIELD();
    }
    #if _WIZCHIP_ < 5500   //M20150401 : for WIZCHIP Errata #4, #5 (ARP errata)
       if(taddr) setSUBR((uint8_t*)&taddr);
@@ -661,6 +669,7 @@ int32_t WIZCHIP_EXPORT(recvfrom)(uint8_t sn, uint8_t * buf, uint16_t len, uint8_
          if(getSn_SR(sn) == SOCK_CLOSED) return SOCKERR_SOCKCLOSED;
          if( (sock_io_mode & (1<<sn)) && (pack_len == 0) ) return SOCK_BUSY;
          if(pack_len != 0) break;
+         WIZCHIP_YIELD();
       };
    }
 //D20150601 : Move it to bottom

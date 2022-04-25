@@ -84,6 +84,13 @@ extern "C" {
 #define WIZCHIP_EXPORT(name) name
 #endif
 
+#ifdef WIZCHIP_YIELD
+// This function macro can be overridden to run a function during any blocking while loops
+extern void WIZCHIP_YIELD(void);
+#else
+#define WIZCHIP_YIELD()
+#endif
+
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
 #define _WIZCHIP_IO_MODE_SPI_          0x0200 /**< SPI interface mode */
