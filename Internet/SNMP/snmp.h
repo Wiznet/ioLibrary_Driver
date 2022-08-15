@@ -4,19 +4,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	
+#include <stdint.h>
 
 // SNMP Debug Message (dump) Enable
-#define _SNMP_DEBUG_
+//#define _SNMP_DEBUG_
 
 #define PORT_SNMP_AGENT				161
 #define PORT_SNMP_TRAP				162
 
 #define SNMP_V1						0
 
-#define MAX_OID						12
-#define MAX_STRING					64
-#define MAX_SNMPMSG_LEN				512
-#define MAX_TRAPMSG_LEN				512
+#define MAX_OID						20
+#define MAX_STRING					48
+#define MAX_SNMPMSG_LEN				2048
+#define MAX_TRAPMSG_LEN				2048
 
 // SNMP Error code
 #define SNMP_SUCCESS				0
@@ -58,6 +60,7 @@ extern "C" {
 #define SNMPTRAP_LINKUP				0x03	// Generic trap-type 3: Link Up
 #define SNMPTRAP_AUTHENTICATION		0x04	// Generic trap-type 4: Authentication Failure
 #define SNMPTRAP_EGPNEIGHBORLOSS	0x05	// Generic trap-type 5: EGP Neighbor Loss
+#define SNMPTRAP_ENTERPRISESPECIFIC	0x06	// Generic trap-type 6: Enterprise Specific
 
 // Macros
 #define COPY_SEGMENT(x) \
@@ -106,9 +109,9 @@ typedef struct {
 /* SNMP : Functions                                                                         */
 /********************************************************************************************/
 // SNMP Main functions
-void snmpd_init(uint8_t * managerIP, uint8_t * agentIP, uint8_t sn_agent, uint8_t sn_trap);
+void snmpd_init(const uint8_t * managerIP, const uint8_t * agentIP, uint8_t sn_agent, uint8_t sn_trap);
 int32_t snmpd_run(void);
-int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community, dataEntryType enterprise_oid, uint32_t genericTrap, uint32_t specificTrap, uint32_t va_count, ...);
+int32_t snmp_sendTrap(const uint8_t * const managerIP, const uint8_t * const agentIP, int8_t* community, const dataEntryType enterprise_oid, uint32_t genericTrap, uint32_t specificTrap, uint32_t va_count, ...);
 
 // SNMP Time handler functions
 void SNMP_time_handler(void);

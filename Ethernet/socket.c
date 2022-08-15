@@ -254,7 +254,7 @@ int8_t listen(uint8_t sn)
 }
 
 
-int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
+int8_t connect(uint8_t sn, const uint8_t * addr, uint16_t port)
 {
    CHECK_SOCKNUM();
    CHECK_SOCKMODE(Sn_MR_TCP);
@@ -314,7 +314,7 @@ int8_t disconnect(uint8_t sn)
 	return SOCK_OK;
 }
 
-int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
+int32_t send(uint8_t sn, const uint8_t * buf, uint16_t len)
 {
    uint8_t tmp=0;
    uint16_t freesize=0;
@@ -487,7 +487,7 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
    return (int32_t)len;
 }
 
-int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port)
+int32_t sendto(uint8_t sn, const uint8_t * buf, uint16_t len, const uint8_t * addr, uint16_t port)
 {
    uint8_t tmp = 0;
    uint16_t freesize = 0;

@@ -1938,3 +1938,5 @@ man/man3/WIZCHIP_register_W5100.3
 man/man3/WIZCHIP_IO_Functions_W5100.3
 man/man3/WIZCHIP_IO_Functions.3
 man/man3/W5200.3
+Internet/SNMP/snmp.c.bak
+Internet/SNMP/snmp.h.bak

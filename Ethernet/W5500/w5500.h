@@ -1237,7 +1237,7 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @param pBuf Pointer buffer to write data
  * @param len Data length
  */
-void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
+void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, const uint8_t* pBuf, uint16_t len);
 
 /////////////////////////////////
 // Common Register I/O function //
@@ -2125,7 +2125,7 @@ uint16_t getSn_RX_RSR(uint8_t sn);
  * @param len Data length
  * @sa wiz_recv_data()
  */
-void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
+void wiz_send_data(uint8_t sn, const uint8_t *wizdata, uint16_t len);
 
 /**
  * @ingroup Basic_IO_function
