@@ -122,7 +122,7 @@ uint8_t wizchip_spi_readbyte(void)        {return 0;}
  * null function is called.
  */
 //void 	wizchip_spi_writebyte(uint8_t wb) {};
-void 	wizchip_spi_writebyte(uint8_t wb) {}
+void 	wizchip_spi_writebyte(const uint8_t wb) {}
 
 /**
  * @brief Default function to burst read in SPI interface.
@@ -138,7 +138,7 @@ void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}
  * null function is called.
  */
 //void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
-void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
+void 	wizchip_spi_writeburst(const uint8_t* pBuf, uint16_t len) {}
 
 /**
  * @\ref _WIZCHIP instance
@@ -248,7 +248,7 @@ void reg_wizchip_bus_cbfunc(iodata_t(*bus_rb)(uint32_t addr), void (*bus_wb)(uin
    }
 }
 
-void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
+void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(const uint8_t wb))
 {
    while(!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_));
    
@@ -265,7 +265,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
 }
 
 // 20140626 Eric Added for SPI burst operations
-void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len))
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(const uint8_t* pBuf, uint16_t len))
 {
    while(!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_));
 
@@ -851,7 +851,7 @@ int8_t wizphy_setphypmode(uint8_t pmode)
 #endif
 
 
-void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
+void wizchip_setnetinfo(const wiz_NetInfo* pnetinfo)
 {
    setSHAR(pnetinfo->mac);
    setGAR(pnetinfo->gw);

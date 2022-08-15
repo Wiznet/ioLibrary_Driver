@@ -153,7 +153,7 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    WIZCHIP_CRITICAL_EXIT();
 }
 
-void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
+void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, const uint8_t* pBuf, uint16_t len)
 {
    uint8_t spi_data[3];
    uint16_t i;
@@ -220,7 +220,7 @@ uint16_t getSn_RX_RSR(uint8_t sn)
    return val;
 }
 
-void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len)
+void wiz_send_data(uint8_t sn, const uint8_t *wizdata, uint16_t len)
 {
    uint16_t ptr = 0;
    uint32_t addrsel = 0;

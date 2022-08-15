@@ -276,9 +276,9 @@ typedef struct __WIZCHIP
       struct
       {
          uint8_t (*_read_byte)   (void);
-         void    (*_write_byte)  (uint8_t wb);
+         void    (*_write_byte)  (const uint8_t wb);
          void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
-         void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
+         void    (*_write_burst) (const uint8_t* pBuf, uint16_t len);
       }SPI;
       // To be added
       //
@@ -502,7 +502,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
-void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(const uint8_t* pBuf, uint16_t len));
 
 /**
  * @ingroup extra_functions
@@ -616,7 +616,7 @@ intr_kind wizchip_getinterruptmask(void);
  * @brief Set the network information for WIZCHIP
  * @param pnetinfo : @ref wizNetInfo
  */
-void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
+void wizchip_setnetinfo(const wiz_NetInfo* pnetinfo);
 
 /**
  * @ingroup extra_functions

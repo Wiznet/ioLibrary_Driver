@@ -97,7 +97,7 @@ uint32_t getSNMPTimeTick(void)
  * @param none
  * @return none
  */
-void snmpd_init(uint8_t * managerIP, uint8_t * agentIP, uint8_t sn_agent, uint8_t sn_trap)
+void snmpd_init(const uint8_t * managerIP, const uint8_t * agentIP, uint8_t sn_agent, uint8_t sn_trap)
 {
 #ifdef _SNMP_DEBUG_
     printf("\r\n - SNMP : Start SNMP Agent Daemon\r\n");
@@ -217,6 +217,62 @@ int32_t findEntry(uint8_t *oid, int32_t len)
 	}
 
 	return OID_NOT_FOUND;
+}
+
+
+int32_t oidCmp(uint8_t *oid1, int32_t len1, uint8_t *oid2, int32_t len2)
+{
+	int32_t i1 = 0, i2 = 0;
+	
+	while (i1 < len1 && i2 < len2)
+	{
+		if (oid1[i1] & 0x80 || oid2[i2] & 0x80)
+		{
+			uint32_t n1 = 0, n2 = 0;
+			
+			do
+			{
+				n1 <<= 7;
+				n1 |= oid1[i1] & 0x7F;
+			}
+			while (oid1[i1++] & 0x80);	// && i1 < len1)
+			
+			do
+			{
+				n2 <<= 7;
+				n2 |= oid2[i2] & 0x7F;
+			}
+			while (oid2[i2++] & 0x80);
+			
+			if (n1 != n2)
+				return n1 - n2;
+			
+		}
+		else	//both numbers are 1 byte
+		{
+			if (oid1[i1] != oid2[i2])
+				return (int32_t)oid1[i1] - (int32_t)oid2[i2];
+			
+			i1++;
+			i2++;
+		}
+	}
+	
+	
+	return len1 - len2;
+}
+
+
+int32_t findNextEntry(uint8_t *oid, int32_t len)
+{
+	int32_t index = 0;
+	while (index < maxData && oidCmp(oid, len, snmpData[index].oid, snmpData[index].oidlen) >= 0)
+		index++;
+	
+	if (index >= maxData)
+		return OID_NOT_FOUND;
+	
+	return index;
 }
 
 
@@ -461,7 +517,7 @@ void insertRespLen(int32_t reqStart, int32_t respStart, int32_t size)
 
 int32_t parseVarBind(int32_t reqType, int32_t index)
 {
-	int32_t seglen = 0, id;
+	int32_t seglen = 0, id = OID_NOT_FOUND;
 	tlvStructType name, value;
 	int32_t size = 0;
 	
@@ -471,21 +527,26 @@ int32_t parseVarBind(int32_t reqType, int32_t index)
 
 	if ( request_msg.buffer[name.start] != SNMPDTYPE_OBJ_ID ) return -1;
 
-	id = findEntry(&request_msg.buffer[name.vstart], name.len);
+	//id = findEntry(&request_msg.buffer[name.vstart], name.len);
 
 	if ((reqType == GET_REQUEST) || (reqType == SET_REQUEST))
 	{
+		id = findEntry(&request_msg.buffer[name.vstart], name.len);
+		
 		seglen = name.nstart - name.start;
 		COPY_SEGMENT(name);
 		size = seglen;
 	}
 	else if (reqType == GET_NEXT_REQUEST)
 	{
+		id = findNextEntry(&request_msg.buffer[name.vstart], name.len);
+		
 		response_msg.buffer[response_msg.index] = request_msg.buffer[name.start];
 
-		if (++id >= maxData)
+		//if (++id >= maxData)
+		if (id == OID_NOT_FOUND)
 		{
-			id = OID_NOT_FOUND;
+			//id = OID_NOT_FOUND;
 			seglen = name.nstart - name.start;
 			COPY_SEGMENT(name);
 			size = seglen;
@@ -582,7 +643,13 @@ int32_t parseSequenceOf(int32_t reqType)
 
 	while (request_msg.index < request_msg.len)
 	{
-		size += parseSequence( reqType, index++ );
+		//if it doesn't check and return here, it could get stuck in the loop!
+		int32_t seqSize = parseSequence( reqType, index++ );
+		if (seqSize < 0)
+			return -1;
+		
+		//size += parseSequence( reqType, index++ );
+		size += seqSize;
 	}
 
 	insertRespLen(seqof.start, respLoc, size);
@@ -792,7 +859,7 @@ int32_t makeTrapVariableBindings(dataEntryType *oid_data, void *ptr, uint32_t *l
 }
 
 
-int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community, dataEntryType enterprise_oid, uint32_t genericTrap, uint32_t specificTrap, uint32_t va_count, ...)
+int32_t snmp_sendTrap(const uint8_t * const managerIP, const uint8_t * const agentIP, int8_t* community, const dataEntryType enterprise_oid, uint32_t genericTrap, uint32_t specificTrap, uint32_t va_count, ...)
 {
 	uint32_t i;
 	int32_t packet_index = 0;
@@ -847,8 +914,36 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
 	packet_trap[packet_index++] = (uint8_t)specificTrap;
 
 	packet_trap[packet_index++] = 0x43; // Timestamp
-	packet_trap[packet_index++] = 0x01;
-	packet_trap[packet_index++] = 0x00;
+	//packet_trap[packet_index++] = 0x01;
+	//packet_trap[packet_index++] = 0x00;
+	
+	
+	
+	
+	
+	
+	packet_trap[packet_index++] = 0x04;
+	
+	union
+	{
+		uint32_t _int;
+		uint8_t _arr[sizeof(uint32_t)];
+	}
+	time;
+	
+	time._int = getSNMPTimeTick() - startTime;	//taken from currentUpTime()
+	
+	packet_trap[packet_index++] = time._arr[3];
+	packet_trap[packet_index++] = time._arr[2];
+	packet_trap[packet_index++] = time._arr[1];
+	packet_trap[packet_index++] = time._arr[0];
+	
+	
+	
+	
+	
+	
+	
 
 	packet_trap[packet_index++] = 0x30; // Sequence of variable-bindings
 	packet_trap[packet_index] = 0xff;
