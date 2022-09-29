@@ -331,18 +331,8 @@ int32_t getEntry(int32_t id, uint8_t *dataType, void *ptr, int32_t *len)
 			{
 				snmpData[id].getfunction( (void *)&snmpData[id].u.octetstring, &snmpData[id].dataLen );
 			}
-
-			//doesn't work when the last byte(s) of the data is 0 (e.g. data types that aren't a textual string but are represented by SNMPDTYPE_OCTET_STRING)!
-			//if ( (*dataType)==SNMPDTYPE_OCTET_STRING )
-			//{
-			//	snmpData[id].dataLen = (uint8_t)strlen((char const*)&snmpData[id].u.octetstring);
-			//}
-
+			
 			*len = snmpData[id].dataLen;
-			//for (j = 0 ; j < *len ; j++)
-			//{
-			//	string[j] = snmpData[id].u.octetstring[j];
-			//}
 			memcpy(string, snmpData[id].u.octetstring, *len);
 		}
 		break;
