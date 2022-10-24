@@ -36,6 +36,8 @@ extern "C" {
 
 #define CTRL_SOCK	2
 #define DATA_SOCK	3
+#define CTRL_SOCK1	4
+
 
 #define	IPPORT_FTPD	20	/* FTP Data port */
 #define	IPPORT_FTP	21	/* FTP Control port */
@@ -101,6 +103,11 @@ enum datasock_mode{
 	ACTIVE_MODE
 };
 
+enum ftp_use_status{
+	STATUS_USED,
+	STATUS_NOT_USED
+};
+
 struct ftpd {
 	uint8_t control;			/* Control stream */
 	uint8_t data;			/* Data stream */
@@ -113,7 +120,11 @@ struct ftpd {
 	enum datasock_state dsock_state;
 	enum datasock_mode dsock_mode;
 
+	enum ftp_use_status ID_Enable;
+	enum ftp_use_status PW_Enable;
+
 	char username[LINELEN];		/* Arg to USER command */
+	char userpassword[LINELEN];
 	char workingdir[LINELEN];
 	char filename[LINELEN];
 
@@ -133,8 +144,10 @@ typedef union _un_l2cval {
 
 void ftpd_init(uint8_t * src_ip);
 uint8_t ftpd_run(uint8_t * dbuf);
-char proc_ftpd(char * buf);
-char ftplogin(char * pass);
+char proc_ftpd(uint8_t sn, char * buf);
+
+char ftplogin(uint8_t sn,char * pass);
+
 int pport(char * arg);
 
 int sendit(char * command);
