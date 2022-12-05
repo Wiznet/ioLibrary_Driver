@@ -82,8 +82,8 @@
  * Following figure shows network flow diagram by WIZnet SOCKET API.
  * @image html WIZnet_SOCKET.jpg "<WIZnet SOCKET API>"
  */
-#ifndef _SOCKET_H_
-#define _SOCKET_H_
+#ifndef _WIZCHIP_SOCKET_H_
+#define _WIZCHIP_SOCKET_H_
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -143,7 +143,9 @@
 #define PACK_COMPLETED           0x00              ///< In Non-TCP packet, It indicates to complete to receive a packet. (When W5300, This flag can be applied)
 //A20150601 : For Integrating with W5300
 #define PACK_FIFOBYTE            0x02              ///< Valid only W5300, It indicate to have read already the Sn_RX_FIFOR.
-//
+
+// resets all global state associated with the socket interface
+void WIZCHIP_EXPORT(socket_reset)(void);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -162,7 +164,7 @@
  *                        @ref SOCKERR_SOCKMODE    - Not support socket mode as TCP, UDP, and so on. \n
  *                        @ref SOCKERR_SOCKFLAG    - Invaild socket flag.
  */
-int8_t  socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
+int8_t  WIZCHIP_EXPORT(socket)(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -174,7 +176,7 @@ int8_t  socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
  * @return @b Success : @ref SOCK_OK \n
  *         @b Fail    : @ref SOCKERR_SOCKNUM - Invalid socket number
  */
-int8_t  close(uint8_t sn);
+int8_t  WIZCHIP_EXPORT(close)(uint8_t sn);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -187,7 +189,7 @@ int8_t  close(uint8_t sn);
  *         @b Fail    :\n @ref SOCKERR_SOCKINIT   - Socket is not initialized \n
  *                        @ref SOCKERR_SOCKCLOSED - Socket closed unexpectedly.
  */
-int8_t  listen(uint8_t sn);
+int8_t  WIZCHIP_EXPORT(listen)(uint8_t sn);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -210,7 +212,7 @@ int8_t  listen(uint8_t sn);
  *                @ref SOCKERR_TIMEOUT   - Timeout occurred during request connection\n
  *                @ref SOCK_BUSY         - In non-block io mode, it returned immediately\n
  */
-int8_t  connect(uint8_t sn, uint8_t * addr, uint16_t port);
+int8_t  WIZCHIP_EXPORT(connect)(uint8_t sn, uint8_t * addr, uint16_t port);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -227,7 +229,7 @@ int8_t  connect(uint8_t sn, uint8_t * addr, uint16_t port);
  *                        @ref SOCKERR_TIMEOUT  - Timeout occurred \n
  *                        @ref SOCK_BUSY        - Socket is busy.
  */
-int8_t  disconnect(uint8_t sn);
+int8_t  WIZCHIP_EXPORT(disconnect)(uint8_t sn);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -247,7 +249,7 @@ int8_t  disconnect(uint8_t sn);
  *                          @ref SOCKERR_DATALEN    - zero data length \n
  *                          @ref SOCK_BUSY          - Socket is busy.
  */
-int32_t send(uint8_t sn, uint8_t * buf, uint16_t len);
+int32_t WIZCHIP_EXPORT(send)(uint8_t sn, uint8_t * buf, uint16_t len);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -269,7 +271,7 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len);
  *                     @ref SOCKERR_DATALEN    - zero data length \n
  *                     @ref SOCK_BUSY          - Socket is busy.
  */
-int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
+int32_t WIZCHIP_EXPORT(recv)(uint8_t sn, uint8_t * buf, uint16_t len);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -297,7 +299,7 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
  *                        @ref SOCKERR_TIMEOUT     - Timeout occurred \n
  *                        @ref SOCK_BUSY           - Socket is busy. 
  */
-int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port);
+int32_t WIZCHIP_EXPORT(sendto)(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -327,7 +329,7 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
  *                       @ref SOCKERR_SOCKNUM    - Invalid socket number \n
  *                       @ref SOCKBUSY           - Socket is busy.
  */
-int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port);
+int32_t WIZCHIP_EXPORT(recvfrom)(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port);
 
 
 /////////////////////////////
@@ -418,7 +420,7 @@ typedef enum
  *  @return @b Success @ref SOCK_OK \n
  *          @b fail    @ref SOCKERR_ARG         - Invalid argument\n
  */
-int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg);
+int8_t  WIZCHIP_EXPORT(ctlsocket)(uint8_t sn, ctlsock_type cstype, void* arg);
 
 /** 
  * @ingroup WIZnet_socket_APIs
@@ -446,7 +448,7 @@ int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg);
  *  - @ref SOCKERR_SOCKOPT     - Invalid socket option or its value \n
  *  - @ref SOCKERR_TIMEOUT     - Timeout occurred when sending keep-alive packet \n
  */
-int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
+int8_t  WIZCHIP_EXPORT(setsockopt)(uint8_t sn, sockopt_type sotype, void* arg);
 
 /** 
  * @ingroup WIZnet_socket_APIs
@@ -480,10 +482,10 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
  *   When SO_PACKINFO value is PACK_FIRST and the return value of recvfrom() is zero, 
  *   This means the zero byte UDP data(UDP Header only) received.
   */
-int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
+int8_t  WIZCHIP_EXPORT(getsockopt)(uint8_t sn, sockopt_type sotype, void* arg);
 
 #ifdef __cplusplus
  }
 #endif
 
-#endif   // _SOCKET_H_
+#endif   // _WIZCHIP_SOCKET_H_

@@ -53,6 +53,7 @@
 //
 
 #include "wizchip_conf.h"
+#include "socket.h"
 
 /////////////
 //M20150401 : Remove ; in the default callback function such as wizchip_cris_enter(), wizchip_cs_select() and etc.
@@ -138,7 +139,7 @@ void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}
  * null function is called.
  */
 //void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
-void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
+void 	wizchip_spi_writeburst(const uint8_t* pBuf, uint16_t len) {}
 
 /**
  * @\ref _WIZCHIP instance
@@ -187,6 +188,10 @@ _WIZCHIP  WIZCHIP =
 };
 
 
+
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+static uint8_t    _SUBN_[4];     // subnet
+#endif
 static uint8_t    _DNS_[4];      // DNS server ip address
 static dhcp_mode  _DHCP_;        // DHCP mode
 
@@ -265,7 +270,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
 }
 
 // 20140626 Eric Added for SPI burst operations
-void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len))
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(const uint8_t* pBuf, uint16_t len))
 {
    while(!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_));
 
@@ -496,6 +501,9 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		}
 	#endif
    }
+
+   WIZCHIP_EXPORT(socket_reset)();
+
    return 0;
 }
 
@@ -857,6 +865,12 @@ void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
    setGAR(pnetinfo->gw);
    setSUBR(pnetinfo->sn);
    setSIPR(pnetinfo->ip);
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+   _SUBN_[0] = pnetinfo->sn[0];
+   _SUBN_[1] = pnetinfo->sn[1];
+   _SUBN_[2] = pnetinfo->sn[2];
+   _SUBN_[3] = pnetinfo->sn[3];
+#endif
    _DNS_[0] = pnetinfo->dns[0];
    _DNS_[1] = pnetinfo->dns[1];
    _DNS_[2] = pnetinfo->dns[2];
@@ -870,12 +884,24 @@ void wizchip_getnetinfo(wiz_NetInfo* pnetinfo)
    getGAR(pnetinfo->gw);
    getSUBR(pnetinfo->sn);
    getSIPR(pnetinfo->ip);
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+   pnetinfo->sn[0] = _SUBN_[0];
+   pnetinfo->sn[1] = _SUBN_[1];
+   pnetinfo->sn[2] = _SUBN_[2];
+   pnetinfo->sn[3] = _SUBN_[3];
+#endif
    pnetinfo->dns[0]= _DNS_[0];
    pnetinfo->dns[1]= _DNS_[1];
    pnetinfo->dns[2]= _DNS_[2];
    pnetinfo->dns[3]= _DNS_[3];
    pnetinfo->dhcp  = _DHCP_;
 }
+
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+uint8_t *wizchip_getsubn(void) {
+    return _SUBN_;
+}
+#endif
 
 int8_t wizchip_setnetmode(netmode_type netmode)
 {

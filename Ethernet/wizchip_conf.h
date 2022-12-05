@@ -75,6 +75,22 @@ extern "C" {
 #define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
 #endif
 
+#if WIZCHIP_PREFIXED_EXPORTS
+// If enabled, all exported function names wll be prepended with
+// "wizchip_" to avoid global namespace clashes on functions, eg.
+// "close()" becomes "wiznet_close()"
+#define WIZCHIP_EXPORT(name) wizchip_ ## name
+#else
+#define WIZCHIP_EXPORT(name) name
+#endif
+
+#ifdef WIZCHIP_YIELD
+// This function macro can be overridden to run a function during any blocking while loops
+extern void WIZCHIP_YIELD(void);
+#else
+#define WIZCHIP_YIELD()
+#endif
+
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
 #define _WIZCHIP_IO_MODE_SPI_          0x0200 /**< SPI interface mode */
@@ -278,7 +294,7 @@ typedef struct __WIZCHIP
          uint8_t (*_read_byte)   (void);
          void    (*_write_byte)  (uint8_t wb);
          void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
-         void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
+         void    (*_write_burst) (const uint8_t* pBuf, uint16_t len);
       }SPI;
       // To be added
       //
@@ -502,7 +518,7 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
-void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
+void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(const uint8_t* pBuf, uint16_t len));
 
 /**
  * @ingroup extra_functions
@@ -624,6 +640,10 @@ void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
  * @param pnetinfo : @ref wizNetInfo
  */
 void wizchip_getnetinfo(wiz_NetInfo* pnetinfo);
+
+#if _WIZCHIP_ == 5200   // for w5200 ARP errata
+uint8_t *wizchip_getsubn(void);
+#endif
 
 /**
  * @ingroup extra_functions
