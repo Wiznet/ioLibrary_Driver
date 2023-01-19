@@ -206,14 +206,10 @@ int32_t snmpd_run(void)
 
 int32_t findEntry(uint8_t *oid, int32_t len)
 {
-	int32_t i;
-
-	for (i = 0 ; i < maxData ; i++)
+	for (int32_t i = 0 ; i < maxData ; i++)
 	{
-		if (len == snmpData[i].oidlen)
-		{
-			if (!memcmp(snmpData[i].oid, oid, len)) return(i);
-		}
+		if (len == snmpData[i].oidlen && !memcmp(snmpData[i].oid, oid, len))
+			return i;
 	}
 
 	return OID_NOT_FOUND;
@@ -393,31 +389,26 @@ int32_t setEntry(int32_t id, void *val, int32_t vlen, uint8_t dataType, int32_t 
 	{
 	case SNMPDTYPE_OCTET_STRING :
 	case SNMPDTYPE_OBJ_ID :
-		{
-			uint8_t *string = val;
-			for (j = 0 ; j < vlen ; j++)
-			{
-				snmpData[id].u.octetstring[j] = string[j];
-			}
-			snmpData[id].dataLen = vlen;
-		}
-		retStatus = SNMP_SUCCESS;
-		break;
+	{
+		uint8_t *string = val;
+		for (j = 0 ; j < vlen ; j++)
+			snmpData[id].u.octetstring[j] = string[j];
+		
+		goto success;
+	}
 
 	case SNMPDTYPE_INTEGER :
 	case SNMPDTYPE_TIME_TICKS :
 	case SNMPDTYPE_COUNTER :
 	case SNMPDTYPE_GAUGE :
-		{
-			snmpData[id].u.intval = getValue( (uint8_t *)val, vlen);
-			snmpData[id].dataLen = vlen;
-
-			if (snmpData[id].setfunction != NULL)
-			{
-				snmpData[id].setfunction(snmpData[id].u.intval);
-			}
-
-		}
+		snmpData[id].u.intval = getValue( (uint8_t *)val, vlen);
+		
+	success:
+		snmpData[id].dataLen = vlen;
+		
+		if (snmpData[id].setfunction != NULL)
+			snmpData[id].setfunction(id);
+		
 		retStatus = SNMP_SUCCESS;
 		break;
 
