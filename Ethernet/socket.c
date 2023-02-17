@@ -318,6 +318,7 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
 {
    uint8_t tmp=0;
    uint16_t freesize=0;
+   uint32_t i;
    
    CHECK_SOCKNUM();
    CHECK_SOCKMODE(Sn_MR_TCP);
@@ -377,8 +378,24 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
    while(getSn_CR(sn));
    sock_is_sending |= (1 << sn);
    //M20150409 : Explicit Type Casting
-   //return len;
-   return (int32_t)len;
+
+   // Added by DongEun 
+   for(i=0;i<1024;i++)
+   {
+      tmp = getSn_IR(sn);
+      if(tmp & Sn_IR_SENDOK)
+      {
+         sock_is_sending &= ~(1<<sn);         
+         return (int32_t)len;
+      }
+      else if(tmp & Sn_IR_TIMEOUT)
+      {
+         close(sn);
+         return SOCKERR_SOCKSTATUS;
+      }
+   }
+
+   return SOCK_BUSY;
 }
 
 
