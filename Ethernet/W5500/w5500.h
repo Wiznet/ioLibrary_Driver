@@ -267,7 +267,7 @@ extern "C" {
  * - \ref IR_PPPoE	  : PPPoE connection close
  * - \ref IR_MP		  : Magic packet
  */
-#define IR                 (_W5500_IO_BASE_ + (0x0015 << 8) + (WIZCHIP_CREG_BLOCK << 3))
+#define WIZCHIP_REG_IR     (_W5500_IO_BASE_ + (0x0015 << 8) + (WIZCHIP_CREG_BLOCK << 3))
 
 /**
  * @ingroup Common_register_group
@@ -1367,7 +1367,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa getIR()
  */
 #define setIR(ir) \
-		WIZCHIP_WRITE(IR, (ir & 0xF0))
+		WIZCHIP_WRITE(WIZCHIP_REG_IR, (ir & 0xF0))
 
 /**
  * @ingroup Common_register_access_function
@@ -1376,7 +1376,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  * @sa setIR()
  */
 #define getIR() \
-		(WIZCHIP_READ(IR) & 0xF0)
+		(WIZCHIP_READ(WIZCHIP_REG_IR) & 0xF0)
 /**
  * @ingroup Common_register_access_function
  * @brief Set @ref _IMR_ register
