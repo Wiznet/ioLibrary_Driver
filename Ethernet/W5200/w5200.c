@@ -132,19 +132,19 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 #elif ( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_) )
    //M20150601 : Rename the function for integrating with W5300
    /*
-   WIZCHIP_WRITE(MR,WIZCHIP_READ(MR) | MR_AI);     
+   WIZCHIP_WRITE(WIZCHIP_REG_MR,WIZCHIP_READ(WIZCHIP_REG_MR) | MR_AI);     
    WIZCHIP.IF.BUS._write_byte(IDM_AR0,(AddrSel & 0x0000FF00) >>  8);
    WIZCHIP.IF.BUS._write_byte(IDM_AR1,(AddrSel & 0x000000FF));
    for(i = 0 ; i < len; i++)
       WIZCHIP.IF.BUS._write_byte(IDM_DR,pBuf[i]);
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI);   
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) & ~MR_AI);   
    */
    setMR(getMR() | MR_AI);     
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0x0000FF00) >>  8);
    WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x000000FF));
    for(i = 0 ; i < len; i++)
       WIZCHIP.IF.BUS._write_data(IDM_DR,pBuf[i]);
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI);   
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) & ~MR_AI);   
 #else
    #error "Unknown _WIZCHIP_IO_MODE_ in W5200. !!!!"
 #endif
@@ -173,12 +173,12 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 #elif ( (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_) )
    //M20150601 : Rename the function for integrating with W5300
    /*
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) | MR_AI);    
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) | MR_AI);    
    WIZCHIP.IF.BUS._write_byte(IDM_AR0,(AddrSel & 0x0000FF00) >>  8);
    WIZCHIP.IF.BUS._write_byte(IDM_AR1,(AddrSel & 0x000000FF));	
    for(i = 0 ; i < len; i++)
       pBuf[i]	= WIZCHIP.IF.BUS._read_byte(IDM_DR);
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI); 
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) & ~MR_AI); 
    */
    setMR(getMR() | MR_AI);    
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0x0000FF00) >>  8);

@@ -159,12 +159,12 @@ extern "C" {
  * It set the configuration such as interrupt, network information, ICMP, etc.
  * @details
  * @sa MR : Mode register.
- * @sa GAR, SUBR, SHAR, SIPR : Network Configuration
- * @sa IR, _IMR_ : Interrupt.
+ * @sa WIZCHIP_REG_GAR, WIZCHIP_REG_SUBR, WIZCHIP_REG_SHAR, WIZCHIP_REG_SIPR : Network Configuration
+ * @sa IR, WIZCHIP_REG__IMR_ : Interrupt.
  * @sa MTYPER, TMS01R,TMS23R, TMS45R, TMS67R,RMS01R,RMS23R, RMS45R, RMS67R : Socket TX/RX memory
- * @sa _RTR_, _RCR_ : Data retransmission.
- * @sa PTIMER, PMAGIC, PSID, PDHAR : PPPoE.
- * @sa UIPR, UPORTR, FMTUR : ICMP message.
+ * @sa WIZCHIP_REG__RTR_, WIZCHIP_REG__RCR_ : Data retransmission.
+ * @sa WIZCHIP_REG_PTIMER, WIZCHIP_REG_PMAGIC, WIZCHIP_REG_PSID, PDHAR : PPPoE.
+ * @sa WIZCHIP_REG_UIPR, WIZCHIP_REG_UPORTR, FMTUR : ICMP message.
  * @sa Pn_BRDYR, Pn_BDPTHR, IDR : etc.
  */
   
@@ -246,28 +246,28 @@ extern "C" {
  * - \ref IR_FMTU : Fragmented MTU 
  * - \ref IR_SnINT(n) : Interrupted from SOCKETn
  *
- * @note : In W5300, IR is operated same as IR and SIR in other WIZCHIP(5100,5200,W5500)
+ * @note : In W5300, IR is operated same as IR and WIZCHIP_REG_SIR in other WIZCHIP(5100,5200,W5500)
  */
 #define IR              (_W5300_IO_BASE_ + 0x02)
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Socket Interrupt Mask Register(R/W)
- * @details Each bit of \ref _IMR_ corresponds to each bit of \ref IR.
- * When a bit of _IMR_ is and the corresponding bit of \ref IR is  Interrupt will be issued.
- * In other words, if a bit of _IMR_, an interrupt will be not issued even if the corresponding bit of \ref IR is set
- * @note : In W5300, _IMR_ is operated same as _IMR_ and SIMR in other WIZCHIP(5100,5200,W5500)
+ * @details Each bit of \ref WIZCHIP_REG__IMR_ corresponds to each bit of \ref IR.
+ * When a bit of WIZCHIP_REG__IMR_ is and the corresponding bit of \ref IR is  Interrupt will be issued.
+ * In other words, if a bit of WIZCHIP_REG__IMR_, an interrupt will be not issued even if the corresponding bit of \ref IR is set
+ * @note : In W5300, WIZCHIP_REG__IMR_ is operated same as WIZCHIP_REG__IMR_ and WIZCHIP_REG_SIMR in other WIZCHIP(5100,5200,W5500)
  */
 #define _IMR_             (_W5300_IO_BASE_ + 0x04)
 
 
 //#define ICFGR           (_W5300_IO_BASE_ + 0x06)
-//#define INTLEVEL        ICFGR
+//#define WIZCHIP_REG_INTLEVEL        ICFGR
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Source MAC Register address(R/W)
- * @details @ref SHAR configures the source hardware address.
+ * @details @ref WIZCHIP_REG_SHAR configures the source hardware address.
  */
 #define SHAR            (_W5300_IO_BASE_ + 0x08)
 
@@ -275,39 +275,39 @@ extern "C" {
 /**
  * @ingroup Common_register_group_W5300
  * @brief Gateway IP Register address(R/W)
- * @details @ref GAR configures the default gateway address.
+ * @details @ref WIZCHIP_REG_GAR configures the default gateway address.
  */
  #define GAR             (_W5300_IO_BASE_ + 0x10)
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Subnet mask Register address(R/W)
- * @details @ref SUBR configures the subnet mask address.
+ * @details @ref WIZCHIP_REG_SUBR configures the subnet mask address.
  */
 #define SUBR            (_W5300_IO_BASE_ + 0x14)
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Source IP Register address(R/W)
- * @details @ref SIPR configures the source IP address.
+ * @details @ref WIZCHIP_REG_SIPR configures the source IP address.
  */
 #define SIPR            (_W5300_IO_BASE_ + 0x18)
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Timeout register address( 1 is 100us )(R/W)
- * @details @ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref _RTR_ is x07D0.
- * And so the default timeout period is 200ms(100us X 2000). During the time configured by @ref _RTR_, W5300 waits for the peer response
+ * @details @ref WIZCHIP_REG__RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of @ref WIZCHIP_REG__RTR_ is x07D0.
+ * And so the default timeout period is 200ms(100us X 2000). During the time configured by @ref WIZCHIP_REG__RTR_, W5300 waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
- * If the peer does not respond within the @ref _RTR_ time, W5300 retransmits the packet or issues timeout.
+ * If the peer does not respond within the @ref WIZCHIP_REG__RTR_ time, W5300 retransmits the packet or issues timeout.
  */
  #define _RTR_          (_W5300_IO_BASE_ + 0x1C)
 
 /**
  * @ingroup Common_register_group_W5300
  * @brief Retry count register(R/W)
- * @details @ref _RCR_ configures the number of time of retransmission.
- * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (@ref Sn_IR_TIMEOUT = '1').
+ * @details @ref WIZCHIP_REG__RCR_ configures the number of time of retransmission.
+ * When retransmission occurs as many as ref WIZCHIP_REG__RCR_+1 Timeout interrupt is issued (@ref Sn_IR_TIMEOUT = '1').
  */
 #define _RCR_           (_W5300_IO_BASE_ + 0x1E)
 
@@ -545,14 +545,14 @@ extern "C" {
  *  @details When trying to transmit UDP data to destination port number which is not open, 
  *   W5300 can receive ICMP (Destination port unreachable) packet. \n
  *   In this case, \ref IR_DPUR bit of \ref IR becomes '1'. 
- *   And destination IP address and unreachable port number of ICMP packet can be acquired through UIPR and \ref UPORTR.
+ *   And destination IP address and unreachable port number of ICMP packet can be acquired through WIZCHIP_REG_UIPR and \ref WIZCHIP_REG_UPORTR.
  */
 #define UIPR            (_W5300_IO_BASE_ + 0x48)
 
 /**
  *  @ingroup Common_register_group_W5300 
  *  @brief Unreachable port number register
- *  @details Refer to \ref UIPR.
+ *  @details Refer to \ref WIZCHIP_REG_UIPR.
  */
 #define UPORTR          (_W5300_IO_BASE_ + 0x4C)
 
@@ -560,7 +560,7 @@ extern "C" {
  *  @ingroup Common_register_group_W5300 
  *  @brief Fragment MTU register
  *  @details When communicating with the peer having a different MTU, W5300 can receive an ICMP(Fragment MTU) packet. 
- *  At this case, IR(FMTU) becomes ‘1’ and destination IP address and fragment MTU value of ICMP packet can be acquired through UIPR and FMTUR. 
+ *  At this case, IR(FMTU) becomes ‘1’ and destination IP address and fragment MTU value of ICMP packet can be acquired through WIZCHIP_REG_UIPR and FMTUR. 
  *  In order to keep communicating with the peer having Fragment MTU, set the FMTUR first in Sn_MSSR of the SOCKETn, and try the next communication. 
  */
 #define FMTUR           (_W5300_IO_BASE_ + 0x4E)
@@ -965,7 +965,7 @@ extern "C" {
  * @details It is valid in TCP(@ref Sn_MR_TCP).
  * In case that it is set as '1', ACK packet is transmitted right after receiving DATA packet from the peer. 
  * It is recommended to be set as '1' for TCP performance improvement.
- * In case that it is set as '0', ACK packet is transmitted after the time set in @ref _RTR_ regardless of DATA packet receipt.\n
+ * In case that it is set as '0', ACK packet is transmitted after the time set in @ref WIZCHIP_REG__RTR_ regardless of DATA packet receipt.\n
  * 0 : No use, 1 : Use 
  */
 #define Sn_MR_ND           (1 << 5)             
@@ -1387,21 +1387,21 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Set \ref _IMR_ register
- * @param (uint16_t)imr Value to set @ref _IMR_ register.
+ * @brief Set \ref WIZCHIP_REG__IMR_ register
+ * @param (uint16_t)imr Value to set @ref WIZCHIP_REG__IMR_ register.
  * @sa getIMR()
  */
 #define  setIMR(imr) \
-   WIZCHIP_WRITE(_IMR_, imr & 0xF0FF)
+   WIZCHIP_WRITE(WIZCHIP_REG__IMR_, imr & 0xF0FF)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get \ref _IMR_ register
+ * @brief Get \ref WIZCHIP_REG__IMR_ register
  * @return uint16_t. Value of \ref IR register.
  * @sa setIMR()
  */
 #define  getIMR() \
-   (WIZCHIP_READ(_IMR_) & 0xF0FF)
+   (WIZCHIP_READ(WIZCHIP_REG__IMR_) & 0xF0FF)
 
 /**
  * @ingroup Common_register_access_function_W5300
@@ -1410,9 +1410,9 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa getSHAR()
  */
 #define  setSHAR(shar) { \
-      WIZCHIP_WRITE(SHAR,                       (((uint16_t)((shar)[0])) << 8) + (((uint16_t)((shar)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(SHAR,2), (((uint16_t)((shar)[2])) << 8) + (((uint16_t)((shar)[3])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(SHAR,4), (((uint16_t)((shar)[4])) << 8) + (((uint16_t)((shar)[5])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_REG_SHAR,                       (((uint16_t)((shar)[0])) << 8) + (((uint16_t)((shar)[1])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,2), (((uint16_t)((shar)[2])) << 8) + (((uint16_t)((shar)[3])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,4), (((uint16_t)((shar)[4])) << 8) + (((uint16_t)((shar)[5])) & 0x00FF)); \
    }
 
 /**
@@ -1422,12 +1422,12 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa setSHAR()
  */
 #define  getSHAR(shar) { \
-		(shar)[0] = (uint8_t)(WIZCHIP_READ(SHAR) >> 8); \
-		(shar)[1] = (uint8_t)(WIZCHIP_READ(SHAR));      \
-		(shar)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SHAR,2)) >> 8); \
-		(shar)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SHAR,2))); \
-		(shar)[4] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SHAR,4)) >> 8); \
-		(shar)[5] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SHAR,4))); \
+		(shar)[0] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SHAR) >> 8); \
+		(shar)[1] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SHAR));      \
+		(shar)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,2)) >> 8); \
+		(shar)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,2))); \
+		(shar)[4] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,4)) >> 8); \
+		(shar)[5] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SHAR,4))); \
    }		
 
 /**
@@ -1437,8 +1437,8 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa getGAR()
  */
 #define  setGAR(gar) { \
-      WIZCHIP_WRITE(GAR,                       (((uint16_t)((gar)[0])) << 8) + (((uint16_t)((gar)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(GAR,2), (((uint16_t)((gar)[2])) << 8) + (((uint16_t)((gar)[3])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_REG_GAR,                       (((uint16_t)((gar)[0])) << 8) + (((uint16_t)((gar)[1])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG_GAR,2), (((uint16_t)((gar)[2])) << 8) + (((uint16_t)((gar)[3])) & 0x00FF)); \
    }
 
 /**
@@ -1448,10 +1448,10 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa setGAR()
  */
 #define  getGAR(gar) { \
-		(gar)[0] = (uint8_t)(WIZCHIP_READ(GAR) >> 8); \
-		(gar)[1] = (uint8_t)(WIZCHIP_READ(GAR));      \
-		(gar)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(GAR,2)) >> 8); \
-		(gar)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(GAR,2))); \
+		(gar)[0] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_GAR) >> 8); \
+		(gar)[1] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_GAR));      \
+		(gar)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_GAR,2)) >> 8); \
+		(gar)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_GAR,2))); \
    }		
 
 /**
@@ -1461,8 +1461,8 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa getSUBR()
  */
 #define  setSUBR(subr) { \
-      WIZCHIP_WRITE(SUBR,                       (((uint16_t)((subr)[0])) << 8) + (((uint16_t)((subr)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(SUBR,2), (((uint16_t)((subr)[2])) << 8) + (((uint16_t)((subr)[3])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_REG_SUBR,                       (((uint16_t)((subr)[0])) << 8) + (((uint16_t)((subr)[1])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SUBR,2), (((uint16_t)((subr)[2])) << 8) + (((uint16_t)((subr)[3])) & 0x00FF)); \
    }
 
 /**
@@ -1472,10 +1472,10 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa setSUBR()
  */
 #define  getSUBR(subr) { \
-		(subr)[0] = (uint8_t)(WIZCHIP_READ(SUBR) >> 8); \
-		(subr)[1] = (uint8_t)(WIZCHIP_READ(SUBR));      \
-		(subr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SUBR,2)) >> 8); \
-		(subr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SUBR,2))); \
+		(subr)[0] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SUBR) >> 8); \
+		(subr)[1] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SUBR));      \
+		(subr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SUBR,2)) >> 8); \
+		(subr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SUBR,2))); \
    }
 
 /**
@@ -1485,8 +1485,8 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa getSIPR()
  */
 #define  setSIPR(sipr) { \
-      WIZCHIP_WRITE(SIPR,                       (((uint16_t)((sipr)[0])) << 8) + (((uint16_t)((sipr)[1])) & 0x00FF)); \
-      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(SIPR,2), (((uint16_t)((sipr)[2])) << 8) + (((uint16_t)((sipr)[3])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_REG_SIPR,                       (((uint16_t)((sipr)[0])) << 8) + (((uint16_t)((sipr)[1])) & 0x00FF)); \
+      WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SIPR,2), (((uint16_t)((sipr)[2])) << 8) + (((uint16_t)((sipr)[3])) & 0x00FF)); \
    }
 
 /**
@@ -1496,48 +1496,48 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint16_t wb );
  * @sa setSIPR()
  */
 #define  getSIPR(sipr) { \
-		(sipr)[0] = (uint8_t)(WIZCHIP_READ(SIPR) >> 8); \
-		(sipr)[1] = (uint8_t)(WIZCHIP_READ(SIPR));      \
-	   (sipr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SIPR,2)) >> 8); \
-		(sipr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(SIPR,2))); \
+		(sipr)[0] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SIPR) >> 8); \
+		(sipr)[1] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_SIPR));      \
+	   (sipr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SIPR,2)) >> 8); \
+		(sipr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_SIPR,2))); \
    }
 
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Set @ref _RTR_ register
- * @param (uint16_t)rtr Value to set @ref _RTR_ register.
+ * @brief Set @ref WIZCHIP_REG__RTR_ register
+ * @param (uint16_t)rtr Value to set @ref WIZCHIP_REG__RTR_ register.
  * @sa getRTR()
  */
 #define  setRTR(rtr)   \
-		WIZCHIP_WRITE(_RTR_, rtr)
+		WIZCHIP_WRITE(WIZCHIP_REG__RTR_, rtr)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref _RTR_ register
- * @return uint16_t. Value of @ref _RTR_ register.
+ * @brief Get @ref WIZCHIP_REG__RTR_ register
+ * @return uint16_t. Value of @ref WIZCHIP_REG__RTR_ register.
  * @sa setRTR()
  */
 #define  getRTR() \
-		WIZCHIP_READ(_RTR_)
+		WIZCHIP_READ(WIZCHIP_REG__RTR_)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Set @ref _RCR_ register
- * @param (uint8_t)rcr Value to set @ref _RCR_ register.
+ * @brief Set @ref WIZCHIP_REG__RCR_ register
+ * @param (uint8_t)rcr Value to set @ref WIZCHIP_REG__RCR_ register.
  * @sa getRCR()
  */
 #define  setRCR(rcr) \
-		WIZCHIP_WRITE(_RCR_, ((uint16_t)rcr)&0x00FF)
+		WIZCHIP_WRITE(WIZCHIP_REG__RCR_, ((uint16_t)rcr)&0x00FF)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref _RCR_ register
- * @return uint8_t. Value of @ref _RCR_ register.
+ * @brief Get @ref WIZCHIP_REG__RCR_ register
+ * @return uint8_t. Value of @ref WIZCHIP_REG__RCR_ register.
  * @sa setRCR()
  */
 #define  getRCR() \
-		((uint8_t)(WIZCHIP_READ(_RCR_) & 0x00FF))
+		((uint8_t)(WIZCHIP_READ(WIZCHIP_REG__RCR_) & 0x00FF))
 
 /**
  * @ingroup Common_register_access_function_W5300
@@ -1751,44 +1751,44 @@ uint8_t getRMSR(uint8_t sn);
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Set @ref PTIMER register
- * @param (uint8_t)ptimer Value to set @ref PTIMER register.
+ * @brief Set @ref WIZCHIP_REG_PTIMER register
+ * @param (uint8_t)ptimer Value to set @ref WIZCHIP_REG_PTIMER register.
  * @sa getPTIMER()
  */
 #define setPTIMER(ptimer) \
-		WIZCHIP_WRITE(PTIMER, ((uint16_t)ptimer) & 0x00FF)
+		WIZCHIP_WRITE(WIZCHIP_REG_PTIMER, ((uint16_t)ptimer) & 0x00FF)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref PTIMER register
- * @return uint8_t. Value of @ref PTIMER register.
+ * @brief Get @ref WIZCHIP_REG_PTIMER register
+ * @return uint8_t. Value of @ref WIZCHIP_REG_PTIMER register.
  * @sa setPTIMER()
  */
 #define getPTIMER() \
-		((uint8_t)(WIZCHIP_READ(PTIMER) & 0x00FF))
+		((uint8_t)(WIZCHIP_READ(WIZCHIP_REG_PTIMER) & 0x00FF))
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Set @ref PMAGIC register
- * @param (uint8_t)pmagic Value to set @ref PMAGIC register.
+ * @brief Set @ref WIZCHIP_REG_PMAGIC register
+ * @param (uint8_t)pmagic Value to set @ref WIZCHIP_REG_PMAGIC register.
  * @sa getPMAGIC()
  */
 #define setPMAGIC(pmagic) \
-		WIZCHIP_WRITE(PMAGIC, ((uint16_t)pmagic) & 0x00FF)
+		WIZCHIP_WRITE(WIZCHIP_REG_PMAGIC, ((uint16_t)pmagic) & 0x00FF)
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref PMAGIC register
- * @return uint8_t. Value of @ref PMAGIC register.
+ * @brief Get @ref WIZCHIP_REG_PMAGIC register
+ * @return uint8_t. Value of @ref WIZCHIP_REG_PMAGIC register.
  * @sa setPMAGIC()
  */
 #define getPMAGIC() \
-		((uint8_t)(WIZCHIP_READ(PMAGIC) & 0x00FF))
+		((uint8_t)(WIZCHIP_READ(WIZCHIP_REG_PMAGIC) & 0x00FF))
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref PSID register
- * @return uint16_t. Value of @ref PSID register.
+ * @brief Get @ref WIZCHIP_REG_PSID register
+ * @return uint16_t. Value of @ref WIZCHIP_REG_PSID register.
  */
 #define getPSIDR() \
 		WIZCHIP_READ(PSIDR)
@@ -1809,23 +1809,23 @@ uint8_t getRMSR(uint8_t sn);
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get unreachable IP address. @ref UIPR
+ * @brief Get unreachable IP address. @ref WIZCHIP_REG_UIPR
  * @param (uint8_t*)uipr Pointer variable to get unreachable IP address. It should be allocated 4 bytes.
  */
 #define getUIPR(uipr) { \
-		(uipr)[0] = (uint8_t)(WIZCHIP_READ(UIPR) >> 8); \
-		(uipr)[1] = (uint8_t)(WIZCHIP_READ(UIPR));      \
-		(uipr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(UIPR,2)) >> 8); \
-		(uipr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(UIPR,2))); \
+		(uipr)[0] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_UIPR) >> 8); \
+		(uipr)[1] = (uint8_t)(WIZCHIP_READ(WIZCHIP_REG_UIPR));      \
+		(uipr)[2] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_UIPR,2)) >> 8); \
+		(uipr)[3] = (uint8_t)(WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG_UIPR,2))); \
    }
 
 /**
  * @ingroup Common_register_access_function_W5300
- * @brief Get @ref UPORTR register
- * @return uint16_t. Value of @ref UPORTR register.
+ * @brief Get @ref WIZCHIP_REG_UPORTR register
+ * @return uint16_t. Value of @ref WIZCHIP_REG_UPORTR register.
  */
 #define getUPORTR() \
-	WIZCHIP_READ(UPORTR)
+	WIZCHIP_READ(WIZCHIP_REG_UPORTR)
 
 /**
  * @ingroup Common_register_access_function_W5300
