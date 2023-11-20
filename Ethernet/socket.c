@@ -240,13 +240,15 @@ int8_t close(uint8_t sn)
 
 int8_t listen(uint8_t sn)
 {
+   uint8_t getSR = 0;
 	CHECK_SOCKNUM();
    CHECK_SOCKMODE(Sn_MR_TCP);
 	CHECK_SOCKINIT();
 	setSn_CR(sn,Sn_CR_LISTEN);
 	while(getSn_CR(sn));
-   while(getSn_SR(sn) != SOCK_LISTEN)
-   {
+   getSR = getSn_SR(sn);
+   while(getSR != SOCK_LISTEN && getSR != SOCK_ESTABLISHED)
+   { 
          close(sn);
          return SOCKERR_SOCKCLOSED;
    }
