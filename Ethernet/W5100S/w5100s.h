@@ -2416,12 +2416,12 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5100S
- * @brief Get \ref RQCR register
- * @return uint8_t. Value of @ref RQCR register.
- * @sa setRQCR()
+ * @brief Get \ref SLCR register
+ * @return uint8_t. Value of @ref SLCR register.
+ * @sa setSLCR()
  */
 #define getSLCR()	\
-		WIZCHIP_READ(RQCR)
+		WIZCHIP_READ(SLCR)
 
 /**
  * @ingroup Common_register_access_function_W5100S
