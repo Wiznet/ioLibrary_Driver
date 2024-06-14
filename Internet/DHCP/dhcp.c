@@ -933,7 +933,7 @@ void DHCP_init(uint8_t s, uint8_t * buf)
    getSHAR(DHCP_CHADDR);
    if((DHCP_CHADDR[0] | DHCP_CHADDR[1]  | DHCP_CHADDR[2] | DHCP_CHADDR[3] | DHCP_CHADDR[4] | DHCP_CHADDR[5]) == 0x00)
    {
-      // assigning temporary mac address, you should be set SHAR before call this function. 
+      // assigning temporary mac address, you should be set WIZCHIP_REG_SHAR before call this function. 
       DHCP_CHADDR[0] = 0x00;
       DHCP_CHADDR[1] = 0x08;
       DHCP_CHADDR[2] = 0xdc;      

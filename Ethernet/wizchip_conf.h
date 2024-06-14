@@ -605,7 +605,7 @@ intr_kind wizchip_getinterruptmask(void);
    void   wizphy_getphystat(wiz_PhyConf* phyconf);
  /**
  * @ingroup extra_functions
- * @brief set the power mode of phy inside WIZCHIP. Refer to @ref PHYCFGR in W5500, @ref PHYSTATUS in W5200
+ * @brief set the power mode of phy inside WIZCHIP. Refer to @ref WIZCHIP_REG_PHYCFGR in W5500, @ref PHYSTATUS in W5200
  * @param pmode Settig value of power down mode.
  */   
    int8_t wizphy_setphypmode(uint8_t pmode);    
@@ -641,17 +641,17 @@ netmode_type wizchip_getnetmode(void);
 
 /**
  * @ingroup extra_functions
- * @brief Set retry time value(@ref _RTR_) and retry count(@ref _RCR_).
- * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
- * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+ * @brief Set retry time value(@ref WIZCHIP_REG__RTR_) and retry count(@ref WIZCHIP_REG__RCR_).
+ * @details @ref WIZCHIP_REG__RTR_ configures the retransmission timeout period and @ref WIZCHIP_REG__RCR_ configures the number of time of retransmission.  
+ * @param nettime @ref WIZCHIP_REG__RTR_ value and @ref WIZCHIP_REG__RCR_ value. Refer to @ref wiz_NetTimeout. 
  */
 void wizchip_settimeout(wiz_NetTimeout* nettime);
 
 /**
  * @ingroup extra_functions
- * @brief Get retry time value(@ref _RTR_) and retry count(@ref _RCR_).
- * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
- * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+ * @brief Get retry time value(@ref WIZCHIP_REG__RTR_) and retry count(@ref WIZCHIP_REG__RCR_).
+ * @details @ref WIZCHIP_REG__RTR_ configures the retransmission timeout period and @ref WIZCHIP_REG__RCR_ configures the number of time of retransmission.  
+ * @param nettime @ref WIZCHIP_REG__RTR_ value and @ref WIZCHIP_REG__RCR_ value. Refer to @ref wiz_NetTimeout. 
  */
 void wizchip_gettimeout(wiz_NetTimeout* nettime);
 #ifdef __cplusplus
