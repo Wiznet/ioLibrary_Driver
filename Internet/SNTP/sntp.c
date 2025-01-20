@@ -132,7 +132,7 @@ void get_seconds_from_ntp_server(uint8_t *buf, uint16_t idx)
 	case 20:
 		seconds -=  1*3600;
 		break;
-	case 21:                            //ï¼?
+	case 21:                            //ï¿½?
 	case 22:
 		break;
 	case 23:
@@ -316,6 +316,7 @@ int8_t SNTP_run(datetime *time)
 void calcdatetime(tstamp seconds)
 {
 	uint8_t yf=0;
+	uint8_t leap;
 	tstamp n=0,d=0,total_d=0,rz=0;
 	uint16_t y=0,r=0,yr=0;
 	signed long long yd=0;
@@ -325,21 +326,34 @@ void calcdatetime(tstamp seconds)
 	d=0;
 	uint32_t p_year_total_sec=SECS_PERDAY*365;
 	uint32_t r_year_total_sec=SECS_PERDAY*366;
-	while(n>=p_year_total_sec)
+	while(1)
 	{
-		if((EPOCH+r)%400==0 || ((EPOCH+r)%100!=0 && (EPOCH+r)%4==0))
+		leap = 0;
+		if( ((EPOCH + r) % 400 == 0) ||
+			(((EPOCH + r) % 100 != 0) && ((EPOCH + r) % 4 == 0)) )
 		{
-			n = n -(r_year_total_sec);
-			d = d + 366;
+			leap = 1;
+		}
+
+		if (leap)
+		{
+			if (n < r_year_total_sec) {
+				break;
+			}
+			n -= r_year_total_sec;
+			d += 366;
 		}
 		else
 		{
-			n = n - (p_year_total_sec);
-			d = d + 365;
+			if (n < p_year_total_sec) {
+				break;
+			}
+			n -= p_year_total_sec;
+			d += 365;
 		}
-		r+=1;
-		y+=1;
 
+		r++;
+		y++;
 	}
 
 	y += EPOCH;
@@ -426,7 +440,7 @@ tstamp changedatetime_to_seconds(void)
 		}
 		if (i==3)
 		{
-			if (l%400==0 && l%100!=0 && l%4==0)
+			if (l%400==0 || l%100!=0 && l%4==0)
 			{
 				total_day += 29;
 			}
