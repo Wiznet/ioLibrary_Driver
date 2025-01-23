@@ -417,7 +417,7 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
                if(recvsize != 0) break;
                else if(getSn_TX_FSR(sn) == getSn_TxMAX(sn))
                {
-                  close(sn);
+                  disconnect(sn);
                   return SOCKERR_SOCKSTATUS;
                }
             }
