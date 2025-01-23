@@ -146,12 +146,12 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
    //M20150601 : Rename the function for integrating with ioLibrary  
    /*
-   WIZCHIP_WRITE(MR,WIZCHIP_READ(MR) | MR_AI);     
+   WIZCHIP_WRITE(WIZCHIP_REG_MR,WIZCHIP_READ(WIZCHIP_REG_MR) | MR_AI);     
    WIZCHIP.IF.BUS._write_byte(IDM_AR0,(AddrSel & 0xFF00) >>  8);
    WIZCHIP.IF.BUS._write_byte(IDM_AR1,(AddrSel & 0x00FF));
    for(i = 0 ; i < len; i++)
       WIZCHIP.IF.BUS._write_byte(IDM_DR,pBuf[i]);
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI);   
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) & ~MR_AI);   
    */
    setMR(getMR()|MR_AI);     
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0xFF00) >>  8);
@@ -199,12 +199,12 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
 #elif ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_) )
    //M20150601 : Rename the function for integrating with ioLibrary  
    /*
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) | MR_AI);    
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) | MR_AI);    
    WIZCHIP.IF.BUS._write_byte(IDM_AR0,(AddrSel & 0xFF00) >>  8);
    WIZCHIP.IF.BUS._write_byte(IDM_AR1,(AddrSel & 0x00FF));	
    for(i = 0 ; i < len; i++)
       pBuf[i]	= WIZCHIP.IF.BUS._read_byte(IDM_DR);
-   WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI); 
+   WIZCHIP_WRITE(WIZCHIP_REG_MR, WIZCHIP_READ(WIZCHIP_REG_MR) & ~MR_AI); 
    */
    setMR(getMR() | MR_AI);
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0xFF00) >>  8);
