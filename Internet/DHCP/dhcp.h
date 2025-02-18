@@ -50,6 +50,9 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 /*
  * @brief 
  * @details If you want to display debug & processing message, Define _DHCP_DEBUG_ 
@@ -70,7 +73,11 @@ extern "C" {
 
 #define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
 
-#define DCHP_HOST_NAME           "WIZnet\0"
+#define DEFAULT_DCHP_HOST_NAME       "WIZnet\0"
+#define MAX_SIZE_OF_DCHP_HOST_NAME	 50
+
+#define MAX_DNS_SERVER_ADDRESS 5
+#define MAX_NTP_SERVER_ADDRESS 5
 
 /* 
  * @brief return value of @ref DHCP_run()
@@ -90,7 +97,7 @@ enum
  * @param s   - socket number
  * @param buf - buffer for processing DHCP message
  */
-void DHCP_init(uint8_t s, uint8_t * buf);
+void DHCP_init(uint8_t s, uint8_t * buf, const char * HostName);
 
 /*
  * @brief DHCP 1s Tick Timer handler
@@ -143,10 +150,22 @@ void getGWfromDHCP(uint8_t* ip);
  */
 void getSNfromDHCP(uint8_t* ip);
 /*
+ * @brief Get NTP address
+ * @param ip  - NTP address to be returned
+ * @retval Number Of NTP Servers
+ */
+uint8_t getNTPfromDHCP(uint8_t* ip);
+/*
+ * @brief Get Time Offset address
+ * @param to  - Time Offset to be returned
+ */
+void getTOfromDHCP(int32_t *to);
+/*
  * @brief Get DNS address
  * @param ip  - DNS address to be returned
+ * @retval Number Of DNS Servers
  */
-void getDNSfromDHCP(uint8_t* ip);
+uint8_t getDNSfromDHCP(uint8_t* ip);
 
 /*
  * @brief Get the leased time by DHCP sever
