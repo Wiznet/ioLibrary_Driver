@@ -147,11 +147,11 @@ extern "C" {
  * It set the basic for the networking\n
  * It set the configuration such as interrupt, network information, ICMP, etc.
  * @details
- * @sa MR : Mode register.
- * @sa GAR, SUBR, SHAR, SIPR
- * @sa IR, Sn_IR, _IMR_  : Interrupt.
- * @sa _RTR_, _RCR_ : Data retransmission.
- * @sa PTIMER, PMAGIC : PPPoE.
+ * @sa WIZCHIP_REG_MR : Mode register.
+ * @sa WIZCHIP_REG_GAR, WIZCHIP_REG_SUBR, WIZCHIP_REG_SHAR, WIZCHIP_REG_SIPR
+ * @sa IR, Sn_IR, WIZCHIP_REG__IMR_  : Interrupt.
+ * @sa WIZCHIP_REG__RTR_, WIZCHIP_REG__RCR_ : Data retransmission.
+ * @sa WIZCHIP_REG_PTIMER, WIZCHIP_REG_PMAGIC : PPPoE.
  */
 
 
@@ -191,8 +191,8 @@ extern "C" {
 /**
  * @ingroup Common_register_group_W5100
  * @brief Mode Register address(R/W)\n
- * \ref MR is used for S/W reset, ping block mode, PPPoE mode and etc.
- * @details Each bit of \ref MR defined as follows.
+ * \ref WIZCHIP_REG_MR is used for S/W reset, ping block mode, PPPoE mode and etc.
+ * @details Each bit of \ref WIZCHIP_REG_MR defined as follows.
  * <table>
  * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
  * 		<tr>  <td>RST</td> <td>Reserved</td> <td>WOL</td> <td>PB</td> <td>PPPoE</td> <td>Reserved</td> <td>AI</td> <td>IND</td> </tr>
@@ -212,28 +212,28 @@ extern "C" {
 /**
  * @ingroup Common_register_group_W5100
  * @brief Gateway IP Register address(R/W)
- * @details \ref GAR configures the default gateway address.
+ * @details \ref WIZCHIP_REG_GAR configures the default gateway address.
  */
 #define GAR     			(_W5100_IO_BASE_ + (0x0001))  // GW Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Subnet mask Register address(R/W)
- * @details \ref SUBR configures the subnet mask address.
+ * @details \ref WIZCHIP_REG_SUBR configures the subnet mask address.
  */
 #define SUBR    			(_W5100_IO_BASE_ + (0x0005)) // SN Mask Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Source MAC Register address(R/W)
- * @details \ref SHAR configures the source hardware address.
+ * @details \ref WIZCHIP_REG_SHAR configures the source hardware address.
  */
 #define SHAR    			(_W5100_IO_BASE_ + (0x0009)) // Source Hardware Address
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Source IP Register address(R/W)
- * @details \ref SIPR configures the source IP address.
+ * @details \ref WIZCHIP_REG_SIPR configures the source IP address.
  */
 #define SIPR    			(_W5100_IO_BASE_ + (0x000F)) // Source IP Address
 
@@ -263,26 +263,26 @@ extern "C" {
 /**
  * @ingroup Common_register_group_W5100
  * @brief Socket Interrupt Mask Register(R/W)
- * @details Each bit of \ref _IMR_ corresponds to each bit of \ref IR.
- * When a bit of \ref _IMR_ is and the corresponding bit of \ref IR is set, Interrupt will be issued.
+ * @details Each bit of \ref WIZCHIP_REG__IMR_ corresponds to each bit of \ref IR.
+ * When a bit of \ref WIZCHIP_REG__IMR_ is and the corresponding bit of \ref IR is set, Interrupt will be issued.
  */
 #define _IMR_    			(_W5100_IO_BASE_ + (0x0016)) // Socket Interrupt Mask
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Timeout register address( 1 is 100us )(R/W)
- * @details \ref _RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of \ref _RTR_ is x07D0or 000
- * And so the default timeout period is 200ms(100us X 2000). During the time configured by \ref _RTR_, W5100 waits for the peer response
+ * @details \ref WIZCHIP_REG__RTR_ configures the retransmission timeout period. The unit of timeout period is 100us and the default of \ref WIZCHIP_REG__RTR_ is x07D0or 000
+ * And so the default timeout period is 200ms(100us X 2000). During the time configured by \ref WIZCHIP_REG__RTR_, W5100 waits for the peer response
  * to the packet that is transmitted by \ref Sn_CR (CONNECT, DISCON, CLOSE, SEND, SEND_MAC, SEND_KEEP command).
- * If the peer does not respond within the \ref _RTR_ time, W5100 retransmits the packet or issues timeout.
+ * If the peer does not respond within the \ref WIZCHIP_REG__RTR_ time, W5100 retransmits the packet or issues timeout.
  */
 #define _RTR_     			(_W5100_IO_BASE_ + (0x0017)) // Retry Time
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief Retry count register(R/W)
- * @details \ref _RCR_ configures the number of time of retransmission.
- * When retransmission occurs as many as ref _RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
+ * @details \ref WIZCHIP_REG__RCR_ configures the number of time of retransmission.
+ * When retransmission occurs as many as ref WIZCHIP_REG__RCR_+1 Timeout interrupt is issued (\ref Sn_IR_TIMEOUT = '1').
  */
 #define _RCR_      		(_W5100_IO_BASE_ + (0x0019)) // Retry Count
 #define RMSR				(_W5100_IO_BASE_ + (0x001A)) // Receicve Memory Size
@@ -301,14 +301,14 @@ extern "C" {
 /**
  * @ingroup Common_register_group_W5100
  * @brief PPP LCP Request Timer register  in PPPoE mode(R)
- * @details \ref PTIMER configures the time for sending LCP echo request. The unit of time is 25ms.
+ * @details \ref WIZCHIP_REG_PTIMER configures the time for sending LCP echo request. The unit of time is 25ms.
  */
 #define PTIMER  			(_W5100_IO_BASE_ + (0x0028)) // PPP LCP RequestTimer
 
 /**
  * @ingroup Common_register_group_W5100
  * @brief PPP LCP Magic number register  in PPPoE mode(R)
- * @details \ref PMAGIC configures the 4bytes magic number to be used in LCP negotiation.
+ * @details \ref WIZCHIP_REG_PMAGIC configures the 4bytes magic number to be used in LCP negotiation.
  */
 #define PMAGIC   			(_W5100_IO_BASE_ + (0x0029)) // PPP LCP Magic number
 
@@ -388,7 +388,7 @@ extern "C" {
  * @ingroup Socket_register_group_W5100
  * @brief Socket interrupt register(R)
  * @details \ref Sn_IR indicates the status of Socket Interrupt such as establishment, termination, receiving data, timeout).\n
- * When an interrupt occurs and the corresponding bit \ref IR_SOCK(N) in \ref _IMR_ are set, \ref IR_SOCK(N) in \ref IR becomes '1'.\n
+ * When an interrupt occurs and the corresponding bit \ref IR_SOCK(N) in \ref WIZCHIP_REG__IMR_ are set, \ref IR_SOCK(N) in \ref IR becomes '1'.\n
  * In order to clear the \ref Sn_IR bit, the host should write the bit to \n
  * <table>
  * 		<tr>  <td>7</td> <td>6</td> <td>5</td> <td>4</td> <td>3</td> <td>2</td> <td>1</td> <td>0</td>   </tr>
@@ -625,7 +625,7 @@ extern "C" {
 /**
  * @brief Get the destination unreachable message in UDP sending.
  * @details When receiving the ICMP (Destination port unreachable) packet, this bit is set as 
- * When this bit is  Destination Information such as IP address and Port number may be checked with the corresponding @ref UIPR & @ref UPORTR.
+ * When this bit is  Destination Information such as IP address and Port number may be checked with the corresponding @ref WIZCHIP_REG_UIPR & @ref WIZCHIP_REG_UPORTR.
  */
 #define IR_UNREACH			0x40 ///< check destination unreachable
 
@@ -679,7 +679,7 @@ extern "C" {
  * 1 : Enable No Delayed ACK option\n
  * This bit is applied only during TCP mode (P[3:0] = 001).\n
  * When this bit is  It sends the ACK packet without delay as soon as a Data packet is received from a peer.\n
- * When this bit is  It sends the ACK packet after waiting for the timeout time configured by \ref _RTR_.
+ * When this bit is  It sends the ACK packet after waiting for the timeout time configured by \ref WIZCHIP_REG__RTR_.
  */
 #define Sn_MR_ND			0x20 ///< No Delayed Ack(TCP) flag 
 
@@ -1115,7 +1115,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get @ref MR.
+ * @brief Get @ref WIZCHIP_REG_MR.
  * @return uint8_t. The value of Mode register.
  * @sa setMR()
  */
@@ -1127,78 +1127,78 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
    
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set @ref GAR.
+ * @brief Set @ref WIZCHIP_REG_GAR.
  * @param (uint8_t*)gar Pointer variable to set gateway IP address. It should be allocated 4 bytes.
  * @sa getGAR()
  */
 #define setGAR(gar) \
-		WIZCHIP_WRITE_BUF(GAR,gar,4)
+		WIZCHIP_WRITE_BUF(WIZCHIP_REG_GAR,gar,4)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get @ref GAR.
+ * @brief Get @ref WIZCHIP_REG_GAR.
  * @param (uint8_t*)gar Pointer variable to get gateway IP address. It should be allocated 4 bytes.
  * @sa setGAR()
  */
 #define getGAR(gar) \
-		WIZCHIP_READ_BUF(GAR,gar,4)
+		WIZCHIP_READ_BUF(WIZCHIP_REG_GAR,gar,4)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set @ref SUBR.
+ * @brief Set @ref WIZCHIP_REG_SUBR.
  * @param (uint8_t*)subr Pointer variable to set subnet mask address. It should be allocated 4 bytes.
- * @note If subr is null pointer, set the backup subnet to SUBR. \n
- *       If subr is 0.0.0.0, back up SUBR and clear it. \n
- *       Otherwize, set subr to SUBR
+ * @note If subr is null pointer, set the backup subnet to WIZCHIP_REG_SUBR. \n
+ *       If subr is 0.0.0.0, back up WIZCHIP_REG_SUBR and clear it. \n
+ *       Otherwize, set subr to WIZCHIP_REG_SUBR
  * @sa getSUBR()
  */
 #define setSUBR(subr) \
-      WIZCHIP_WRITE_BUF(SUBR,subr,4)
+      WIZCHIP_WRITE_BUF(WIZCHIP_REG_SUBR,subr,4)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get @ref SUBR.
+ * @brief Get @ref WIZCHIP_REG_SUBR.
  * @param (uint8_t*)subr Pointer variable to get subnet mask address. It should be allocated 4 bytes.
  * @sa setSUBR()
  */
 #define getSUBR(subr) \
-		WIZCHIP_READ_BUF(SUBR, subr, 4)
+		WIZCHIP_READ_BUF(WIZCHIP_REG_SUBR, subr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set @ref SHAR.
+ * @brief Set @ref WIZCHIP_REG_SHAR.
  * @param (uint8_t*)shar Pointer variable to set local MAC address. It should be allocated 6 bytes.
  * @sa getSHAR()
  */
 #define setSHAR(shar) \
-		WIZCHIP_WRITE_BUF(SHAR, shar, 6)
+		WIZCHIP_WRITE_BUF(WIZCHIP_REG_SHAR, shar, 6)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get @ref SHAR.
+ * @brief Get @ref WIZCHIP_REG_SHAR.
  * @param (uint8_t*)shar Pointer variable to get local MAC address. It should be allocated 6 bytes.
  * @sa setSHAR()
  */
 #define getSHAR(shar) \
-		WIZCHIP_READ_BUF(SHAR, shar, 6)
+		WIZCHIP_READ_BUF(WIZCHIP_REG_SHAR, shar, 6)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set @ref SIPR.
+ * @brief Set @ref WIZCHIP_REG_SIPR.
  * @param (uint8_t*)sipr Pointer variable to set local IP address. It should be allocated 4 bytes.
  * @sa getSIPR()
 */
 #define setSIPR(sipr) \
-		WIZCHIP_WRITE_BUF(SIPR, sipr, 4)
+		WIZCHIP_WRITE_BUF(WIZCHIP_REG_SIPR, sipr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get @ref SIPR.
+ * @brief Get @ref WIZCHIP_REG_SIPR.
  * @param (uint8_t*)sipr Pointer variable to get local IP address. It should be allocated 4 bytes.
  * @sa setSIPR()
  */
 #define getSIPR(sipr) \
-		WIZCHIP_READ_BUF(SIPR, sipr, 4)
+		WIZCHIP_READ_BUF(WIZCHIP_REG_SIPR, sipr, 4)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1219,59 +1219,59 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set \ref _IMR_ register
- * @param (uint8_t)imr Value to set @ref _IMR_ register.
+ * @brief Set \ref WIZCHIP_REG__IMR_ register
+ * @param (uint8_t)imr Value to set @ref WIZCHIP_REG__IMR_ register.
  * @sa getIMR()
  */
 #define setIMR(imr) \
-		WIZCHIP_WRITE(_IMR_, imr)
+		WIZCHIP_WRITE(WIZCHIP_REG__IMR_, imr)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get \ref _IMR_ register
- * @return uint8_t. Value of @ref _IMR_ register.
+ * @brief Get \ref WIZCHIP_REG__IMR_ register
+ * @return uint8_t. Value of @ref WIZCHIP_REG__IMR_ register.
  * @sa setIMR()
  */
 #define getIMR() \
-		WIZCHIP_READ(_IMR_)
+		WIZCHIP_READ(WIZCHIP_REG__IMR_)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set \ref _RTR_ register
- * @param (uint16_t)rtr Value to set @ref _RTR_ register.
+ * @brief Set \ref WIZCHIP_REG__RTR_ register
+ * @param (uint16_t)rtr Value to set @ref WIZCHIP_REG__RTR_ register.
  * @sa getRTR()
  */
 #define setRTR(rtr)   {\
-		WIZCHIP_WRITE(_RTR_,   (uint8_t)(rtr >> 8)); \
-		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(_RTR_,1), (uint8_t) rtr); \
+		WIZCHIP_WRITE(WIZCHIP_REG__RTR_,   (uint8_t)(rtr >> 8)); \
+		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(WIZCHIP_REG__RTR_,1), (uint8_t) rtr); \
 	}
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get \ref _RTR_ register
- * @return uint16_t. Value of @ref _RTR_ register.
+ * @brief Get \ref WIZCHIP_REG__RTR_ register
+ * @return uint16_t. Value of @ref WIZCHIP_REG__RTR_ register.
  * @sa setRTR()
  */
 #define getRTR() \
-		(((uint16_t)WIZCHIP_READ(_RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_RTR_,1)))
+		(((uint16_t)WIZCHIP_READ(WIZCHIP_REG__RTR_) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(WIZCHIP_REG__RTR_,1)))
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set \ref _RCR_ register
- * @param (uint8_t)rcr Value to set @ref _RCR_ register.
+ * @brief Set \ref WIZCHIP_REG__RCR_ register
+ * @param (uint8_t)rcr Value to set @ref WIZCHIP_REG__RCR_ register.
  * @sa getRCR()
  */
 #define setRCR(rcr) \
-		WIZCHIP_WRITE(_RCR_, rcr)
+		WIZCHIP_WRITE(WIZCHIP_REG__RCR_, rcr)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get \ref _RCR_ register
- * @return uint8_t. Value of @ref _RCR_ register.
+ * @brief Get \ref WIZCHIP_REG__RCR_ register
+ * @return uint8_t. Value of @ref WIZCHIP_REG__RCR_ register.
  * @sa setRCR()
  */
 #define getRCR() \
-		WIZCHIP_READ(_RCR_)
+		WIZCHIP_READ(WIZCHIP_REG__RCR_)
 
 /**
  * @ingroup Common_register_access_function_W5100
@@ -1325,39 +1325,39 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set \ref PTIMER register
- * @param (uint8_t)ptimer Value to set \ref PTIMER register.
+ * @brief Set \ref WIZCHIP_REG_PTIMER register
+ * @param (uint8_t)ptimer Value to set \ref WIZCHIP_REG_PTIMER register.
  * @sa getPTIMER()
  */
 #define setPTIMER(ptimer) \
-		WIZCHIP_WRITE(PTIMER, ptimer)
+		WIZCHIP_WRITE(WIZCHIP_REG_PTIMER, ptimer)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get \ref PTIMER register
- * @return uint8_t. Value of @ref PTIMER register.
+ * @brief Get \ref WIZCHIP_REG_PTIMER register
+ * @return uint8_t. Value of @ref WIZCHIP_REG_PTIMER register.
  * @sa setPTIMER()
  */
 #define getPTIMER() \
-		WIZCHIP_READ(PTIMER)
+		WIZCHIP_READ(WIZCHIP_REG_PTIMER)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Set \ref PMAGIC register
- * @param (uint8_t)pmagic Value to set @ref PMAGIC register.
+ * @brief Set \ref WIZCHIP_REG_PMAGIC register
+ * @param (uint8_t)pmagic Value to set @ref WIZCHIP_REG_PMAGIC register.
  * @sa getPMAGIC()
  */
 #define setPMAGIC(pmagic) \
-		WIZCHIP_WRITE(PMAGIC, pmagic)
+		WIZCHIP_WRITE(WIZCHIP_REG_PMAGIC, pmagic)
 
 /**
  * @ingroup Common_register_access_function_W5100
- * @brief Get \ref PMAGIC register
- * @return uint8_t. Value of @ref PMAGIC register.
+ * @brief Get \ref WIZCHIP_REG_PMAGIC register
+ * @return uint8_t. Value of @ref WIZCHIP_REG_PMAGIC register.
  * @sa setPMAGIC()
  */
 #define getPMAGIC() \
-		WIZCHIP_READ(PMAGIC)
+		WIZCHIP_READ(WIZCHIP_REG_PMAGIC)
 
 ///////////////////////////////////
 // Socket N register I/O function //
