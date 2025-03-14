@@ -281,6 +281,11 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
    }
 }
 
+void reg_wizchip_tick_cbfunc(uint32_t (*_get_tick) (void))
+{
+	WIZCHIP._get_tick = _get_tick;
+}
+
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 {
 #if	_WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500

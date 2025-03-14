@@ -388,6 +388,7 @@ typedef enum
    SO_MSS,              ///< Set MSS. @ref Sn_MSSR ( @ref setSn_MSSR(), @ref getSn_MSSR() )
    SO_DESTIP,           ///< Set the destination IP address. @ref Sn_DIPR ( @ref setSn_DIPR(), @ref getSn_DIPR() )
    SO_DESTPORT,         ///< Set the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
+   SO_RCVTIMEO,			///< Set the timeout for recv() function, by default it is infinite or wait forever
 #if _WIZCHIP_ != 5100   
    SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode, Not supported in W5100
    #if !( (_WIZCHIP_ == 5100) || (_WIZCHIP_ == 5200) )
