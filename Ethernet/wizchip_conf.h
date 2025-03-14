@@ -249,7 +249,13 @@ typedef struct __WIZCHIP
    {
       void (*_select)  (void);      ///< @ref \_WIZCHIP_ selected
       void (*_deselect)(void);      ///< @ref \_WIZCHIP_ deselected
-   }CS;  
+   }CS;
+
+   /**
+    * A function to get current one millisecond tick
+    */
+   uint32_t (*_get_tick) (void);
+
    /**
     * The set of interface IO callback func.
     */
@@ -505,6 +511,16 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
 void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
 
 /**
+ * @brief Registers call back function to get one millisecond tick counter value.
+ * @details Resets WIZCHIP & internal PHY, Configures PHY mode, Monitor PHY(Link,Speed,Half/Full/Auto),
+ * controls interrupt & mask and so on.
+ * @param _get_tick : callback function to get one millisecond tick counter value
+ * @param arg : arg type is dependent on cwtype.
+ *
+ */
+void reg_wizchip_tick_cbfunc(uint32_t (*_get_tick) (void));
+
+/**
  * @ingroup extra_functions
  * @brief Controls to the WIZCHIP.
  * @details Resets WIZCHIP & internal PHY, Configures PHY mode, Monitor PHY(Link,Speed,Half/Full/Auto),
@@ -512,7 +528,7 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
  * @param cwtype : Decides to the control type
  * @param arg : arg type is dependent on cwtype.
  * @return  0 : Success \n
- *         -1 : Fail because of invalid \ref ctlwizchip_type or unsupported \ref ctlwizchip_type in WIZCHIP 
+ *         -1 : Fail because of invalid \ref ctlwizchip_type or unsupported \ref ctlwizchip_type in WIZCHIP
  */          
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg);
 

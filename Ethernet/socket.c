@@ -65,6 +65,9 @@ static uint16_t sock_is_sending = 0;
 
 static uint16_t sock_remained_size[_WIZCHIP_SOCK_NUM_] = {0,0,};
 
+//used to store the recv timeout values for each socket in ms, default is 0 which means infinite
+static uint32_t sock_rcvtimeo[_WIZCHIP_SOCK_NUM_] = {0,};
+
 //M20150601 : For extern decleation
 //static uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
@@ -258,6 +261,9 @@ int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
 {
    CHECK_SOCKNUM();
    CHECK_SOCKMODE(Sn_MR_TCP);
+
+   uint8_t _SR_=getSn_SR(sn);
+
    CHECK_SOCKINIT();
    //M20140501 : For avoiding fatal error on memory align mismatched
    //if( *((uint32_t*)addr) == 0xFFFFFFFF || *((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
@@ -386,6 +392,7 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
 {
    uint8_t  tmp = 0;
    uint16_t recvsize = 0;
+   uint32_t start_time=WIZCHIP._get_tick();
 //A20150601 : For integarating with W5300
 #if   _WIZCHIP_ == 5300
    uint8_t head[2];
@@ -429,6 +436,12 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
          }
          if((sock_io_mode & (1<<sn)) && (recvsize == 0)) return SOCK_BUSY;
          if(recvsize != 0) break;
+
+         //implement timeout
+         if(sock_rcvtimeo[sn]!=0 && WIZCHIP._get_tick() >= start_time+sock_rcvtimeo[sn])
+         {
+        	 return SOCKERR_TIMEOUT;
+         }
       };
 #if _WIZCHIP_ == 5300
    }
@@ -866,6 +879,10 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg)
          break;
    #endif      
 #endif   
+      case SO_RCVTIMEO:
+    	  sock_rcvtimeo[sn] = *((uint32_t*) arg);
+    	  break;
+
       default:
          return SOCKERR_ARG;
    }   
