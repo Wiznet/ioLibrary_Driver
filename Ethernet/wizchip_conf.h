@@ -70,10 +70,20 @@ extern "C" {
 #define W5200						5200
 #define W5300						5300
 #define W5500						5500
+#define W6100						6100
+#define W6300                 6300
 
-#ifndef _WIZCHIP_
-#define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
-#endif
+
+ #ifndef _WIZCHIP_
+   // NOTE_LIHAN: Some sections of this code are not yet fully defined.
+   #define _WIZCHIP_                      W6300   // W5100, W5100S, W5200, W5300, W5500, 6300
+ #endif
+
+//
+//#ifndef _WIZCHIP_
+//   #error  please Define your WIZnet chip numer
+//#endif
+
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */
@@ -89,6 +99,38 @@ extern "C" {
 #define _WIZCHIP_IO_MODE_SPI_VDM_      (_WIZCHIP_IO_MODE_SPI_ + 1) /**< SPI interface mode for variable length data*/
 #define _WIZCHIP_IO_MODE_SPI_FDM_      (_WIZCHIP_IO_MODE_SPI_ + 2) /**< SPI interface mode for fixed length data mode*/
 #define _WIZCHIP_IO_MODE_SPI_5500_     (_WIZCHIP_IO_MODE_SPI_ + 3) /**< SPI interface mode for fixed length data mode*/
+//teddy 240122
+#define _WIZCHIP_IO_MODE_SPI_QSPI_     (_WIZCHIP_IO_MODE_SPI_ + 4) /**< SPI interface mode for QSPI mode*/
+
+
+
+/**
+ * @brief PHY can be accessed by @ref _PHYCR0_, _PHYCR1_.
+ * @details It provides hardware access method. 
+ * @note It is smaller s/w footprint than @ref _PHY_IO_MODE_MII_.
+ * @sa _PHY_IO_MODE_MII_, _PHY_IO_MODE_
+ * @sa ctlwizchip(), getPHYCR0(), getPHYCR1(), setPHYCR1(), getPHYSR()
+ */
+#define _PHY_IO_MODE_PHYCR_            0x0000
+
+/**
+ * @brief PHY can be accessed by MDC/MDIO signals of MII interface. 
+ * @details It provide software access method. 
+ * @note It is bigger s/w footprint than @ref _PHY_IO_MODE_PHYCR_.
+ * @sa _PHY_IO_MODE_PHYCR_, _PHY_IO_MODE_
+ * @sa ctlwizchip(), wiz_read_mdio(), wiz_write_mdio()
+ */
+#define _PHY_IO_MODE_MII_              0x0010
+
+/**
+ * @brief Select PHY Access Mode
+ * @details @ref _PHY_IO_MODE_ selects PHY access method.
+ * @todo You should select one of @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.
+ * @sa ctlwizchip()
+ */
+#define _PHY_IO_MODE_                  _PHY_IO_MODE_MII_ //_PHY_IO_MODE_MII_
+
+
 
 #if   (_WIZCHIP_ == W5100)
    #define _WIZCHIP_ID_                "W5100\0"
@@ -111,9 +153,13 @@ extern "C" {
 * @brief Define interface mode.
 * @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
 */
-//	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
-	//#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
-	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+#if 0
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+#elif 0
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
+#else
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+#endif
 
 //A20150601 : Define the unit of IO DATA.
    typedef   uint8_t   iodata_t;
@@ -150,7 +196,7 @@ extern "C" {
  */
 #ifndef _WIZCHIP_IO_MODE_
    //#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_FDM_
-   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
 #endif
 //A20150601 : Define the unit of IO DATA.   
    typedef   uint8_t   iodata_t;
@@ -183,8 +229,78 @@ extern "C" {
    #endif
 //
    #include "W5300/w5300.h"
+
+
+#elif ( _WIZCHIP_ == W6100)
+
+#define _WIZCHIP_ID_                "W6100\0"
+
+/**
+* @brief Define @ref _WIZCHIP_ interface mode.
+* @todo You should select interface mode of @ref _WIZCHIP_.\n\n
+*       Select one of @ref _WIZCHIP_IO_MODE_SPI_VDM_, @ref _WIZCHIP_IO_MODE_SPI_FDM_, and @ref _WIZCHIP_IO_MODE_BUS_INDIR_
+* @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
+*/
+#if 1
+// 20231103 taylor
+#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+#elif 0
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_VDM_
 #else
-   #error "Unknown defined _WIZCHIP_. You should define one of 5100, 5200, and 5500 !!!"
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPV_FDM_
+#endif
+
+typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
+typedef   int16_t   datasize_t;     ///< sent or received data size
+#include "./W6100/w6100.h"
+#include "../Application/Application.h"
+
+//teddy 240122
+#elif ( _WIZCHIP_ == W6300)
+
+#define _WIZCHIP_ID_                "W6300\0"
+
+
+
+
+/**
+* @brief Define @ref _WIZCHIP_ interface mode.
+* @todo You should select interface mode of @ref _WIZCHIP_.\n\n
+*       Select one of @ref _WIZCHIP_IO_MODE_SPI_QSPI_, @ref _WIZCHIP_IO_MODE_SPI_VDM_,@ref _WIZCHIP_IO_MODE_BUS_INDIR_
+* @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
+*/
+#define QSPI_SINGLE_MODE            (0x00 << 6)
+#define QSPI_DUAL_MODE              (0x01 << 6)
+#define QSPI_QUAD_MODE              (0x02 << 6)
+
+#if 1
+#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+#define _WIZCHIP_QSPI_MODE_          QSPI_QUAD_MODE
+
+
+#if 1 //by lihan //
+#define QSPI_MODE_SINGLE 	0x00
+#define QSPI_MODE_DUAL		0x01
+#define QSPI_MODE_QUAD 		0x02
+#define QSPI_MODE  QSPI_MODE_SINGLE
+
+#endif 
+
+#elif 0
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_VDM_
+#define _WIZCHIP_QSPI_MODE          QSPI_SINGLE_MODE
+
+#else
+#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
+#endif
+
+typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
+typedef   int16_t   datasize_t;     ///< sent or received data size
+#include "./W6300/w6300.h"
+#include "../Application/Application.h"
+
+#else
+   #error "Unknown defined _WIZCHIP_. You should define one of 5100, 5200, 5300, 5500, 6100 and 6300!!!"
 #endif
 
 #ifndef _WIZCHIP_IO_MODE_
@@ -198,14 +314,37 @@ extern "C" {
  *       ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
  */
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
+#if 1
+// 20231108 taylor
+#if (_WIZCHIP_ == W6100)
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W6100-EVB
+#elif (_WIZCHIP_ == W5100S)
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W5100S-EVB
+#elif (_WIZCHIP_ == W5300)
+#define _WIZCHIP_IO_BASE_            0x68000000   // for W5300 by javakys 20210408 @66c27e960a813f7ea6e8b1ce083d12b3e7e86fc0
+#else
+#define _WIZCHIP_IO_BASE_            0x00000000
+#endif
+
+#else
+#if (_WIZCHIP_ == W6100)
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W6100 BUS
+#else
 //	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
 	#define _WIZCHIP_IO_BASE_				0x68000000	// for W5300
+#endif
+#endif
 #elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
-	#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
+	//#define _WIZCHIP_IO_BASE_				0x00000000	// for 5100S SPI
 #endif
 
 #ifndef _WIZCHIP_IO_BASE_
+#if 1
+// 20231108 taylor
+#define _WIZCHIP_IO_BASE_              0x00000000
+#else
 #define _WIZCHIP_IO_BASE_              0x00000000  // 0x8000
+#endif
 #endif
 
 //M20150401 : Typing Error
@@ -268,6 +407,11 @@ typedef struct __WIZCHIP
       {
          iodata_t  (*_read_data)   (uint32_t AddrSel);
          void      (*_write_data)  (uint32_t AddrSel, iodata_t wb);
+         #if 1
+         // 20231103 taylor
+         void      (*_read_data_buf)  (uint32_t AddrSel, iodata_t* pBuf, int16_t len, uint8_t addrinc);  ///< Read @ref iodata_t as many as <i>len</i> from @ref _WIZCHIP_ through BUS
+         void      (*_write_data_buf) (uint32_t AddrSel, iodata_t* pBuf, int16_t len, uint8_t addrinc);  ///< Write @ref iodata_t data as many as <i>len</i> to @ref _WIZCHIP_ through BUS
+         #endif
       }BUS;      
 
       /**
@@ -280,6 +424,16 @@ typedef struct __WIZCHIP
          void    (*_read_burst)  (uint8_t* pBuf, uint16_t len);
          void    (*_write_burst) (uint8_t* pBuf, uint16_t len);
       }SPI;
+
+      /**
+       * For QSPI interface IO
+       */
+	   //teddy 240122
+      struct
+      {
+         void    (*_read_qspi)  (uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len);
+         void    (*_write_qspi) (uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len);
+      }QSPI;
       // To be added
       //
    }IF;
@@ -293,29 +447,34 @@ extern _WIZCHIP  WIZCHIP;
  */
 typedef enum
 {
-   CW_RESET_WIZCHIP,   ///< Resets WIZCHIP by softly
-   CW_INIT_WIZCHIP,    ///< Initializes to WIZCHIP with SOCKET buffer size 2 or 1 dimension array typed uint8_t.
-   CW_GET_INTERRUPT,   ///< Get Interrupt status of WIZCHIP
-   CW_CLR_INTERRUPT,   ///< Clears interrupt
-   CW_SET_INTRMASK,    ///< Masks interrupt
-   CW_GET_INTRMASK,    ///< Get interrupt mask
-   CW_SET_INTRTIME,    ///< Set interval time between the current and next interrupt. 
-   CW_GET_INTRTIME,    ///< Set interval time between the current and next interrupt. 
-   CW_GET_ID,          ///< Gets WIZCHIP name.
+   CW_SYS_LOCK,           ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
+   CW_SYS_UNLOCK,         ///< Lock or Unlock @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
+   CW_GET_SYSLOCK,        ///< Get the lock status of @ref _WIZCHIP_ with @ref SYS_CHIP_LOCK, @ref SYS_PHY_LOCK, and @ref SYS_NET_LOCK
 
-//D20150601 : For no modification your application code
-//#if _WIZCHIP_ ==  W5500
-   CW_RESET_PHY,       ///< Resets internal PHY. Valid Only W5500
-   CW_SET_PHYCONF,     ///< When PHY configured by internal register, PHY operation mode (Manual/Auto, 10/100, Half/Full). Valid Only W5000
-   CW_GET_PHYCONF,     ///< Get PHY operation mode in internal register. Valid Only W5500
-   CW_GET_PHYSTATUS,   ///< Get real PHY status on operating. Valid Only W5500
-   CW_SET_PHYPOWMODE,  ///< Set PHY power mode as normal and down when PHYSTATUS.OPMD == 1. Valid Only W5500
-//#endif
-//D20150601 : For no modification your application code
-//#if _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
-   CW_GET_PHYPOWMODE,  ///< Get PHY Power mode as down or normal, Valid Only W5100, W5200
-   CW_GET_PHYLINK      ///< Get PHY Link status, Valid Only W5100, W5200
-//#endif
+   CW_RESET_WIZCHIP,      ///< Reset @ref _WIZCHIP_ by software
+   CW_INIT_WIZCHIP,       ///< Initialize to SOCKETn buffer size with n byte array typed uint8_t
+   CW_GET_INTERRUPT,      ///< Get the interrupt status with @ref intr_kind
+   CW_CLR_INTERRUPT,      ///< Clear the interrupt with @ref intr_kind
+   CW_SET_INTRMASK,       ///< Set the interrupt mask with @ref intr_kind
+   CW_GET_INTRMASK,       ///< Get the interrupt mask with @ref intr_kind
+   CW_SET_INTRTIME,       ///< Set the interrupt pending time
+   CW_GET_INTRTIME,       ///< Get the interrupt pending time
+   CW_SET_IEN,            ///< Set the global interrupt enable only when @ref SYS_CHIP_LOCK is not set
+   CW_GET_IEN,            ///< Get the global interrupt enable 
+
+   CW_GET_ID,             ///< Get @ref _WIZCHIP_ name.
+   CW_GET_VER,            ///< Get the version of TCP/IP TOE engine
+
+   CW_SET_SYSCLK,         ///< Set the system clock with @ref SYSCLK_100MHZ or SYSCLK_10MHZ only when @ref SYS_CHIP_LOCK is unlock
+   CW_GET_SYSCLK,         ///< Get the system clock with @ref SYSCLK_100MHZ or SYSCLK_10MHZ 
+
+   CW_RESET_PHY,          ///< Reset PHY
+   CW_SET_PHYCONF,        ///< Set PHY operation mode (Manual/Auto, 10/100, Half/Full) with @ref wiz_PhyConf
+   CW_GET_PHYCONF,        ///< Get PHY operation mode (Manual/Auto, 10/100, Half/Full) with @ref wiz_PhyConf
+   CW_GET_PHYSTATUS,      ///< Get real operation mode with @ref wiz_PhyConf when PHY is linked up.
+   CW_SET_PHYPOWMODE,     ///< Set PHY power mode with @ref PHY_POWER_NORM or PHY_POWER_DOWN
+   CW_GET_PHYPOWMODE,     ///< Get PHY Power mode with @ref PHY_POWER_NORM or PHY_POWER_DOWN
+   CW_GET_PHYLINK         ///< Get PHY Link status with @ref PHY_LINK_ON or @ref PHY_LINK_OFF
 }ctlwizchip_type;
 
 /**
@@ -330,8 +489,48 @@ typedef enum
    CN_GET_NETMODE,  ///< Get network mode as WOL, PPPoE, Ping Block, and Force ARP mode
    CN_SET_TIMEOUT,  ///< Set network timeout as retry count and time.
    CN_GET_TIMEOUT,  ///< Get network timeout as retry count and time.
+   //teddy 240122
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+   CN_SET_PREFER,   ///< Set the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
+   CN_GET_PREFER,   ///< Get the preferred source IPv6 address of @ref _SLCR_.\n Refer to @ref IPV6_ADDR_AUTO, @ref IPV6_ADDR_LLA, @ref IPV6_ADDR_GUA
+#endif
 }ctlnetwork_type;
 
+//teddy 240122
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+/**
+ * @ingroup DATA_TYPE
+ * @brief  Network Service Control Type enumeration
+ * @details @ref ctlnetservice_type includes network management or monitor functions for @ref _WIZCHIP_.
+ * @sa ctlnetservice(), wiz_IPAddress, wiz_Prefix
+ */
+typedef enum
+{
+   CNS_ARP,            ///< ARP process with @ref wiz_IPAddress
+   CNS_PING,           ///< PING process with @ref wiz_IPAddress
+   CNS_DAD,            ///< Duplicated IPv6 Address Detection
+   /**
+    * @brief Stateless Address Auto-configuration(SLAAC) with @ref wiz_Prefix. 
+    * @details @ref CNS_SLAAC sends first RS message to all-router and then receives RA message from a router.
+    * @note It is valid only when the first received RA option is the source link-layer address(0x01) and the second is prefix information(0x03).\n
+    *       Refer to @ref SLIR_RS.
+    * @sa ctlnetservice()
+    * @sa CNS_GET_PREFIX
+    */
+   CNS_SLAAC,          
+   CNS_UNSOL_NA,       ///< Unsolicited Neighbor Advertisement for update @ref _WIZCHIP_ network information to neighbors
+   /**
+    * @brief Get prefix information with @ref wiz_Prefix.  
+    * @details @ref CNS_GET_PREFIX can get prefix information of RA message to be sent by a router without RS message.
+    * @note It is valid only when @ref IK_SOCKL_RA is set and the prefix information(0x03) of RA option is first received. 
+    * @sa ctlnetservice()
+    * @sa CNS_SLAAC
+    */
+   CNS_GET_PREFIX      
+}ctlnetservice_type;
+#endif
+
+#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /**
  * @ingroup DATA_TYPE
  *  Interrupt kind when CW_SET_INTRRUPT, CW_GET_INTERRUPT, CW_SET_INTRMASK
@@ -371,6 +570,69 @@ typedef enum
    IK_SOCK_ALL          = (0x0F << 8) ///< All Socket interrupt
 #endif      
 }intr_kind;
+//teddy 240122
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+/**
+ * @ingroup DATA_TYPE
+ * @brief Interrupt Kind
+ * @details @ref intr_kind can be used as the interrupt bits of @ref _IR_, @ref _SIR_, and @ref _SLIR_,\n
+ *          It can be used as the interrupt mask bits of @ref _IMR_, @ref _SIMR_, and @ref _SLIMR_,\n
+ *          and also, It can be used as the interrupt clear bits of @ref _IRCLR_, @ref _Sn_IRCLR_, and @ref _SLIRCLR_.
+ * @note It can be used with @b OR operation.
+ * @sa ctlwizchip(), CW_GET_INTERRUPT, CW_CLR_INTERRUPT, CW_GET_INTRMASK, CW_SET_INTRMASK
+ * @sa ctlnetservice(), ctlnetservice_type
+ * @sa wizchip_getinterrupt(), wizchip_clrinterrupt(), wizchip_getinterruptmask(), wizchip_setinterruptmask()
+ */
+typedef enum
+{
+   IK_PPPOE_TERMINATED = (1 << 0),     ///< PPPoE Termination Interrupt
+   IK_DEST_UNREACH     = (1 << 1),     ///< ICMPv4 Destination Unreachable Interrupt
+   IK_IP_CONFLICT      = (1 << 2),     ///< IPv4 Address Conflict Interrupt
+   IK_DEST_UNREACH6    = (1 << 4),     ///< ICMPv6 Destination Unreachable Interrupt
+   IK_WOL              = (1 << 7),     ///< WOL magic packet Interrupt
+   IK_NET_ALL          = (0x97),       ///< All Network Interrupt
+   
+   IK_SOCK_0           = (1 << 8),     ///< Socket 0 Interrupt
+   IK_SOCK_1           = (1 << 9),     ///< Socket 1 Interrupt
+   IK_SOCK_2           = (1 << 10),    ///< Socket 2 Interrupt
+   IK_SOCK_3           = (1 << 11),    ///< Socket 3 Interrupt
+   IK_SOCK_4           = (1 << 12),    ///< Socket 4 Interrupt
+   IK_SOCK_5           = (1 << 13),    ///< Socket 5 Interrupt
+   IK_SOCK_6           = (1 << 14),    ///< Socket 6 Interrupt
+   IK_SOCK_7           = (1 << 15),    ///< Socket 7 Interrupt
+   IK_SOCK_ALL         = (0xFF << 8),  ///< All Socket Interrupt
+
+   IK_SOCKL_TOUT       = (1 << 16),    ///< @ref _SLCR_ Timeout Interrupt.\n Refer to @ref ctlnetservice_type.
+   IK_SOCKL_ARP4       = (1 << 17),    ///< @ref _SLCR_ APR4 Interrupt.\n Refer to @ref CNS_ARP.
+   IK_SOCKL_PING4      = (1 << 18),    ///< @ref _SLCR_ PING4 Interrupt.\n Refer to @ref CNS_PING.
+   IK_SOCKL_ARP6       = (1 << 19),    ///< @ref _SLCR_ ARP6 Interrupt.\n Refer to @ref CNS_ARP.
+   IK_SOCKL_PING6      = (1 << 20),    ///< @ref _SLCR_ PING6 Interrupt.\n Refer to @ref CNS_PING.
+   IK_SOCKL_NS         = (1 << 21),    ///< @ref _SLCR_ NS Interrupt.\n Refer to @ref CNS_DAD.
+   IK_SOCKL_RS         = (1 << 22),    ///< @ref _SLCR_ RS Interrupt.\n Refer to @ref CNS_SLAAC.
+   IK_SOCKL_RA         = (1 << 23),    ///< @ref _SLCR_ RA Interrupt.\n Refer to @ref CNS_GET_PREFIX.
+   IK_SOCKL_ALL        = (0xFF << 16), ///< @ref _SLCR_ All Interrupt
+
+   IK_INT_ALL          = (0x00FFFF97)   ///< All Interrupt
+}intr_kind;
+#endif
+
+//teddy 240122
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+#define SYS_CHIP_LOCK           (1<<2)   ///< CHIP LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
+#define SYS_NET_LOCK            (1<<1)   ///< NETWORK Information LOCK. \n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
+#define SYS_PHY_LOCK            (1<<0)   ///< PHY LOCK.\n Refer to @ref CW_SYS_LOCK, @ref CW_SYS_UNLOCK, and @ref CW_GET_SYSLOCK.
+
+#define SYSCLK_100MHZ            0       ///< System Clock 100MHz.\n Refer to Refer to @ref CW_SET_SYSCLK and  @ref CW_GET_SYSCLK.
+#define SYSCLK_25MHZ             1       ///< System Clock 25MHz.\n Refer to Refer to @ref CW_SET_SYSCLK and  @ref CW_GET_SYSCLK.
+
+#define PHY_MODE_MANUAL          0       ///< Configured PHY operation mode with user setting.\n Refer to @ref CW_SET_PHYCONF and @ref CW_GET_PHYCONF.
+#define PHY_MODE_AUTONEGO        1       ///< Configured PHY operation mode with auto-negotiation.\n Refer to @ref CW_SET_PHYCONF and @ref CW_GET_PHYCONF.
+#define PHY_MODE_TE              2
+
+#define IPV6_ADDR_AUTO           0x00    ///< IPv6 Address Type : Auto.\n Refer to @ref CN_SET_PREFER, @ref CN_GET_PREFER.
+#define IPV6_ADDR_LLA            0x02    ///< IPv6 Address Type : LLA. \n Refer to @ref CN_SET_PREFER, @ref CN_GET_PREFER, @ref CNS_DAD.
+#define IPV6_ADDR_GUA            0x03    ///< IPv6 Address Type : GUA. \n Refer to @ref CN_SET_PREFER, @ref CN_GET_PREFER, @ref CNS_DAD.
+#endif
 
 #define PHY_CONFBY_HW            0     ///< Configured PHY operation mode by HW pin
 #define PHY_CONFBY_SW            1     ///< Configured PHY operation mode by SW register   
@@ -386,7 +648,8 @@ typedef enum
 #define PHY_POWER_DOWN           1     ///< PHY power down mode 
 
 
-#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500
+//teddy 240122
+#if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
 /**
  * @ingroup DATA_TYPE
  *  It configures PHY configuration when CW_SET PHYCONF or CW_GET_PHYCONF in W5500,  
@@ -404,6 +667,7 @@ typedef struct wiz_PhyConf_t
    }wiz_PhyConf;
 #endif   
 
+#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /**
  * @ingroup DATA_TYPE
  *  It used in setting dhcp_mode of @ref wiz_NetInfo.
@@ -451,6 +715,167 @@ typedef struct wiz_NetTimeout_t
    uint8_t  retry_cnt;     ///< retry count 
    uint16_t time_100us;    ///< time unit 100us
 }wiz_NetTimeout;
+//teddy 240122
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+/**
+ * @ingroup DATA_TYPE
+ * @brief IP Address Configuration Mode
+ * @details @ref ipconf_mode can be used to save the DHCP mode running on your system.
+ * @sa ctlnetwork(), CN_SET_NETINFO, CN_GET_NETINFO
+ * @sa wizchip_setnetinfo(), wizchip_getnetinfo(), wiz_NetInfo
+ */
+typedef enum
+{
+   NETINFO_NONE       = 0x00,    ///< No use DHCP
+   NETINFO_STATIC_V4  = 0x01,    ///< Static IPv4 configuration by manually.
+   NETINFO_STATIC_V6  = 0x02,    ///< Static IPv6 configuration by manually.
+   NETINFO_STATIC_ALL = 0x03,    ///< Static IPv4 and IPv6 configuration by manually.
+   NETINFO_SLAAC_V6   = 0x04,    ///< Stateless Adders Auto Configuration for IPv6
+   NETINFO_DHCP_V4    = 0x10,    ///< Dynamic IPv4 configuration from a DHCP sever
+   NETINFO_DHCP_V6    = 0x20,    ///< Dynamic IPv6 configuration from a DHCP sever
+   NETINFO_DHCP_ALL   = 0x30     ///< Dynamic IPv4 and IPv6 configuration from a DHCP sever
+}ipconf_mode;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Network Information for @ref _WIZCHIP_
+ * @details @ref wiz_NetInfo is a structure type to configure or indicate the network information of @ref _WIZCHIP_.
+ * @sa ctlnetwork(), CN_SET_NETINFO, CN_GET_NETINFO
+ * @sa wizchip_setnetinfo(), wizchip_getnetinfo()
+ */
+
+typedef enum
+{
+   NETINFO_STATIC = 1,    ///< Static IP configuration by manually.
+   NETINFO_DHCP           ///< Dynamic IP configruation from a DHCP sever
+}dhcp_mode;
+
+typedef struct wiz_NetInfo_t
+{
+   uint8_t     mac[6];    ///< Source Hardware Address
+   uint8_t     ip[4];     ///< Source IPv4 Address
+   uint8_t     sn[4];     ///< Subnet Mask value
+   uint8_t     gw[4];     ///< Gateway IPv4 Address
+   uint8_t     lla[16];   ///< Source Link Local Address
+   uint8_t     gua[16];   ///< Source Global Unicast Address
+   uint8_t     sn6[16];   ///< IPv6 Prefix
+   uint8_t     gw6[16];   ///< Gateway IPv6 Address
+   uint8_t     dns[4];    ///< DNS server IPv4 Address
+   uint8_t     dns6[16];  ///< DNS server IPv6 Address
+   ipconf_mode ipmode;    ///< IP Configuration Mode
+   dhcp_mode dhcp;  ///< 1 - Static, 2 - DHCP
+}wiz_NetInfo;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Network mode Configuration
+ * @details @ref netmode_type includes the network mode control function such as ping, TCP/RST block and etc.
+ * @sa ctlnetwork(), CN_SET_NETMODE, CN_GET_NETMODE
+ */
+typedef enum
+{
+   // NETMR Bit Values
+   NM_IPB_V4            = (1 << 0),      ///< IPv4 Packet Block
+   NM_IPB_V6            = (1 << 1),      ///< IPv6 Packet Block
+   NM_WOL               = (1 << 2),      ///< Wake On Lan(WOL) Mode
+   NM_PB6_MULTI         = (1 << 4),      ///< PING6 request from multicasting group address Block
+   NM_PB6_ALLNODE       = (1 << 5),      ///< PING6 request from all-node multicasting address Block
+   NM_MR_MASK           = (0x37),        ///< @ref _NETMR_ Mask value
+
+   // NETMR2 Bit Values
+   NM_PPPoE             = (1 << 8),      ///< PPPoE Mode
+   NM_DHA_SELECT        = (1 << 15),     ///< Destination Hardware Address Select
+   NM_MR2_MASK          = (0x09<<8),     ///< @ref _NETMR2_ Mask value
+
+  //NET4MR Bit Values
+   NM_PB4_ALL           = (1 << 16),     ///< All PING4 request Block
+   NM_TRSTB_V4          = (1 << 17),     ///< TCP RST packet for IPv4 Send Block
+   NM_PARP_V4           = (1 << 18),     ///< ARP request for IPv4 before PINGv4 Replay
+   NM_UNRB_V4           = (1 << 19),     ///< Unreachable Destination for IPv4 Block
+   NM_NET4_MASK         = (0x0F << 16),  ///< @ref _NET4MR_ Mask value
+
+  //NET4MR Bit Values
+   NM_PB6_ALL           = (1 << 24),     ///< All PING6 request Block
+   NM_TRSTB_V6          = (1 << 25),     ///< TCP RST packet for IPv6 Send Block
+   NM_PARP_V6           = (1 << 26),     ///< ARP request for IPv6 before PINGv4 Replay
+   NM_UNRB_V6           = (1 << 27),     ///< Unreachable Destination for IPv6 Block
+   NM_NET6_MASK         = (0x0F << 24),  ///< @ref _NET6MR_ Mask value
+
+   NM_MASK_ALL          = (0x0F0F0937)   ///< @ref netmode_type all mask value
+}netmode_type;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Network Timeout for @ref _WIZCHIP_
+ * @details @ref wiz_NetInfo is a structure type to configure or indicate the network timeout of @ref _WIZCHIP_.
+ * @sa ctlnetwork(), CN_SET_TIMEOUT, CN_GET_TIMEOUT
+ * @sa wizchip_settimeout(), wizchip_gettimeout()
+ */
+typedef struct wiz_NetTimeout_t
+{
+   uint8_t  s_retry_cnt;         ///< The default retry count of SOCKETn
+   uint16_t s_time_100us;        ///< The retransmission time of SOCKETn (unit 100us)
+   uint8_t  sl_retry_cnt;        ///< The retry count of SOCKET-less
+   uint16_t sl_time_100us;       ///< The retransmission time of SOCKET-less (unit 100us)
+}wiz_NetTimeout;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Destination Information for Network Service of @ref _WIZCHIP_
+ * @details @ref wiz_NetInfo is a structure type to configure or indicate a destination information of network service.
+ * @sa ctlnetservice(), CNS_ARP, CNS_PING
+ * @sa IK_SOCKL_TOUT, IK_SOCKL_ARP4, IK_SOCKL_ARP6, IK_SOCKL_PING4, IK_SOCKL_PING6
+ */
+typedef struct wiz_IPAddress_t
+{
+   uint8_t ip[16];               ///< Destination IP Address. \n IPv4 index : 0 to 3, IPv6 index : 0 to 15
+   uint8_t len;                  ///< Destination IP Address Length.\n IPv4 : 4, IPv6 : 16.
+}wiz_IPAddress;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Prefix Information
+ * @details @ref wiz_Prefix is a structure type to indicate a prefix information(0x03) of received RA message from a router.
+ * @sa ctlnetservice(), CNS_SLAAC, IK_SOCKL_RS
+ * @sa IK_SOCKL_TOUT, IK_SOCKL_RA, CNS_GET_PREFIX
+ */
+typedef struct wiz_Prefix_t
+{
+   uint8_t  len;                 ///< Prefix Length. \n It is used to set @ref _SUB6R_ to 1 as many as <i>len</i> from LSB bit.
+   uint8_t  flag;                ///< Prefix Flag
+   uint32_t valid_lifetime;      ///< Valid Lifetime
+   uint32_t preferred_lifetime;  ///< Preferred Lifetime
+   uint8_t  prefix[16];          ///< Prefix
+}wiz_Prefix;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Destination Information & Destination Hardware Address for @ref CNS_ARP
+ * @details @ref wiz_ARP is a structure type to set a destination IP address for ARP-request or \n
+ *          indicate a destination hardware address in APR-reply.
+ * @sa ctlnetservice(), CNS_ARP
+ * @sa IK_SOCKL_TOUT, IK_SOCKL_ARP4, IK_SOCKL_ARP6
+ */
+typedef struct wiz_ARP_t
+{
+   wiz_IPAddress destinfo;       ///< Destination IP address for ARP-request
+   uint8_t dha[6];               ///< Destination Hardware Address when ARP-reply is received from the destination.
+}wiz_ARP;
+
+/**
+ * @ingroup DATA_TYPE
+ * @brief Destination Information & Destination Hardware Address for @ref CNS_ARP
+ * @details @ref wiz_PING is a structure type to set a ID, sequence number, destination IP address for PING-request.
+ * @sa ctlnetservice(), CNS_PING
+ * @sa IK_SOCKL_TOUT, IK_SOCKL_PING4, IK_SOCKL_PING6
+ */
+typedef struct wiz_PING_t
+{
+   uint16_t id;
+   uint16_t seq;
+   wiz_IPAddress destinfo;
+}wiz_PING;
+#endif
 
 /**
  *@brief Registers call back function for critical section of I/O functions such as
@@ -492,7 +917,14 @@ void reg_wizchip_bus_cbfunc(iodata_t (*bus_rb)(uint32_t addr), void (*bus_wb)(ui
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
+#if _WIZCHIP_ == W6300
+void reg_wizchip_spi_cbfunc( uint8_t (*spi_rb)(void), 
+                             void (*spi_wb)(uint8_t wb),
+                             void (*spi_rbuf)(uint8_t* buf, datasize_t len),
+                             void (*spi_wbuf)(uint8_t* buf, datasize_t len) );
+#else
 void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb));
+#endif 
 
 /**
  *@brief Registers call back function for SPI interface.
@@ -503,6 +935,17 @@ void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void), void (*spi_wb)(uint8_t wb))
  *@note If you do not describe or register, null function is called.
  */
 void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), void (*spi_wb)(uint8_t* pBuf, uint16_t len));
+
+//teddy 240122
+/**
+ *@brief Registers call back function for QSPI interface.
+ *@param spi_rb : callback function to read using QSPI
+ *@param spi_wb : callback function to write using QSPI
+ *@todo Describe \ref wizchip_qspi_read and \ref wizchip_qspi_write function
+ *or register your functions.
+ *@note If you do not describe or register, null function is called.
+ */
+void reg_wizchip_qspi_cbfunc(void (*qspi_rb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len), void (*qspi_wb)(uint8_t opcode, uint16_t addr, uint8_t* pBuf, uint16_t len));
 
 /**
  * @ingroup extra_functions
@@ -527,6 +970,19 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg);
  */          
 int8_t ctlnetwork(ctlnetwork_type cntype, void* arg);
 
+//teddy 240122
+#if ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+/**
+ * @ingroup extra_functions
+ * @brief Controls to network service.
+ * @details Controls to network environment, mode, timeout and so on.
+ * @param cnstype : Decides to the control type
+ * @param arg : arg type is dependent on cnstype.
+ * @return -1 : Fail because of invalid @ref ctlnetwork_type or unsupported @ref ctlnetwork_type \n
+ *          0 : Success      
+ */          
+int8_t ctlnetservice(ctlnetservice_type cnstype, void* arg);
+#endif
 
 /* 
  * The following functions are implemented for internal use. 
@@ -608,52 +1064,318 @@ intr_kind wizchip_getinterruptmask(void);
  * @brief set the power mode of phy inside WIZCHIP. Refer to @ref PHYCFGR in W5500, @ref PHYSTATUS in W5200
  * @param pmode Settig value of power down mode.
  */   
-   int8_t wizphy_setphypmode(uint8_t pmode);    
-#endif
+   int8_t wizphy_setphypmode(uint8_t pmode);  
+   //teddy 240122  
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+/** 
+ * @ingroup extra_functions
+ * @brief Reset the integrated PHY.
+ * @details @ref wizphy_reset() resets the integrated Ethernet PHY \n
+ *          through @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_. \n
+ * @note In @ref _PHY_IO_MODE_PHYCR_, It needs a stable reset time. \n
+ *       So you need to wait for the stable reset time.\n
+ *       The stable reset time for each @ref _WIZCHIP_ maybe different.
+ * @sa ctlwizchip(), CW_RESET_PHY
+ * @sa _PHY_IO_MODE_
+ */
+void wizphy_reset(void);                   ///< Reset phy. Vailid only in W5500
 
 /**
-* @ingroup extra_functions
- * @brief Set the network information for WIZCHIP
- * @param pnetinfo : @ref wizNetInfo
+ * @ingroup extra_functions
+ * @details @ref wizphy_setphyconf() set a operation mode of the integrated Ethernet PHY \n
+ *          through @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.\n
+ * @param phyconf : @ref wiz_PhyConf
+ * @note The operation mode can be applied to Ethernet PHY after the Ethernet PHY is reset by @ref wizphy_reset().
+ * @sa ctlwizchip(), CW_SET_PHYCONF, CW_GET_PHYCONF, CW_GET_PHYSTATUS, CW_RESET_PHY
+ * @sa _PHY_IO_MODE_, wizphy_getphyconf(), wizphy_getphystatus(), wizphy_reset()
+ */
+void wizphy_setphyconf(wiz_PhyConf* phyconf);  
+
+/**
+ * @ingroup extra_functions
+ * @brief Get the integrated Ethernet PHY operation mode.
+ * @details @ref wizphy_getphyconf() gets a operation mode of the integrated Ethernet PHY \n
+ *          through @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.\n
+ * @param phyconf : @ref wiz_PhyConf
+ * @note It gets just the configured value for PHY operation, not real PHY operation.\n
+ *       To get real PHY operation, you can call @ref wizphy_getphystatus()
+ * @sa ctlwizchip(), CW_GET_PHYCONF, CW_SET_PHYCONF, CW_GET_PHYSTATUS
+ * @sa _PHY_IO_MODE_, wizphy_setphyconf(), wizphy_getphystatus()
+ */
+void wizphy_getphyconf(wiz_PhyConf* phyconf); 
+
+/**
+ * @ingroup extra_functions
+ * @brief Get the real PHY operation status when link is established.
+ * @details @ref wizphy_getphystatus() gets a operation mode of the integrated Ethernet PHY. \n
+ * @param phyconf : @ref wiz_PhyConf
+ * @sa ctlwizchip(), CW_GET_PHYSTATUS, CW_GET_PHYCONF, CW_SET_PHYCONF 
+ * @sa wizphy_setphyconf(), wizphy_getphyconf() 
+ */ 
+void wizphy_getphystat(wiz_PhyConf* phyconf);
+ 
+/**
+ * @ingroup extra_functions
+ * @brief Set the power mode of integrated Ethernet PHY.
+ * @details @ref wizphy_setphypmode() sets a power mode of the integrated Ethernet PHY \n
+ *          through @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.\n
+ * @param pmode @ref PHY_POWER_NORM or @ref PHY_POWER_DOWN
+ * @note When the integrated Ethernet PHY enters in power down mode, \n
+ *       the system clock of @ref _WIZCHIP_ is changed to the lowest speed. \n
+ *       So, you should adjust the access time of @ref _WIZCHIP_ to the changed system clock.
+ * @sa ctlwizchip(), CW_SET_PHYPOWMODE, CW_GET_PHYPOWMODE
+ * @sa _PHY_IO_MODE_, wizphy_setphypmode(), wizphy_getphypmode()
+ */   
+void wizphy_setphypmode(uint8_t pmode);    
+
+/**
+ * @ingroup extra_functions
+ * @brief get the power mode of integrated Ethernet PHY.
+ * @details @ref wizphy_getphypmode() gets a power mode of the integrated Ethernet PHY \n
+ *          through @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.\n
+ * @return @ref PHY_POWER_NORM or @ref PHY_POWER_DOWN
+ * @note When the integrated Ethernet PHY enters in power down mode,\n
+ *       the system clock of @ref _WIZCHIP_ is changed to the lowest speed. \n
+ *       So, you should adjust the access time of @ref _WIZCHIP_ to the changed system clock.
+ * @sa ctlwizchip(), CW_SET_PHYPOWMODE, CW_GET_PHYPOWMODE
+ * @sa _PHY_IO_MODE_, wizphy_setphypmode(), wizphy_getphypmode()
+ */   
+int8_t wizphy_getphypmode(void);
+
+/**
+ * @ingroup extra_functions
+ * @brief Set the network information for @ref _WIZCHIP_
+ * @param pnetinfo : @ref wiz_NetInfo
+ * @sa ctlnetwork(), CN_SET_NETINFO, CN_GET_NETINFO
+ * @sa wizchip_getnetinfo()
  */
 void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
 
 /**
  * @ingroup extra_functions
- * @brief Get the network information for WIZCHIP
- * @param pnetinfo : @ref wizNetInfo
+ * @brief Get the network information of @ref _WIZCHIP_
+ * @param pnetinfo : @ref wiz_NetInfo
+ * @sa ctlnetwork(), CN_GET_NETINFO, CN_SET_NETINFO
+ * @sa wizchip_setnetinfo()
  */
 void wizchip_getnetinfo(wiz_NetInfo* pnetinfo);
 
 /**
  * @ingroup extra_functions
- * @brief Set the network mode such WOL, PPPoE, Ping Block, and etc. 
- * @param pnetinfo Value of network mode. Refer to @ref netmode_type.
+ * @brief Set the network mode such as WOL, PPPoE, PING Block, and etc. 
+ * @param netmode : @ref netmode_type.
+ * @sa ctlnetwork(), CN_SET_NETMODE, CN_GET_NETMODE
+ * @sa wizchip_getnetmode()
  */
-int8_t wizchip_setnetmode(netmode_type netmode);
+void wizchip_setnetmode(netmode_type netmode);
 
 /**
  * @ingroup extra_functions
- * @brief Get the network mode such WOL, PPPoE, Ping Block, and etc. 
- * @return Value of network mode. Refer to @ref netmode_type.
+ * @brief Get the network mode such as WOL, PPPoE, PING Block, and etc. 
+ * @return @ref netmode_type.
+ * @sa ctlnetwork(), CN_GET_NETMODE, CN_SET_NETMODE
+ * @sa wizchip_setnetmode()
  */
 netmode_type wizchip_getnetmode(void);
 
 /**
  * @ingroup extra_functions
- * @brief Set retry time value(@ref _RTR_) and retry count(@ref _RCR_).
- * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
- * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+ * @brief Set retransmission time values and retry counts.
+ * @param nettime : @ref wiz_NetTimeout. 
+ * @sa ctlnetwork(), CN_SET_TIMEOUT, CN_GET_TIMEOUT
+ * @sa wizchip_gettimeout()
  */
 void wizchip_settimeout(wiz_NetTimeout* nettime);
 
 /**
  * @ingroup extra_functions
- * @brief Get retry time value(@ref _RTR_) and retry count(@ref _RCR_).
- * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
- * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+ * @brief Get retransmission time values and retry counts.
+ * @param nettime : @ref wiz_NetTimeout. 
+ * @sa ctlnetwork(), CN_GET_TIMEOUT, CN_SET_TIMEOUT
+ * @sa wizchip_settimeout()
  */
 void wizchip_gettimeout(wiz_NetTimeout* nettime);
+
+/**
+ * @ingroup extra_functions
+ * @brief ARP process.
+ * @details @ref wizchip_arp() processes ARP. \n
+ *          It sends the APR-request to destination and waits to receive the ARP-reply.
+ * @param arp @ref wiz_ARP.\n
+ *            It sets a destination IP address and indicates the destination hardware address.
+ * @return 0 : success, destination hardware address is valid.\n
+ *         -1 : fail. destination hardware address is invalid because timeout is occurred.\n
+ * @sa ctlnetservice(), CNS_ARP
+ */
+int8_t wizchip_arp(wiz_ARP* arp);
+
+/**
+ * @ingroup extra_functions
+ * @brief PING process.
+ * @details @ref wizchip_ping() processes PING. \n
+ *          It sends the PING-request to destination and waits to receive the PING-reply.
+ * @param ping @ref wiz_PING, It sets a destination IP address, ID, SEQ of PING-request message
+ * @return 0 : success, PING-reply is successfully received.\n
+ *         -1 : fail. Timeout is occurred.\n
+ * @sa ctlnetservice(), CNS_PING
+ */
+int8_t wizchip_ping(wiz_PING* ping);
+
+/**
+ * @ingroup extra_functions
+ * @brief DAD(Duplcated Address Detection) process.
+ * @details @ref wizchip_dad() detects the duplication of source IPv6 address.\n
+ *          It sends a NA message for DAD to all-node multicasting address(FF02::01).
+ * @param ipv6 : IPv6 address to be detected the duplication.
+ * @return 0 : success, There is no duplicated address. \n
+ *         -1 : fail. @ref _WIZCHIP_ source IP address to use is duplicated with a neighbor's one.
+ * @sa ctlnetservice(), CNS_DAD
+ */
+int8_t wizchip_dad(uint8_t* ipv6);
+
+/**
+ * @ingroup extra_functions
+ * @brief Stateless Address Auto Configuration(SLAAC) process.
+ * @details @ref wizchip_slaac() get a prefix information from a router for SLAAC.\n
+ *          It sends first a RS message to all-router and waits to receive a RS message with prefix information option from a router.
+ * @param prefix @ref wiz_Prefix
+ * @return 0 : success, RA message is successfully received, and <i>prefix</i> is valid.  \n
+ *         -1 : fail. Timeout is occurred.
+ * @note It is valid only when the prefix information type(0x03) of RA option received first.\n
+ *       The prefix option should be in the order of prefix length, prefix flag, valid lifetime, default lifetime and prefix address. \n
+ *       For more detail, Refer to @ref SLIR_RS.
+ * @sa ctlnetservice(), CNS_SLAAC
+ */
+int8_t wizchip_slaac(wiz_Prefix* prefix);
+
+/**
+ * @ingroup extra_functions
+ * @brief Unsolicited NA process.
+ * @details @ref wizchip_unsolicited() updates the network information of @ref _WIZCHIP_ to neighbors.\n
+ *          It sends a unsolicited NA message with @ref _LLAR_ or @ref _GUAR_ to neighbors \n
+ *          in order to update the network information of @ref _WIZCHIP_.\n
+ *          Because the unsolicited NA message have no reply, timeout is always occurred.
+ * @return always 0. Timeout is occurred.
+ * @sa ctlnetservice(), CNS_UNSOL
+ */
+int8_t wizchip_unsolicited(void);
+
+/**
+ * @ingroup extra_functions
+ * @brief Get a prefix information of RA message from a router.
+ * @details @ref wizchip_getprefix() get a prefix information of RA is periodically sent by a router. \n
+ * @return 0 : success, a RS message is successfully received from a router.
+ *         -1 : fail, a RS message is not received from a router yet.
+ * @note It is valid only when the prefix information type(0x03) of RA option received first.\n
+ *       The prefix option should be in the order of prefix length, prefix flag, valid lifetime, default lifetime and prefix address. \n
+ *       For more detail, Refer to @ref SLIR_RS.
+ * @sa ctlnetservice(), CNS_GET_PREFIX
+ */
+int8_t wizchip_getprefix(wiz_Prefix * prefix);
+#endif
+
+#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+   /**
+   * @ingroup extra_functions
+    * @brief Set the network information for WIZCHIP
+    * @param pnetinfo : @ref wizNetInfo
+    */
+   void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get the network information for WIZCHIP
+    * @param pnetinfo : @ref wizNetInfo
+    */
+   void wizchip_getnetinfo(wiz_NetInfo* pnetinfo);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Set the network mode such WOL, PPPoE, Ping Block, and etc. 
+    * @param pnetinfo Value of network mode. Refer to @ref netmode_type.
+    */
+   int8_t wizchip_setnetmode(netmode_type netmode);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get the network mode such WOL, PPPoE, Ping Block, and etc. 
+    * @return Value of network mode. Refer to @ref netmode_type.
+    */
+   netmode_type wizchip_getnetmode(void);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Set retry time value(@ref _RTR_) and retry count(@ref _RCR_).
+    * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
+    * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+    */
+   void wizchip_settimeout(wiz_NetTimeout* nettime);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get retry time value(@ref _RTR_) and retry count(@ref _RCR_).
+    * @details @ref _RTR_ configures the retransmission timeout period and @ref _RCR_ configures the number of time of retransmission.  
+    * @param nettime @ref _RTR_ value and @ref _RCR_ value. Refer to @ref wiz_NetTimeout. 
+    */
+   void wizchip_gettimeout(wiz_NetTimeout* nettime);
+   //teddy 240122
+#elif ((_WIZCHIP_ == W6100)||(_WIZCHIP_ == W6300))
+   /**
+    * @ingroup extra_functions
+    * @brief Set the network information for @ref _WIZCHIP_
+    * @param pnetinfo : @ref wiz_NetInfo
+    * @sa ctlnetwork(), CN_SET_NETINFO, CN_GET_NETINFO
+    * @sa wizchip_getnetinfo()
+    */
+   void wizchip_setnetinfo(wiz_NetInfo* pnetinfo);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get the network information of @ref _WIZCHIP_
+    * @param pnetinfo : @ref wiz_NetInfo
+    * @sa ctlnetwork(), CN_GET_NETINFO, CN_SET_NETINFO
+    * @sa wizchip_setnetinfo()
+    */
+   void wizchip_getnetinfo(wiz_NetInfo* pnetinfo);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Set the network mode such as WOL, PPPoE, PING Block, and etc. 
+    * @param netmode : @ref netmode_type.
+    * @sa ctlnetwork(), CN_SET_NETMODE, CN_GET_NETMODE
+    * @sa wizchip_getnetmode()
+    */
+   void wizchip_setnetmode(netmode_type netmode);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get the network mode such as WOL, PPPoE, PING Block, and etc. 
+    * @return @ref netmode_type.
+    * @sa ctlnetwork(), CN_GET_NETMODE, CN_SET_NETMODE
+    * @sa wizchip_setnetmode()
+    */
+   netmode_type wizchip_getnetmode(void);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Set retransmission time values and retry counts.
+    * @param nettime : @ref wiz_NetTimeout. 
+    * @sa ctlnetwork(), CN_SET_TIMEOUT, CN_GET_TIMEOUT
+    * @sa wizchip_gettimeout()
+    */
+   void wizchip_settimeout(wiz_NetTimeout* nettime);
+   
+   /**
+    * @ingroup extra_functions
+    * @brief Get retransmission time values and retry counts.
+    * @param nettime : @ref wiz_NetTimeout. 
+    * @sa ctlnetwork(), CN_GET_TIMEOUT, CN_SET_TIMEOUT
+    * @sa wizchip_settimeout()
+    */
+   void wizchip_gettimeout(wiz_NetTimeout* nettime);
+
+#endif
+
 #ifdef __cplusplus
  }
 #endif

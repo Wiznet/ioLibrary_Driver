@@ -10,6 +10,10 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
    uint16_t size, sentsize;
    uint8_t destip[4];
    uint16_t destport, port=3000;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
    switch(getSn_SR(sn))
    {
@@ -17,7 +21,16 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
          if((size = getSn_RX_RSR(sn)) > 0)
          {
             if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
+#if 1
+            // 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100)|| (_WIZCHIP_ == 6300))
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport, &addr_len);
+#else
             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+#endif
+#else
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+#endif
             if(ret <= 0)
             {
 #ifdef _MULTICAST_DEBUG_
@@ -29,7 +42,16 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
             sentsize = 0;
             while(sentsize != size)
             {
+#if 1
+            	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+            	ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport, 4);
+#else
+            	ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport);
+#endif
+#else
                ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport);
+#endif
                if(ret < 0)
                {
 #ifdef _MULTICAST_DEBUG_
@@ -68,6 +90,10 @@ int32_t multicast_recv(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint16_t
    uint16_t size, port=3000;
    uint8_t destip[4];
    uint16_t destport;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
    switch(getSn_SR(sn))
    {
@@ -75,7 +101,16 @@ int32_t multicast_recv(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint16_t
          if((size = getSn_RX_RSR(sn)) > 0)
          {
             if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
+#if 1
+            // 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport, &addr_len);
+#else
             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+#endif
+#else
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+#endif
             if(ret <= 0)
             {
 #ifdef _MULTICAST_DEBUG_

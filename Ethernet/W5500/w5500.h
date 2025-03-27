@@ -1738,7 +1738,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(Sn_PORT(sn),   (uint8_t)(port >> 8)); \
 		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1), (uint8_t) port); \
 	}
-
+#define setSn_PORTR  setSn_PORT
 /**
  * @ingroup Socket_register_access_function
  * @brief Get @ref Sn_PORT register
@@ -1805,6 +1805,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(Sn_DPORT(sn),   (uint8_t) (dport>>8)); \
 		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1), (uint8_t)  dport); \
 	}
+#define setSn_DPORTR(sn, dport)   setSn_DPORT(sn,dport) ///< For compatible ioLibrary. Refer to @ref Sn_DPORTR.
 
 /**
  * @ingroup Socket_register_access_function
@@ -1820,8 +1821,8 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 */
 #define getSn_DPORT(sn) \
 		(((uint16_t)WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1)))		
-
-/**
+#define getSn_DPORTR(sn)  getSn_DPORT(sn)
+ /**
  * @ingroup Socket_register_access_function
  * @brief Set @ref Sn_MSSR register
  * @param (uint8_t)sn Socket number. It should be <b>0 ~ 7</b>.

@@ -149,6 +149,10 @@ int32_t snmpd_run(void)
     
 	uint8_t svr_addr[6];
 	uint16_t  svr_port;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
 	if(SOCK_SNMP_AGENT > _WIZCHIP_SOCK_NUM_) return -99;
     
@@ -157,7 +161,16 @@ int32_t snmpd_run(void)
 		case SOCK_UDP :
 			if ( (len = getSn_RX_RSR(SOCK_SNMP_AGENT)) > 0)
 			{
+#if 1
+				// 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+				request_msg.len= recvfrom(SOCK_SNMP_AGENT, request_msg.buffer, len, svr_addr, &svr_port, &addr_len);
+#else
 				request_msg.len= recvfrom(SOCK_SNMP_AGENT, request_msg.buffer, len, svr_addr, &svr_port);
+#endif
+#else
+				request_msg.len= recvfrom(SOCK_SNMP_AGENT, request_msg.buffer, len, svr_addr, &svr_port);
+#endif
 			}
 			else
 			{
@@ -178,7 +191,16 @@ int32_t snmpd_run(void)
 				// Received message parsing and send response process
 				if (parseSNMPMessage() != -1)
 				{
+#if 1
+					// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+					sendto(SOCK_SNMP_AGENT, response_msg.buffer, response_msg.index, svr_addr, svr_port, 4);
+#else
 					sendto(SOCK_SNMP_AGENT, response_msg.buffer, response_msg.index, svr_addr, svr_port);
+#endif
+#else
+					sendto(SOCK_SNMP_AGENT, response_msg.buffer, response_msg.index, svr_addr, svr_port);
+#endif
 				}
 
 #ifdef _SNMP_DEBUG_
@@ -878,7 +900,16 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
 	// Send SNMP Trap Packet to NMS
 	{
 		socket(SOCK_SNMP_TRAP, Sn_MR_UDP, PORT_SNMP_TRAP, 0);
+#if 1
+		// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+		sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP, 4);
+#else
 		sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP);
+#endif
+#else
+		sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP);
+#endif
 		
 		close(SOCK_SNMP_TRAP);
 		return 0;

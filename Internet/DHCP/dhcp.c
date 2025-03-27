@@ -265,8 +265,21 @@ void default_ip_assign(void)
 void default_ip_update(void)
 {
 	/* WIZchip Software Reset */
+#if 1
+// 20231019 taylor//teddy 240122
+#if (_WIZCHIP_ == 6100)||(_WIZCHIP_ == 6300)
+	CHIPUNLOCK();
+	setSYCR0(SYCR0_RST);
+	CHIPLOCK();
+	getSYSR();
+#else
+	setMR(MR_RST);
+	getMR(); // for delay
+#endif
+#else
    setMR(MR_RST);
    getMR(); // for delay
+#endif
    default_ip_assign();
    setSHAR(DHCP_CHADDR);
 }
@@ -275,8 +288,22 @@ void default_ip_update(void)
 void default_ip_conflict(void)
 {
 	// WIZchip Software Reset
+#if 1
+// 20231019 taylor//teddy 240122
+#if (_WIZCHIP_ == 6100)||(_WIZCHIP_ == 6300)
+	// 20231019 taylor
+	CHIPUNLOCK();
+	setSYCR0(SYCR0_RST);
+	CHIPLOCK();
+	getSYSR();
+#else
 	setMR(MR_RST);
 	getMR(); // for delay
+#endif
+#else
+   setMR(MR_RST);
+   getMR(); // for delay
+#endif
 	setSHAR(DHCP_CHADDR);
 }
 
@@ -420,7 +447,16 @@ void send_DHCP_DISCOVER(void)
 	printf("> Send DHCP_DISCOVER\r\n");
 #endif
 
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100)|| (_WIZCHIP_ == 6300))
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT, 4);
+#else
 	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
+#else
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
 }
 
 /* SEND DHCP REQUEST */
@@ -518,7 +554,16 @@ void send_DHCP_REQUEST(void)
 	printf("> Send DHCP_REQUEST\r\n");
 #endif
 	
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT, 4);
+#else
 	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
+#else
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
 
 }
 
@@ -579,7 +624,16 @@ void send_DHCP_DECLINE(void)
 	printf("\r\n> Send DHCP_DECLINE\r\n");
 #endif
 
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT, 4);
+#else
 	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
+#else
+	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
+#endif
 }
 
 /* PARSE REPLY pDHCPMSG */
@@ -593,10 +647,23 @@ int8_t parseDHCPMSG(void)
 	uint8_t * e;
 	uint8_t type = 0;
 	uint8_t opt_len;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
    
    if((len = getSn_RX_RSR(DHCP_SOCKET)) > 0)
    {
-   	len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port);
+#if 1
+	   // 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	   len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port, &addr_len);
+#else
+	   len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port);
+#endif
+#else
+	   len = recvfrom(DHCP_SOCKET, (uint8_t *)pDHCPMSG, len, svr_addr, &svr_port);
+#endif
    #ifdef _DHCP_DEBUG_   
       printf("DHCP message : %d.%d.%d.%d(%d) %d received. \r\n",svr_addr[0],svr_addr[1],svr_addr[2], svr_addr[3],svr_port, len);
    #endif   
@@ -903,7 +970,16 @@ int8_t check_DHCP_leasedIP(void)
 
 	// IP conflict detection : ARP request - ARP reply
 	// Broadcasting ARP Request for check the IP conflict using UDP sendto() function
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	ret = sendto(DHCP_SOCKET, (uint8_t *)"CHECK_IP_CONFLICT", 17, DHCP_allocated_ip, 5000, 4);
+#else
 	ret = sendto(DHCP_SOCKET, (uint8_t *)"CHECK_IP_CONFLICT", 17, DHCP_allocated_ip, 5000);
+#endif
+#else
+	ret = sendto(DHCP_SOCKET, (uint8_t *)"CHECK_IP_CONFLICT", 17, DHCP_allocated_ip, 5000);
+#endif
 
 	// RCR value restore
 	setRCR(tmp);

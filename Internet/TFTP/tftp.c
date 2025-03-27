@@ -147,7 +147,16 @@ static int send_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t i
 
 	ip = htonl(ip);
 
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	snd_len = sendto(socket, packet, len, (uint8_t *)&ip, port, 4);
+#else
 	snd_len = sendto(socket, packet, len, (uint8_t *)&ip, port);
+#endif
+#else
+	snd_len = sendto(socket, packet, len, (uint8_t *)&ip, port);
+#endif
 	if(snd_len != len) {
 		//DBG_PRINT(ERROR_DBG, "[%s] sendto error\r\n", __func__);
 		return -1;
@@ -161,6 +170,10 @@ static int recv_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t *
 	int ret;
 	uint8_t sck_state;
 	uint16_t recv_len;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
 	/* Receive Packet Process */
 	ret = getsockopt(socket, SO_STATUS, &sck_state);
@@ -177,7 +190,16 @@ static int recv_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t *
 		}
 
 		if(recv_len) {
+#if 1
+			// 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+			recv_len = recvfrom(socket, packet, len, (uint8_t *)ip, port, &addr_len);
+#else
 			recv_len = recvfrom(socket, packet, len, (uint8_t *)ip, port);
+#endif
+#else
+			recv_len = recvfrom(socket, packet, len, (uint8_t *)ip, port);
+#endif
 			if(recv_len < 0) {
 				//DBG_PRINT(ERROR_DBG, "[%s] recvfrom error\r\n", __func__);
 				return -1;

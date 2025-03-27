@@ -96,8 +96,14 @@ char sizefail[] = "550 File not found\r\n";
 #define ftp_ID 		"wiznet"
 #define ftp_PW 		"wiznet54321"
 
+#if 1
+// 20231017 taylor
+un_l2cval ftp_remote_ip;
+uint16_t  ftp_remote_port;
+#else
 un_l2cval remote_ip;
 uint16_t  remote_port;
+#endif
 un_l2cval local_ip;
 uint16_t  local_port;
 uint8_t connect_state_control = 0;
@@ -741,7 +747,16 @@ uint8_t ftpd_run(uint8_t * dbuf)
    				printf("%d:Listen ok\r\n",DATA_SOCK);
 #endif
    			}else{
+#if 1
+   				// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+   				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
+#else
+   				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port)) != SOCK_OK){
+#endif
+#else
    				if((ret = connect(DATA_SOCK, remote_ip.cVal, remote_port)) != SOCK_OK){
+#endif
 #if defined(_FTP_DEBUG_)
    					printf("%d:Connect error\r\n", DATA_SOCK);
 #endif
@@ -954,7 +969,16 @@ char proc_ftpd(uint8_t sn, char * buf)
 			ftp.current_cmd = STOR_CMD;
 			if(ftp.dsock_mode == ACTIVE_MODE)
 			{
+#if 1
+				// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port, 4)) != SOCK_OK){
+#else
+				if((ret = connect(DATA_SOCK, ftp_remote_ip.cVal, ftp_remote_port)) != SOCK_OK){
+#endif
+#else
 				if((ret = connect(DATA_SOCK, remote_ip.cVal, remote_port)) != SOCK_OK){
+#endif
 	#if defined(_FTP_DEBUG_)
 					printf("%d:Connect error\r\n", DATA_SOCK);
 	#endif
@@ -1183,7 +1207,12 @@ int pport(char * arg)
 	{
 		if(i==0) tok = strtok(arg,",\r\n");
 		else	 tok = strtok(NULL,",");
+#if 1
+		// 20231017 taylor
+		ftp_remote_ip.cVal[i] = (uint8_t)atoi(tok);
+#else
 		remote_ip.cVal[i] = (uint8_t)atoi(tok);
+#endif
 		if (!tok)
 		{
 #if defined(_FTP_DEBUG_)
@@ -1192,12 +1221,23 @@ int pport(char * arg)
 			return -1;
 		}
 	}
+#if 1
+	// 20231017 taylor
+	ftp_remote_port = 0;
+#else
 	remote_port = 0;
+#endif
 	for (i = 0; i < 2; i++)
 	{
 		tok = strtok(NULL,",\r\n");
+#if 1
+		// 20231017 taylor
+		ftp_remote_port <<= 8;
+		ftp_remote_port += atoi(tok);
+#else
 		remote_port <<= 8;
 		remote_port += atoi(tok);
+#endif
 		if (!tok)
 		{
 #if defined(_FTP_DEBUG_)
@@ -1207,7 +1247,12 @@ int pport(char * arg)
 		}
 	}
 #if defined(_FTP_DEBUG_)
+#if 1
+	// 20231017 taylor
+	printf("ip : %d.%d.%d.%d, port : %d\r\n", ftp_remote_ip.cVal[0], ftp_remote_ip.cVal[1], ftp_remote_ip.cVal[2], ftp_remote_ip.cVal[3], ftp_remote_port);
+#else
 	printf("ip : %d.%d.%d.%d, port : %d\r\n", remote_ip.cVal[0], remote_ip.cVal[1], remote_ip.cVal[2], remote_ip.cVal[3], remote_port);
+#endif
 #endif
 
 	return 0;

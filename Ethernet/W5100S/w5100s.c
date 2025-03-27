@@ -225,11 +225,28 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
       WIZCHIP.IF.BUS._write_byte(IDM_DR,pBuf[i]);
    WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI);   
    */
-   setMR(getMR()|MR_AI);     
+   setMR(getMR()|MR_AI);
+#if 1
+   // 20231108 taylor
+
+   uint8_t tAD[2];
+   tAD[0] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[1] = (uint8_t)(AddrSel & 0x000000FF);
+
+   WIZCHIP.IF.BUS._write_data_buf(IDM_AR0, tAD, 2, 1);
+
+#else
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0xFF00) >>  8);
    WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x00FF));
+#endif
+
+#if 1
+   // 20231108 taylor
+   WIZCHIP.IF.BUS._write_data_buf(IDM_DR, pBuf, len, 0);
+#else
    for(i = 0 ; i < len; i++)
       WIZCHIP.IF.BUS._write_data(IDM_DR,pBuf[i]);
+#endif
    setMR(getMR() & ~MR_AI);   
 
 #else
@@ -305,10 +322,27 @@ void     WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    WIZCHIP_WRITE(MR, WIZCHIP_READ(MR) & ~MR_AI); 
    */
    setMR(getMR() | MR_AI);
+#if 1
+   // 20231108 taylor
+
+   uint8_t tAD[2];
+   tAD[0] = (uint8_t)((AddrSel & 0x0000FF00) >> 8);
+   tAD[1] = (uint8_t)(AddrSel & 0x000000FF);
+
+   WIZCHIP.IF.BUS._write_data_buf(IDM_AR0, tAD, 2, 1);
+
+#else
    WIZCHIP.IF.BUS._write_data(IDM_AR0,(AddrSel & 0xFF00) >>  8);
-   WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x00FF));	
+   WIZCHIP.IF.BUS._write_data(IDM_AR1,(AddrSel & 0x00FF));
+#endif
+
+#if 1
+   // 20231108 taylor
+   WIZCHIP.IF.BUS._read_data_buf(IDM_DR, pBuf, len, 0);
+#else
    for(i = 0 ; i < len; i++)
       pBuf[i]	= WIZCHIP.IF.BUS._read_data(IDM_DR);
+#endif
    setMR(getMR() & ~MR_AI); 
    
 #else

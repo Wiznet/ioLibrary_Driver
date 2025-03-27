@@ -113,6 +113,7 @@
 
 #define SOCKFATAL_PACKLEN     (SOCK_FATAL - 1)     ///< Invalid packet length. Fatal Error.
 
+#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /*
  * SOCKET FLAG
  */
@@ -120,6 +121,12 @@
 #define SF_IGMP_VER2           (Sn_MR_MC)          ///< In @ref Sn_MR_UDP with \ref SF_MULTI_ENABLE, Select IGMP version 2.   
 #define SF_TCP_NODELAY         (Sn_MR_ND)          ///< In @ref Sn_MR_TCP, Use to nodelayed ack.
 #define SF_MULTI_ENABLE        (Sn_MR_MULTI)       ///< In @ref Sn_MR_UDP, Enable multicast mode.
+
+#define Sn_MR2_DHAM          (1<<1)
+#define SF_DHA_MANUAL        (Sn_MR2_DHAM)
+#define Sn_MR2_FARP          (1<<0)
+#define SF_FORCE_ARP         (Sn_MR2_FARP)
+
 
 #if _WIZCHIP_ == 5500
    #define SF_BROAD_BLOCK         (Sn_MR_BCASTB)   ///< In @ref Sn_MR_UDP or @ref Sn_MR_MACRAW, Block broadcast packet. Valid only in W5500
@@ -144,6 +151,98 @@
 //A20150601 : For Integrating with W5300
 #define PACK_FIFOBYTE            0x02              ///< Valid only W5300, It indicate to have read already the Sn_RX_FIFOR.
 //
+//teddy 240122
+
+#define PACK_IPv6            (1<<7)                ///< It indicates the destination IP address of the received packet is IPv6 or IPv4.
+#define PACK_IPV6_ALLNODE    (PACK_IPv6 | (1<<6))  ///< It indicates the destination IP address of the received packet is allnode multicast(broadcast) address or not.
+#define PACK_IPV6_MULTI      (PACK_IPv6 | (1<<5))  ///< It indicates the destination IP address of the received packet is multicast address or not.
+#define PACK_IPV6_LLA        (PACK_IPv6 | (1<<4))  ///< It indicates the destination IP address of the received packet is lla or gua.
+#define PACK_NONE            (0x00)                ///< It indicates no information of a packet
+
+#elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+
+/*
+ * - @ref Sn_MR_MULTI : Support UDP Multicasting
+ * - @ref Sn_MR_MF    : Support MAC Filter Enable
+ * - @ref Sn_MR_BRDB  : Broadcast Block
+ * - @ref Sn_MR_FPSH  : Force PSH flag
+ * - @ref Sn_MR_ND    : No Delay ACK flag
+ * - @ref Sn_MR_MC    : IGMP ver2, ver1
+ * - @ref Sn_MR_SMB   : Solicited Multicast Block
+ * - @ref Sn_MR_MMB   : IPv4 Multicast block
+ * - @ref Sn_MR_UNIB  : Unicast Block
+ * - @ref Sn_MR_MMB6  : IPv6 UDP Multicast Block </b>
+
+ * - @ref Sn_MR2_DHAM : @ref Sn_MR2_DHAM_AUTO, @ref Sn_MR2_DHAM_MANUAL
+ * - @ref Sn_MR_FARP   
+*/
+
+/*
+ * SOCKET FLAG
+ */
+/**
+ * @brief In UDP mode such as @ref Sn_MR_UDP4 and @ref Sn_MR_UDP6, @ref Sn_MR_UDP6, Enable multicast mode. When @ref Sn_MR_UDP6, Enable only IPv6 Multicating.
+ */
+#define SF_MULTI_ENABLE      (Sn_MR_MULTI)    
+#define SF_ETHER_OWN         (Sn_MR_MF)       ///< In MACRAW mode such as @ref Sn_MR_MACRAW, Receive only the packet as broadcast, multicast and own packet
+
+/**
+ * @brief In UDP mode such as @ref Sn_MR_UDP4, @ref Sn_MR_UDP6 and @ref Sn_MR_UDPD, or In MACRAW mode sucha as @ref Sn_MR_MACRAW, Block a broadcast packet. 
+ */
+#define SF_BROAD_BLOCK       (Sn_MR_BRDB)       
+#define SF_TCP_FPSH          (Sn_MR_FPSH)       ///< In TCP mode such as @ref Sn_MR_TCP4, @ref Sn_MR_TCP6 and @ref Sn_MR_TCPD, Use to forced push flag.
+
+#define SF_TCP_NODELAY       (Sn_MR_ND)       ///< In TCP mode such as @ref Sn_MR_TCP4, @ref Sn_MR_TCP6 and @ref Sn_MR_TCPD, Use to nodelayed ack.
+#define SF_IGMP_VER2         (Sn_MR_MC)       ///< In UDP mode such as @ref Sn_MR_UDP4 with @ref SF_MULTI_ENABLE, Select IGMP version 2.   
+#define SF_SOLICIT_BLOCK     (Sn_MR_SMB)      ///< In UDP mode such as @ref Sn_MR_UDP6 and @ref Sn_MR_UDPD, Block a solicited mutlicast packet.
+#define SF_ETHER_MULTI4B     (Sn_MR_MMB4)     ///< In MACRAW mode such as @ref Sn_MR_MACRAW with @ref SF_MULTI_ENABLE, Block a IPv4 multicast packet. 
+
+#define SF_UNI_BLOCK         (Sn_MR_UNIB)     ///< In UDP mdoe such as @ref Sn_MR_UDP4, @ref Sn_MR_UDP6 and @ref Sn_MR_UDPD with @ref SF_MULTI_ENABLE, Block a unicast packet. 
+#define SF_ETHER_MULIT6B     (Sn_MR_MMB6)     ///< In MACRAW mode such as @ref Sn_MR_MACRAW with @ref SF_MULTI_ENABLE, Block a IPv6 multicast packet. 
+
+/**
+ * @brief Force to APR.
+ * @details In datagram mode such as @ref Sn_MR_IPRAW4, @ref Sn_MR_IPRAW6, @ref Sn_MR_UDP4, @ref Sn_MR_UDP6, and @ref Sn_MR_UDPD,
+ *          Force to request ARP before a packet is sent to a destination.\n
+ *          In TCP mode such as @ref Sn_MR_TCP4, @ref Sn_MR_TCP6, and @ref Sn_MR_TCPD and <b>TCP SERVER</b> operation mode, 
+ *          Force to request ARP before SYN/ACK packet is sent to a <b>TCP CLIENT</b>. \n
+ *          When @ref SF_DHA_MANUAL is set, the ARP is process but the destination hardware address is fixed by user.
+ */
+#define SF_FORCE_ARP         (Sn_MR2_FARP)
+
+/**
+ * @brief The destination hardware address of packet to be transmitted is set by user through @ref _Sn_DHAR_. It is invalid in MACRAW mode such as @ref Sn_MR_MACRAW.
+ */
+#define SF_DHA_MANUAL        (Sn_MR2_DHAM)
+
+#define SF_IO_NONBLOCK       (0x01 << 3)     ///< Socket nonblock io mode. It used parameter in @ref socket().
+
+/*
+ * UDP, IPRAW, MACRAW Packet Infomation
+ */
+#define PACK_IPv6            (1<<7)                ///< It indicates the destination IP address of the received packet is IPv6 or IPv4.
+#define PACK_IPV6_ALLNODE    (PACK_IPv6 | (1<<6))  ///< It indicates the destination IP address of the received packet is allnode multicast(broadcast) address or not.
+#define PACK_IPV6_MULTI      (PACK_IPv6 | (1<<5))  ///< It indicates the destination IP address of the received packet is multicast address or not.
+#define PACK_IPV6_LLA        (PACK_IPv6 | (1<<4))  ///< It indicates the destination IP address of the received packet is lla or gua.
+#define PACK_COMPLETED       (1<<3)                ///< It indicates the read data is last in the received packet.
+#define PACK_REMAINED        (1<<2)                ///< It indicates to remain data in the received packet
+#define PACK_FIRST           (1<<1)                ///< It indicates the read data is first in the received packet.
+#define PACK_NONE            (0x00)                ///< It indicates no information of a packet
+
+#define SRCV6_PREFER_AUTO    (PSR_AUTO)            ///< Soruce IPv6 address is preferred to auto-selection. Refer to @ref _Sn_PSR_
+#define SRCV6_PREFER_LLA     (PSR_LLA)             ///< Soruce IPv6 address is preferred to link local address. Refer to @ref _Sn_PSR_
+#define SRCV6_PREFER_GUA     (PSR_GUA)             ///< Soruce IPv6 address is preferred to global unique address. Refer to @ref _Sn_PSR_
+
+#define TCPSOCK_MODE         (Sn_ESR_TCPM)         ///< It indicates the IP version when SOCKETn is opened as TCP6 or TCPD mode.(0 - IPv4 , 1 - IPv6)
+#define TCPSOCK_OP           (Sn_ESR_TCPOP)        ///< It indicates the operation mode when SOCKETn is connected.(0 - <b>TCP CLIENT</b> , 1 - <b>TCP SERVER</b>)
+#define TCPSOCK_SIP          (Sn_ESR_IP6T)         ///< It indicates the source ip address type when SOCKET is connected. (0 - Link Local, 1 - Global Unique) 
+
+/////////////////////////////
+// SOCKET CONTROL & OPTION //
+/////////////////////////////
+#define SOCK_IO_BLOCK         0  ///< Socket Block IO Mode in @ref setsockopt().
+#define SOCK_IO_NONBLOCK      1  ///< Socket Non-block IO Mode in @ref setsockopt().
+#endif
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -189,28 +288,31 @@ int8_t  close(uint8_t sn);
  */
 int8_t  listen(uint8_t sn);
 
-/**
- * @ingroup WIZnet_socket_APIs
- * @brief Try to connect a server.
- * @details It requests connection to the server with destination IP address and port number passed as parameter.\n
- * @note It is valid only in TCP client mode. 
- *       In block io mode, it does not return until connection is completed.
- *       In Non-block io mode, it return @ref SOCK_BUSY immediately.
- *
- * @param sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
- * @param addr Pointer variable of destination IP address. It should be allocated 4 bytes.
- * @param port Destination port number.
- *
- * @return @b Success : @ref SOCK_OK \n
- * @b Fail    :\n @ref SOCKERR_SOCKNUM   - Invalid socket number\n
- *                @ref SOCKERR_SOCKMODE  - Invalid socket mode\n
- *                @ref SOCKERR_SOCKINIT  - Socket is not initialized\n
- *                @ref SOCKERR_IPINVALID - Wrong server IP address\n
- *                @ref SOCKERR_PORTZERO  - Server port zero\n
- *                @ref SOCKERR_TIMEOUT   - Timeout occurred during request connection\n
- *                @ref SOCK_BUSY         - In non-block io mode, it returned immediately\n
- */
-int8_t  connect(uint8_t sn, uint8_t * addr, uint16_t port);
+//teddy 240122
+ /**
+  * @ingroup WIZnet_socket_APIs
+  * @brief Try to connect to a <b>TCP SERVER</b>.
+  * @details It sends a connection-reqeust message to the server with destination IP address and port number passed as parameter.\n
+  *          SOCKET <i>sn</i> is used as active(<b>TCP CLIENT</b>) mode.
+  * @param sn SOCKET number. It should be <b>0 ~ @ref _WIZCHIP_SOCK_NUM_</b>.
+  * @param addr Pointer variable of destination IPv6 or IPv4 address. 
+  * @param port Destination port number.
+  * @param addrlen the length of <i>addr</i>. \n <- removed 
+  *                If addr is IPv6 address it should be 16,else if addr is IPv4 address it should be 4. Otherwize, return @ref SOCKERR_IPINVALID.
+  * @return Success : @ref SOCK_OK \n
+  *         Fail    :\n @ref SOCKERR_SOCKNUM   - Invalid socket number\n
+  *                     @ref SOCKERR_SOCKMODE  - Invalid socket mode\n
+  *                     @ref SOCKERR_SOCKINIT  - Socket is not initialized\n
+  *                     @ref SOCKERR_IPINVALID - Wrong server IP address\n
+  *                     @ref SOCKERR_PORTZERO  - Server port zero\n
+  *                     @ref SOCKERR_TIMEOUT   - Timeout occurred during request connection\n
+  *                     @ref SOCK_BUSY         - In non-block io mode, it returns immediately\n
+  * @note It is valid only in TCP client mode. \n
+  *       In block io mode, it does not return until connection is completed. \n
+  *       In Non-block io mode(@ref SF_IO_NONBLOCK), it returns @ref SOCK_BUSY immediately.
+  */
+static int8_t connect_IO_6(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen );
+//int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
 
 /**
  * @ingroup WIZnet_socket_APIs
@@ -273,61 +375,68 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
 
 /**
  * @ingroup WIZnet_socket_APIs
- * @brief	Sends datagram to the peer with destination IP address and port number passed as parameter.
- * @details It sends datagram of UDP or MACRAW to the peer with destination IP address and port number passed as parameter.\n
- *          Even if the connectionless socket has been previously connected to a specific address,
- *          the address and port number parameters override the destination address for that particular datagram only.
- * @note    In block io mode, It doesn't return until data send is completed - socket buffer size is greater than <I>len</I>.
- *          In non-block io mode, It return @ref SOCK_BUSY immediately when socket buffer is not enough.
- *
- * @param sn    Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
- * @param buf   Pointer buffer to send outgoing data.
- * @param len   The byte length of data in buf.
- * @param addr  Pointer variable of destination IP address. It should be allocated 4 bytes.
- * @param port  Destination port number.
- *
- * @return @b Success : The sent data size \n
- *         @b Fail    :\n @ref SOCKERR_SOCKNUM     - Invalid socket number \n
- *                        @ref SOCKERR_SOCKMODE    - Invalid operation in the socket \n
- *                        @ref SOCKERR_SOCKSTATUS  - Invalid socket status for socket operation \n
- *                        @ref SOCKERR_DATALEN     - zero data length \n
- *                        @ref SOCKERR_IPINVALID   - Wrong server IP address\n
- *                        @ref SOCKERR_PORTZERO    - Server port zero\n
- *                        @ref SOCKERR_SOCKCLOSED  - Socket unexpectedly closed \n
- *                        @ref SOCKERR_TIMEOUT     - Timeout occurred \n
- *                        @ref SOCK_BUSY           - Socket is busy. 
+ * @brief Send datagram to the peer specifed by destination IP address and port number passed as parameter.
+ * @details It sends datagram data by using UDP,IPRAW, or MACRAW mode SOCKET.
+ * @param sn SOCKET number. It should be <b>0 ~ @ref _WIZCHIP_SOCK_NUM_</b>.
+ * @param buf Pointer of data buffer to be sent.
+ * @param len The byte length of data in buf.
+ * @param addr Pointer variable of destination IPv6 or IPv4 address. 
+ * @param port Destination port number.
+ * @param addrlen the length of <i>addr</i>. \n
+ *                If addr is IPv6 address it should be 16,else if addr is IPv4 address it should be 4. Otherwize, return @ref SOCKERR_IPINVALID.
+ * @return Success : The real sent data size. It may be equal to <i>len</i> or small.\n
+ *         Fail    :\n @ref SOCKERR_SOCKNUM     - Invalid SOCKET number \n
+ *                     @ref SOCKERR_SOCKMODE    - Invalid operation in the SOCKET \n
+ *                     @ref SOCKERR_SOCKSTATUS  - Invalid SOCKET status for SOCKET operation \n
+ *                     @ref SOCKERR_IPINVALID   - Invalid IP address\n
+ *                     @ref SOCKERR_PORTZERO    - Destination port number is zero\n
+ *                     @ref SOCKERR_DATALEN     - Invalid data length \n
+ *                     @ref SOCKERR_SOCKCLOSED  - SOCKET unexpectedly closed \n
+ *                     @ref SOCKERR_TIMEOUT     - Timeout occurred \n
+ *                     @ref SOCK_BUSY           - SOCKET is busy.
+ * @note It is valid only in @ref Sn_MR_UDP4, @ref Sn_MR_UDP6, @ref Sn_MR_UDPD, @ref Sn_MR_IPRAW4, @ref Sn_MR_IPRAW6, and @ref Sn_MR_MACRAW. \n
+ *       In UDP mode, It can send data as many as SOCKET RX buffer size if data is greater than SOCKET TX buffer size. \n
+ *       In IPRAW and MACRAW mode, It should send data as many as MTU(maxium transmission unit) if data is greater than MTU. That is, <i>len</i> can't exceed to MTU.
+ *       In block io mode, It doesn't return until data send is completed. 
+ *       In non-block io mode(@ref SF_IO_NONBLOCK), It return @ref SOCK_BUSY immediately when SOCKET transimttable buffer size is not enough.
  */
-int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port);
+//int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
 
 /**
  * @ingroup WIZnet_socket_APIs
- * @brief Receive datagram of UDP or MACRAW
- * @details This function is an application I/F function which is used to receive the data in other then TCP mode. \n
- *          This function is used to receive UDP and MAC_RAW mode, and handle the header as well. 
- *          This function can divide to received the packet data.
- *          On the MACRAW SOCKET, the addr and port parameters are ignored.
- * @note    In block io mode, it doesn't return until data reception is completed - data is filled as <I>len</I> in socket buffer
- *          In non-block io mode, it return @ref SOCK_BUSY immediately when <I>len</I> is greater than data size in socket buffer.
- *
- * @param sn   Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
- * @param buf  Pointer buffer to read incoming data.
- * @param len  The max data length of data in buf. 
- *             When the received packet size <= len, receives data as packet sized.
- *             When others, receives data as len.
- * @param addr Pointer variable of destination IP address. It should be allocated 4 bytes.
- *             It is valid only when the first call recvfrom for receiving the packet.
- *             When it is valid, @ref  packinfo[7] should be set as '1' after call @ref getsockopt(sn, SO_PACKINFO, &packinfo).
- * @param port Pointer variable of destination port number.
- *             It is valid only when the first call recvform for receiving the packet.
-*             When it is valid, @ref  packinfo[7] should be set as '1' after call @ref getsockopt(sn, SO_PACKINFO, &packinfo).
- *
- * @return	@b Success : This function return real received data size for success.\n
- *          @b Fail    : @ref SOCKERR_DATALEN    - zero data length \n
- *                       @ref SOCKERR_SOCKMODE   - Invalid operation in the socket \n
- *                       @ref SOCKERR_SOCKNUM    - Invalid socket number \n
- *                       @ref SOCKBUSY           - Socket is busy.
+ * @brief Receive datagram from a peer 
+ * @details It can read a data received from a peer by using UDP, IPRAW, or MACRAW mode SOCKET.
+ * @param sn   SOCKET number. It should be <b>0 ~ @ref _WIZCHIP_SOCK_NUM_</b>.
+ * @param buf  Pointer buffer to be saved the received data.
+ * @param len  The max read data length. \n
+ *             When the received packet size <= <i>len</i>, it can read data as many as the packet size. \n
+ *             When others, it can read data as many as len and remain to the rest data of the packet.
+ * @param addr Pointer variable of destination IP address.\n
+ *             It is valid only when @ref recvfrom() is first called for receiving the datagram packet.
+ *             You can check it valid or not through @ref PACK_FIRST. You can get it through @ref getsockopt(sn, @ref SO_PACKINFO, &packinfo).\n
+ *             In UDP4, IPRAW mode SOCKET, it should be allocated over 4bytes. \n
+ *             In UDP6, UDPD mode SOCKET, it should be allocated over 16bytes.
+ * @param port Pointer variable of destination port number. \n
+ *             It is valid only when @ref recvfrom() is first called for receiving the datagram packet, same as <i>port</i> case.
+ * @param addrlen The byte length of destination IP address. \n
+ *                It is valid only when @ref recvfrom() is first called for receiving the datagram packet, same as <i>port</i> case.\n
+ *                When the destination has a IPv4 address, it is set to 4. \n
+ *                when the destination has a IPv6 address, it is set to 16. 
+ * @return   Success : The real received data size. It may be equal to <i>len</i> or small.\n
+ *          Fail    : @ref SOCKERR_SOCKMODE   - Invalid operation in the socket \n
+ *                    @ref SOCKERR_SOCKNUM    - Invalid socket number \n
+ *                    @ref SOCKERR_ARG        - Invalid parameter such as <i>addr</i>, <i>port</i>
+ *                    @ref SOCK_BUSY          - SOCKET is busy.
+ * @note It is valid only in @ref Sn_MR_UDP4, @ref Sn_MR_UDP6, @ref Sn_MR_UDPD, @ref Sn_MR_IPRAW4, @ref Sn_MR_IPRAW6, and @ref Sn_MR_MACRAW. \n
+ *       When SOCKET is opened with @ref Sn_MR_MACRAW or When it reads the the remained data of the previous datagram packet,
+ *       the parameters such as <i>addr</i>, <i>port</i>, <i>addrlen</i> is ignored. \n
+ *       Also, It can read data as many as the received datagram packet size if <i>len</i> is greater than the datagram packet size. \n
+ *       In block io mode, it doesn't return until data reception is completed. that is, it waits until any datagram packet is received in SOCKET RX buffer. \n
+ *       In non-block io mode(@ref SF_IO_NONBLOCK), it return @ref SOCK_BUSY immediately when SOCKET RX buffer is empty. \n
  */
-int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port);
+//int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
+static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port ,uint8_t *addrlen);
 
 
 /////////////////////////////
@@ -369,7 +478,13 @@ typedef enum
    CS_GET_MAXRXBUF,        ///< get the size of socket buffer allocated in RX memory
    CS_CLR_INTERRUPT,       ///< clear the interrupt of socket with @ref sockint_kind
    CS_GET_INTERRUPT,       ///< get the socket interrupt. refer to @ref sockint_kind
-#if _WIZCHIP_ > 5100
+   
+   //teddy 240122
+//#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
+   CS_SET_PREFER,          ///< set the preferred source IPv6 address of transmission packet.\n Refer to @ref SRCV6_PREFER_AUTO, @ref SRCV6_PREFER_LLA and @ref SRCV6_PREFER_GUA.
+   CS_GET_PREFER,          ///< get the preferred source IPv6 address of transmission packet.\n Refer to @ref SRCV6_PREFER_AUTO, @ref SRCV6_PREFER_LLA and @ref SRCV6_PREFER_GUA.
+//#endif
+#if _WIZCHIP_ >= 5100
    CS_SET_INTMASK,         ///< set the interrupt mask of socket with @ref sockint_kind, Not supported in W5100
    CS_GET_INTMASK          ///< get the masked interrupt of socket. refer to @ref sockint_kind, Not supported in W5100
 #endif
@@ -397,8 +512,14 @@ typedef enum
    SO_SENDBUF,          ///< Valid only in getsockopt. Get the free data size of Socekt TX buffer. @ref Sn_TX_FSR, @ref getSn_TX_FSR()
    SO_RECVBUF,          ///< Valid only in getsockopt. Get the received data size in socket RX buffer. @ref Sn_RX_RSR, @ref getSn_RX_RSR()
    SO_STATUS,           ///< Valid only in getsockopt. Get the socket status. @ref Sn_SR, @ref getSn_SR()
+   
+   //teddy 240122
+//#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
+     SO_EXTSTATUS,        ///< Valid only in @ref getsockopt(). Get the extended TCP SOCKETn status. @ref getSn_ESR()
+     SO_MODE,
+//#endif
    SO_REMAINSIZE,       ///< Valid only in getsockopt. Get the remained packet size in other then TCP mode.
-   SO_PACKINFO          ///< Valid only in getsockopt. Get the packet information as @ref PACK_FIRST, @ref PACK_REMAINED, and @ref PACK_COMPLETED in other then TCP mode.
+   SO_PACKINFO          ///< Valid only in getsockopt. Get the packet information as @ref PACK_FIRST, @ref PACK_REMAINED, and @ref PACK_COMPLETED in other then TCP mode.   
 }sockopt_type;
 
 /**
@@ -482,8 +603,137 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
   */
 int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
 
+//teddy 240122
+#if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
+   /**
+    * @ingroup WIZnet_socket_APIs
+    *  @brief Peeks a sub-message in SOCKETn RX buffer
+    *  @details It peeks the incoming message of SOCKETn RX buffer. \n
+    *           It can find the specified sub-message in the incoming message and
+    *           return the length of incoming message before the sub-message. \n
+    *           It is useful when you need to read each messages from multiple message in SOCKET RX buffer.
+    *  @param sn SOCKET number
+    *  @param submsg sub-message pointer to find
+    *  @param subsize the length of <i>submsg</i>
+    * @return
+    *   - Success : the length of incoming message length before the <i>submsg</i> \n
+    *   - Fail : -1
+    * @note
+    *   It is just return the length of incoming message before the found sub-message. It does not receive the message.\n
+    *   So, after calling peeksockmsg, @ref _Sn_RX_RD_ is not changed.
+    */
+   int16_t peeksockmsg(uint8_t sn, uint8_t* submsg, uint16_t subsize);
+
+#endif
+
+// void setAddrlen_W6x00( uint8_t num) ;
+// uint8_t checkAddrlen_W6x00() ;
+
+// void inline_setAddrlen_W6x00( uint8_t num);
+// uint8_t inline_CheckAddrlen_W6x00( void );
+
+
+#if 1 // by_Lihan
+
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  by_Lihan_W5x00
+    */
+int8_t connect_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  );
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  by_Lihan_Wx00
+    */
+int8_t connect_W6x00(uint8_t sn , uint8_t * addr, uint16_t port,uint8_t addrlen );
+
+
+
+
+
+#define GET_MACRO_connect(_1, _2, _3, _4, NAME, ...) NAME
+#define CHOOSE_TESTCODE_MACRO(...) GET_MACRO_connect(__VA_ARGS__, connect_4, connect_3)
+
+/**
+// by_LIhan for overroading
+// NOTE_LIHAN: Some sections of this code are not yet fully defined.
+   * @note 
+   *    In case of get 3 arguments - int8_t connect_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  );\n
+   *    In case of get 4 arguments - int8_t connect_W6x00(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen );
+*/
+
+#define connect(...) CHOOSE_TESTCODE_MACRO(__VA_ARGS__)(__VA_ARGS__)
+
+//   In case of get 3 arguments
+#define connect_3(sn , addr , port ) connect_W5x00(sn , addr , port)
+
+//   In case of get 4 arguments
+#define connect_4(sn , addr , port, addrlen ) connect_W6x00(sn , addr , port,addrlen)
+
+
+
+
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  by_Lihan
+    */
+int32_t sendto_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port );
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  by_Lihan
+    */
+int32_t sendto_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port,uint8_t addrlen );
+
+
+#define GET_MACRO_sendto(_1, _2, _3, _4, _5 , _6, NAME, ...) NAME
+#define CHOOSE_sendto_MACRO(...) GET_MACRO_sendto(__VA_ARGS__, sendto_6, sendto_5)
+
+// by_LIhan for overroading
+// NOTE_LIHAN: Some sections of this code are not yet fully defined.
+//   In case of get 3 arguments - int8_t sendto_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  );
+//   In case of get 4 arguments - int8_t sendto_W6x00(uint8_t sn, uint8_t * addr, uint16_t port,uint8_t addrlen );
+#define sendto(...) CHOOSE_sendto_MACRO(__VA_ARGS__)(__VA_ARGS__)
+
+//   In case of get 3 arguments
+#define sendto_5( sn,   buf,  len,  addr,  port ) sendto_W5x00( sn,   buf,  len,  addr,  port)
+
+//   In case of get 4 arguments
+#define sendto_6( sn,   buf,  len,  addr,  port, addrlen ) sendto_W6x00( sn,   buf,  len,  addr,  port, addrlen)
+
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  byLihan_W5x00
+    */
+int32_t recvfrom_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port);
+ /**
+    * @ingroup WIZnet_socket_APIs
+    * @brief  byLihan_Wx00
+    */
+int32_t recvfrom_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port,  uint8_t *addrlen );
+
+
+#define GET_MACRO_recvfrom(_1, _2, _3, _4, _5, _6 ,NAME, ...) NAME
+#define CHOOSE_recvfrom_MACRO(...) GET_MACRO_recvfrom(__VA_ARGS__, recvfrom_6, recvfrom_5)
+
+// by_LIhanfor overroading
+// In case of get 3 arguments - int8_t recvfrom_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  );
+// In case of get 4 arguments - int8_t recvfrom_W6x00(uint8_t sn, uint8_t * addr, uint16_t port,uint8_t addrlen );
+#define recvfrom(...) CHOOSE_recvfrom_MACRO(__VA_ARGS__)(__VA_ARGS__)
+
+//   In case of get 3 arguments
+#define recvfrom_5(sn,   buf,  len,  addr,  port ) recvfrom_W5x00(sn,   buf,  len,  addr,  port)
+
+//   In case of get 4 arguments
+#define recvfrom_6(sn,   buf,  len,  addr,  port, addrlen  ) recvfrom_W6x00(sn,   buf,  len,  addr,  port, addrlen )
+
+
+#endif 
+
+
+
 #ifdef __cplusplus
  }
 #endif
 
 #endif   // _SOCKET_H_
+
+

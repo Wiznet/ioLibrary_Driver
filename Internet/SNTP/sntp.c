@@ -253,6 +253,10 @@ int8_t SNTP_run(datetime *time)
 	uint32_t destip = 0;
 	uint16_t destport;
 	uint16_t startindex = 40; //last 8-byte of data_buf[size is 48 byte] is xmt, so the startindex should be 40
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
 	switch(getSn_SR(NTP_SOCKET))
 	{
@@ -260,7 +264,16 @@ int8_t SNTP_run(datetime *time)
 		if ((RSR_len = getSn_RX_RSR(NTP_SOCKET)) > 0)
 		{
 			if (RSR_len > MAX_SNTP_BUF_SIZE) RSR_len = MAX_SNTP_BUF_SIZE;	// if Rx data size is lager than TX_RX_MAX_BUF_SIZE
+#if 1
+			// 20231019 taylor//teddy 240122
+			#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport, &addr_len);
+			#else
 			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport);
+			#endif
+#else
+			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport);
+#endif
 
 			get_seconds_from_ntp_server(data_buf,startindex);
 			time->yy = Nowdatetime.yy;
@@ -280,14 +293,32 @@ int8_t SNTP_run(datetime *time)
 		{
 			if(ntp_retry_cnt==0)//first send request, no need to wait
 			{
+#if 1
+				// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port, 4);
+#else
 				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
+#endif
+#else
+				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
+#endif
 				ntp_retry_cnt++;
 			}
 			else // send request again? it should wait for a while
 			{
 				if((ntp_retry_cnt % 0xFFF) == 0) //wait time
 				{
+#if 1
+					// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port, 4);
+#else
 					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
+#endif
+#else
+					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
+#endif
 #ifdef _SNTP_DEBUG_
 					printf("ntp retry: %d\r\n", ntp_retry_cnt);
 #endif
@@ -316,7 +347,6 @@ int8_t SNTP_run(datetime *time)
 void calcdatetime(tstamp seconds)
 {
 	uint8_t yf=0;
-	uint8_t leap;
 	tstamp n=0,d=0,total_d=0,rz=0;
 	uint16_t y=0,r=0,yr=0;
 	signed long long yd=0;
@@ -326,34 +356,21 @@ void calcdatetime(tstamp seconds)
 	d=0;
 	uint32_t p_year_total_sec=SECS_PERDAY*365;
 	uint32_t r_year_total_sec=SECS_PERDAY*366;
-	while(1)
+	while(n>=p_year_total_sec)
 	{
-		leap = 0;
-		if( ((EPOCH + r) % 400 == 0) ||
-			(((EPOCH + r) % 100 != 0) && ((EPOCH + r) % 4 == 0)) )
+		if((EPOCH+r)%400==0 || ((EPOCH+r)%100!=0 && (EPOCH+r)%4==0))
 		{
-			leap = 1;
-		}
-
-		if (leap)
-		{
-			if (n < r_year_total_sec) {
-				break;
-			}
-			n -= r_year_total_sec;
-			d += 366;
+			n = n -(r_year_total_sec);
+			d = d + 366;
 		}
 		else
 		{
-			if (n < p_year_total_sec) {
-				break;
-			}
-			n -= p_year_total_sec;
-			d += 365;
+			n = n - (p_year_total_sec);
+			d = d + 365;
 		}
+		r+=1;
+		y+=1;
 
-		r++;
-		y++;
 	}
 
 	y += EPOCH;
@@ -440,7 +457,7 @@ tstamp changedatetime_to_seconds(void)
 		}
 		if (i==3)
 		{
-			if (l%400==0 || l%100!=0 && l%4==0)
+			if (l%400==0 && l%100!=0 && l%4==0)
 			{
 				total_day += 29;
 			}

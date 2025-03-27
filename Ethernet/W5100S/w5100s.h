@@ -2416,12 +2416,12 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 
 /**
  * @ingroup Common_register_access_function_W5100S
- * @brief Get \ref SLCR register
- * @return uint8_t. Value of @ref SLCR register.
- * @sa setSLCR()
+ * @brief Get \ref RQCR register
+ * @return uint8_t. Value of @ref RQCR register.
+ * @sa setRQCR()
  */
 #define getSLCR()	\
-		WIZCHIP_READ(SLCR)
+		WIZCHIP_READ(RQCR)
 
 /**
  * @ingroup Common_register_access_function_W5100S
@@ -2768,7 +2768,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(Sn_PORT(sn),   (uint8_t)(port >> 8)); \
 		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_PORT(sn),1), (uint8_t) port); \
 	}
-
+#define setSn_PORTR  setSn_PORT
 /**
  * @ingroup Socket_register_access_function_W5100S
  * @brief Get @ref Sn_PORT register
@@ -2830,7 +2830,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_WRITE(Sn_DPORT(sn),   (uint8_t) (dport>>8)); \
 		WIZCHIP_WRITE(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1), (uint8_t)  dport); \
 	}
-
+#define setSn_DPORTR(sn, dport)   setSn_DPORT(sn,dport)
 /**
  * @ingroup Socket_register_access_function_W5100S
  * @brief Get @ref Sn_DPORT register
@@ -2840,7 +2840,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
  */
 #define getSn_DPORT(sn) \
 		(((uint16_t)WIZCHIP_READ(Sn_DPORT(sn)) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_DPORT(sn),1)))
-
+#define getSn_DPORTR(sn)   getSn_DPORT(sn)
 /**
  * @ingroup Socket_register_access_function_W5100S
  * @brief Set @ref Sn_MSSR register

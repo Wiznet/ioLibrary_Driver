@@ -509,6 +509,10 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 
 	retry_count = 0;
 	dns_1s_tick = 0;
+#if 1
+	// 20231019 taylor
+	uint8_t addr_len;
+#endif
 
    // Socket open
    socket(DNS_SOCKET, Sn_MR_UDP, 0, 0);
@@ -518,14 +522,32 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 #endif
 
 	len = dns_makequery(0, (char *)name, pDNSMSG, MAX_DNS_BUF_SIZE);
+#if 1
+	// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+	sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN, 4);
+#else
 	sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN);
+#endif
+#else
+	sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN);
+#endif
 
 	while (1)
 	{
 		if ((len = getSn_RX_RSR(DNS_SOCKET)) > 0)
 		{
 			if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
+#if 1
+			// 20231019 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port, &addr_len);
+#else
 			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port);
+#endif
+#else
+			len = recvfrom(DNS_SOCKET, pDNSMSG, len, ip, &port);
+#endif
       #ifdef _DNS_DEBUG_
 	      printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
       #endif
@@ -547,7 +569,16 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns)
 #ifdef _DNS_DEBUG_
 			printf("> DNS Timeout\r\n");
 #endif
+#if 1
+			// 20231016 taylor//teddy 240122
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+			sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN, 4);
+#else
 			sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN);
+#endif
+#else
+			sendto(DNS_SOCKET, pDNSMSG, len, dns_ip, IPPORT_DOMAIN);
+#endif
 		}
 	}
 	close(DNS_SOCKET);

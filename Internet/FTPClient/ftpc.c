@@ -1,9 +1,17 @@
 #include "ftpc.h"
 
+#if 1
+// 20231012 taylor
+un_l2cval remote_ip_ftpc;
+uint16_t  remote_port_ftpc;
+un_l2cval local_ip_ftpc;
+uint16_t  local_port_ftpc;
+#else
 un_l2cval remote_ip;
 uint16_t  remote_port;
 un_l2cval local_ip;
 uint16_t  local_port;
+#endif
 uint8_t connect_state_control_ftpc = 0;
 uint8_t connect_state_data_ftpc = 0;
 uint8_t gModeActivePassiveflag = 0;
@@ -21,11 +29,21 @@ void ftpc_init(uint8_t * src_ip)
 {
 	ftpc.dsock_mode = ACTIVE_MODE;
 
+#if 1
+	// 20231012 taylor
+
+	local_ip_ftpc.cVal[0] = src_ip[0];
+	local_ip_ftpc.cVal[1] = src_ip[1];
+	local_ip_ftpc.cVal[2] = src_ip[2];
+	local_ip_ftpc.cVal[3] = src_ip[3];
+	local_port_ftpc = 35000;
+#else
 	local_ip.cVal[0] = src_ip[0];
 	local_ip.cVal[1] = src_ip[1];
 	local_ip.cVal[2] = src_ip[2];
 	local_ip.cVal[3] = src_ip[3];
 	local_port = 35000;
+#endif
 	strcpy(ftpc.workingdir, "/");
 	socket(CTRL_SOCK, Sn_MR_TCP, FTP_destport, 0x0);
 }
@@ -553,23 +571,44 @@ int pportc(char * arg)
 	{
 		if(i==0) tok = strtok(NULL,",\r\n");
 		else	 tok = strtok(NULL,",");
+#if 1
+		// 20231012 taylor
+		remote_ip_ftpc.cVal[i] = (uint8_t)atoi(tok);
+#else
 		remote_ip.cVal[i] = (uint8_t)atoi(tok);
+#endif
 		if (!tok){
 			printf("bad pport : %s\r\n", arg);
 			return -1;
 		}
 	}
+#if 1
+	// 20231012 taylor
+	remote_port_ftpc = 0;
+#else
 	remote_port = 0;
+#endif
 	for (i = 0; i < 2; i++){
 		tok = strtok(NULL,",\r\n");
+#if 1
+		// 20231012 taylor
+		remote_port_ftpc <<= 8;
+		remote_port_ftpc += atoi(tok);
+#else
 		remote_port <<= 8;
 		remote_port += atoi(tok);
+#endif
 		if (!tok){
 			printf("bad pport : %s\r\n", arg);
 			return -1;
 		}
 	}
+#if 1
+	// 20231012 taylor
+	printf("ip : %d.%d.%d.%d, port : %d\r\n", remote_ip_ftpc.cVal[0], remote_ip_ftpc.cVal[1], remote_ip_ftpc.cVal[2], remote_ip_ftpc.cVal[3], remote_port_ftpc);
+#else
 	printf("ip : %d.%d.%d.%d, port : %d\r\n", remote_ip.cVal[0], remote_ip.cVal[1], remote_ip.cVal[2], remote_ip.cVal[3], remote_port);
+#endif
 	return 0;
 }
 uint8_t* User_Keyboard_MSG()
