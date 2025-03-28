@@ -1057,13 +1057,26 @@ void wizphy_reset(void)
 
 void wizphy_setphyconf(wiz_PhyConf* phyconf)
 {
-   uint8_t tmp = 0;
+   uint8_t tmp = getPHYCFGR() & ~(PHYCFGR_RST);
    if(phyconf->by == PHY_CONFBY_SW)
       tmp |= PHYCFGR_OPMD;
    else
       tmp &= ~PHYCFGR_OPMD;
    if(phyconf->mode == PHY_MODE_AUTONEGO)
-      tmp |= PHYCFGR_OPMDC_ALLA;
+   {
+        /* For the W5500, 100BT-HDX is the only valid speed+duplex config
+    	 * that can be paired with auto-negotiation */
+    	if (phyconf->speed == PHY_SPEED_100 && phyconf->duplex == PHY_DUPLEX_HALF)
+    	{
+    		tmp |= PHYCFGR_OPMDC_100HA;
+    	}
+    	else
+    	{
+    		/* For all other combinations, ignore them as garbage
+    		 * and simply enable All Modes with auto-negotiation */
+    		tmp |= PHYCFGR_OPMDC_ALLA;
+    	}
+   }
    else
    {
       if(phyconf->duplex == PHY_DUPLEX_FULL)
@@ -1093,7 +1106,7 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf)
    switch(tmp & PHYCFGR_OPMDC_ALLA)
    {
       case PHYCFGR_OPMDC_ALLA:
-      case PHYCFGR_OPMDC_100FA: 
+      case PHYCFGR_OPMDC_100HA: 
          phyconf->mode = PHY_MODE_AUTONEGO;
          break;
       default:
@@ -1102,7 +1115,7 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf)
    }
    switch(tmp & PHYCFGR_OPMDC_ALLA)
    {
-      case PHYCFGR_OPMDC_100FA:
+      case PHYCFGR_OPMDC_100HA:
       case PHYCFGR_OPMDC_100F:
       case PHYCFGR_OPMDC_100H:
          phyconf->speed = PHY_SPEED_100;
@@ -1113,7 +1126,6 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf)
    }
    switch(tmp & PHYCFGR_OPMDC_ALLA)
    {
-      case PHYCFGR_OPMDC_100FA:
       case PHYCFGR_OPMDC_100F:
       case PHYCFGR_OPMDC_10F:
          phyconf->duplex = PHY_DUPLEX_FULL;
