@@ -269,30 +269,17 @@ typedef   int16_t   datasize_t;     ///< sent or received data size
 *       Select one of @ref _WIZCHIP_IO_MODE_SPI_QSPI_, @ref _WIZCHIP_IO_MODE_SPI_VDM_,@ref _WIZCHIP_IO_MODE_BUS_INDIR_
 * @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
 */
-#define QSPI_SINGLE_MODE            (0x00 << 6)
-#define QSPI_DUAL_MODE              (0x01 << 6)
-#define QSPI_QUAD_MODE              (0x02 << 6)
 
-#if 1
-#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
+#define QSPI_SINGLE_MODE            (0x00 << 6) // 0b0000 0000 // 0x00
+#define QSPI_DUAL_MODE              (0x01 << 6) // 0b0100 0000 // 0x40
+#define QSPI_QUAD_MODE              (0x02 << 6) // 0b1000 0000 // 0x80 
+
 #define _WIZCHIP_QSPI_MODE_          QSPI_QUAD_MODE
 
+//#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
+#define _WIZCHIP_IO_MODE_           ((_WIZCHIP_IO_MODE_SPI_ & 0xff00) | (_WIZCHIP_QSPI_MODE_ & 0x00ff))
 
-#if 1 //by lihan //
-#define QSPI_MODE_SINGLE 	0x00
-#define QSPI_MODE_DUAL		0x01
-#define QSPI_MODE_QUAD 		0x02
-#define QSPI_MODE  QSPI_MODE_SINGLE
 
-#endif 
-
-#elif 0
-#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_VDM_
-#define _WIZCHIP_QSPI_MODE          QSPI_SINGLE_MODE
-
-#else
-#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
-#endif
 
 typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
 typedef   int16_t   datasize_t;     ///< sent or received data size
@@ -316,8 +303,10 @@ typedef   int16_t   datasize_t;     ///< sent or received data size
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
 #if 1
 // 20231108 taylor
-#if (_WIZCHIP_ == W6100)
+#if (_WIZCHIP_ == W6300)
 #define _WIZCHIP_IO_BASE_            0x60000000   // for W6100-EVB
+#elif (_WIZCHIP_ == W6100)
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W5100S-EV
 #elif (_WIZCHIP_ == W5100S)
 #define _WIZCHIP_IO_BASE_            0x60000000   // for W5100S-EVB
 #elif (_WIZCHIP_ == W5300)

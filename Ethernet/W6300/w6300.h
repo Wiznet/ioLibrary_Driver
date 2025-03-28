@@ -56,7 +56,7 @@ extern "C" {
 
 #define WIZCHIP_OFFSET_INC(ADDR, N) (ADDR + (N<<8)) ///< Increase offset address
 
-#if (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_)      
+#if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_)      
    #define IDM_AR0                        ((_WIZCHIP_IO_BASE_ + 0x0000))      ///< Indirect High Address Register
    #define IDM_AR1                        ((_WIZCHIP_IO_BASE_ + 0x0001))      ///< Indirect Low Address Register
    #define IDM_BSR                        ((_WIZCHIP_IO_BASE_ + 0x0002))      ///< Block Select Register
@@ -67,7 +67,7 @@ extern "C" {
 #define IDM_AR1                        ((_WIZCHIP_IO_BASE_ + 0x0001))      ///< Indirect Low Address Register
 #define IDM_BSR                        ((_WIZCHIP_IO_BASE_ + 0x0002))      ///< Block Select Register
 #define IDM_DR                         ((_WIZCHIP_IO_BASE_ + 0x0003))      ///< Indirect Data Register
-   #define _W6300_IO_BASE_       0x00000000
+   #define _W6300_IO_BASE_       0x00000000     
 #define _W6100_IO_BASE_       0x00000000
 #endif
 
