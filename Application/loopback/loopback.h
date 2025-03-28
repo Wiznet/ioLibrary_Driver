@@ -23,8 +23,11 @@ extern "C" {
 /************************/
 #define LOOPBACK_MAIN_NOBLOCK    0
 #define LOOPBACK_MODE   LOOPBACK_MAIN_NOBLOCK
+
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ) ;
 int8_t check_loopback_mode_W6x00();
+#endif 
 
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port);
 
@@ -34,7 +37,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 /* UDP Loopback test example */
 int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port);
 //teddy 240122
-int32_t iperf_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport, uint32_t size, uint16_t count);
+
 #ifdef __cplusplus
 }
 #endif

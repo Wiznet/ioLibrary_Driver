@@ -2,25 +2,13 @@
 #include "loopback.h"
 #include "socket.h"
 #include "wizchip_conf.h"
-#include "wiznetlogo.h"
+
 
 #if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLCOK
 
 
 static uint8_t loopback_mode = -1 ;
 
-int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ){
-    loopback_mode =  get_loopback_mode ;   
-    return 0;
-}
-
-int8_t check_loopback_mode_W6x00(){
-    if (loopback_mode < 0){ 
-        perror("Error: loopback_mode variable is not initialized");
-        return 0;
-    }
-    return loopback_mode;
-}
 
 
 
@@ -244,7 +232,22 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
    return 1;
 }
 //teddy 240122
+
+
+
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
+
+int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ){
+    loopback_mode =  get_loopback_mode ;   
+    return 0;
+}
+
+int8_t check_loopback_mode_W6x00(){
+    if (loopback_mode < 0){ 
+        loopback_mode = AS_IPV4 ; 
+    }
+    return loopback_mode;
+}
 
 //static uint16_t j=0;
 static uint16_t any_port = 	50000;
@@ -930,204 +933,8 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
 }
 
 
-int32_t iperf_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport, uint32_t size, uint16_t count)
-{
-       check_loopback_mode_W6x00();
-        int32_t ret; // return value for SOCK_ERRORs
-        datasize_t sentsize=0;
-        uint8_t status,inter,addr_len;
-        datasize_t send_size;
-        datasize_t received_size;
-        uint8_t tmp = 0;
-        uint8_t arg_tmp8;
-        wiz_IPAddress destinfo;
-        uint32_t i, j;
-        uint32_t lens = sizeof(wiznet_logo);
-        // Socket Status Transitions
-        // Check the W6100 Socket n status register (Sn_SR, The 'Sn_SR' controlled by Sn_CR command or Packet send/recv status)
-        getsockopt(sn,SO_STATUS,&status);
-        
-        switch(status)
-        {
-        case SOCK_ESTABLISHED :
-            ctlsocket(sn,CS_GET_INTERRUPT,&inter);
-            if(inter & Sn_IR_CON)   // Socket n interrupt register mask; TCP CON interrupt = connection with peer is successful
-            {
-            #ifdef _LOOPBACK_DEBUG_
-                    printf("%d:Connected to - %d.%d.%d.%d : %d\r\n",sn, destip[0], destip[1], destip[2], destip[3], destport);
-            #endif
-                arg_tmp8 = Sn_IR_CON;
-                ctlsocket(sn,CS_CLR_INTERRUPT,&arg_tmp8);// this interrupt should be write the bit cleared to '1'
-            }
-            #if 1
-            // 20230420 taylor
-            
-
-            for(j=0; j<10000; j++)
-            {
-
-                buf = wiznet_logo;
-
-                send_size = lens;
-                //printf ( " size= %d \r\n " ,send_size ) ;
-                sentsize = 0;
-                
-                while(send_size != sentsize)
-                {
-                    ret = send(sn, buf+sentsize, send_size-sentsize); // Data send process (User's buffer -> Destination through H/W Tx socket buffer)
-                    if(ret < 0) // Send Error occurred (sent data length < 0)
-                    {
-                    //    printf("Send Error Occured\r\n");
-                        close(sn); // socket close
-                        return ret;
-                    }
-                    sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
-                }
-            }
-
-            if((ret=disconnect(sn)) != SOCK_OK)
-            {
-                //close(sn);
-                // disconnect failed
-                if(ret == SOCK_BUSY)
-                {
-                    if((ret=disconnect(sn)) != SOCK_OK)
-                    {
-                    //    printf("disconnect\r\n");
-                        return 56783192;
-                    }
-                }
-                return 56783192;
-            }
-            else
-            {
-                // disconnected
-                return 31925678;
-            }
-            
-            #else
-    
-            //////////////////////////////////////////////////////////////////////////////////////////////
-            // Data Transaction Parts; Handle the [data receive and send] process
-            //////////////////////////////////////////////////////////////////////////////////////////////
-            getsockopt(sn, SO_RECVBUF, &received_size);
-    
-            if(received_size > 0) // Sn_RX_RSR: Socket n Received Size Register, Receiving data length
-            {
-                if(received_size > DATA_BUF_SIZE) received_size = DATA_BUF_SIZE; // DATA_BUF_SIZE means user defined buffer size (array)
-                ret = recv(sn, buf, received_size); // Data Receive process (H/W Rx socket buffer -> User's buffer)
-    
-                if(ret <= 0) return ret; // If the received data length <= 0, receive failed and process end
-                received_size = (uint16_t) ret;
-                sentsize = 0;
-    
-                // Data sentsize control
-                while(received_size != sentsize)
-                {
-                    ret = send(sn, buf+sentsize, received_size-sentsize); // Data send process (User's buffer -> Destination through H/W Tx socket buffer)
-                    if(ret < 0) // Send Error occurred (sent data length < 0)
-                    {
-                        close(sn); // socket close
-                        return ret;
-                    }
-                    sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
-                }
-            }
-            //////////////////////////////////////////////////////////////////////////////////////////////
-            #endif
-            break;
-    
-        case SOCK_CLOSE_WAIT :
-        #ifdef _LOOPBACK_DEBUG_
-                printf("%d:CloseWait\r\n",sn);
-        #endif
-            getsockopt(sn, SO_RECVBUF, &received_size);
-    
-            if((received_size = getSn_RX_RSR(sn)) > 0) // Sn_RX_RSR: Socket n Received Size Register, Receiving data length
-            {
-                if(received_size > DATA_BUF_SIZE) received_size = DATA_BUF_SIZE; // DATA_BUF_SIZE means user defined buffer size (array)
-                ret = recv(sn, buf, received_size); // Data Receive process (H/W Rx socket buffer -> User's buffer)
-    
-                if(ret <= 0) return ret; // If the received data length <= 0, receive failed and process end
-                received_size = (uint16_t) ret;
-                sentsize = 0;
-    
-                // Data sentsize control
-                while(received_size != sentsize)
-                {
-                    ret = send(sn, buf+sentsize, received_size-sentsize); // Data send process (User's buffer -> Destination through H/W Tx socket buffer)
-                    if(ret < 0) // Send Error occurred (sent data length < 0)
-                    {
-                        close(sn); // socket close
-                        return ret;
-                    }
-                    sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
-                }
-            }
-            if((ret=disconnect(sn)) != SOCK_OK) return ret;
-            #ifdef _LOOPBACK_DEBUG_
-                    printf("%d:Socket Closed\r\n", sn);
-            #endif
-            break;
-    
-        case SOCK_INIT :
-            if(loopback_mode == AS_IPV4)
-              ret = connect(sn, destip, destport, 4); /* Try to connect to TCP server(Socket, DestIP, DestPort) */
-            else if(loopback_mode == AS_IPV6)
-              ret = connect(sn, destip, destport, 16); /* Try to connect to TCP server(Socket, DestIP, DestPort) */
-    
-            //printf("SOCK Status: %d\r\n", ret);
-    
-            if( ret != SOCK_OK) return ret; //  Try to TCP connect to the TCP server (destination)
-            break;
-    
-        case SOCK_CLOSED:
-            switch(loopback_mode)
-            {
-            case AS_IPV4:
-#if NDA
-                  tmp = socket(sn, Sn_MR_TCP4, 5000, SOCK_IO_NONBLOCK|SF_TCP_NODELAY);
- #else
-                tmp = socket(sn, Sn_MR_TCP4, any_port++, SOCK_IO_NONBLOCK);
-#endif
-                break;
-            case AS_IPV6:
-                tmp = socket(sn, Sn_MR_TCP6, any_port++, SOCK_IO_NONBLOCK);
-                break;
-            case AS_IPDUAL:
-                tmp = socket(sn, Sn_MR_TCPD, any_port++, SOCK_IO_NONBLOCK);
-                break;
-            default:
-                break;
-            }
-    
-            if(tmp != sn){    /* reinitialize the socket */
-            #ifdef _LOOPBACK_DEBUG_
-                    printf("%d : Fail to create socket.\r\n",sn);
-            #endif
-                return SOCKERR_SOCKNUM;
-            }
-         //   printf("%d:Socket opened[%d]\r\n",sn, getSn_SR(sn));
-            sock_state[sn] = 1;
-    
-            break;
-        default:
-            break;
-        }
-        return 1;
-
-}
 
 
-
-int32_t recv_iperf(uint8_t sn, uint8_t * buf, uint16_t len)
-{
-   wiz_recv_data(sn, buf, len);
-   setSn_CR(sn,Sn_CR_RECV);
-   while(getSn_CR(sn));
- 
-   return (int32_t)len;
-}
 #endif
 
 #endif
