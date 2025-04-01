@@ -373,7 +373,7 @@ void reg_wizchip_busbuf_cbfunc(void(*busbuf_rb)(uint32_t AddrSel, iodata_t* pBuf
 }
 #endif
 
-#if _WIZCHIP_ == W6300
+#if _WIZCHIP_ == W6100
 
 void reg_wizchip_spi_cbfunc( uint8_t (*spi_rb)(void), 
                              void (*spi_wb)(uint8_t wb),

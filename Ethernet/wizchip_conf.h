@@ -906,7 +906,7 @@ void reg_wizchip_bus_cbfunc(iodata_t (*bus_rb)(uint32_t addr), void (*bus_wb)(ui
  *or register your functions.
  *@note If you do not describe or register, null function is called.
  */
-#if _WIZCHIP_ == W6300
+#if _WIZCHIP_ == W6100
 void reg_wizchip_spi_cbfunc( uint8_t (*spi_rb)(void), 
                              void (*spi_wb)(uint8_t wb),
                              void (*spi_rbuf)(uint8_t* buf, datasize_t len),
