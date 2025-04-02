@@ -137,11 +137,9 @@ uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 #endif
 
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
-#define IPV6_EN 0
-#else 
-#define IPV6_EN 1
-#endif 
+#if (_WIZCHIP_ > W5500)
+#define IPV6_AVAILABLE
+#endif
 
 #if 1
 
@@ -202,7 +200,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    CHECK_SOCKNUM(); 
    switch (protocol & 0x0F)
    {
-#if IPV6_EN
+#ifdef IPV6_AVAILABLE
       case Sn_MR_TCP4 :
          getSIPR(taddr);
          CHECK_IPZERO(taddr, 4);
@@ -247,7 +245,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
       switch(protocol)
       {
 
-#if IPV6_EN
+#ifdef IPV6_AVAILABLE
          case Sn_MR_MACRAW:
             if((flag & (SF_DHA_MANUAL | SF_FORCE_ARP)) != 0)
             	return SOCKERR_SOCKFLAG;
@@ -294,7 +292,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    }
    close(sn);
    setSn_MR(sn,(protocol | (flag & 0xF0)));
-#if IPV6_EN
+#ifdef IPV6_AVAILABLE
    setSn_MR2(sn, flag & 0x03);  
 #endif 
    if(!port)
@@ -354,14 +352,16 @@ int8_t listen(uint8_t sn)
 //int8_t connect (uint8_t sn, uint8_t * addr, uint16_t port )
 int8_t connect_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  ){
    printf(" W5x00 - connect - addrlen = %d \r\n" , 4 );
-   // #if IPV6_En
+   // #ifdef IPV6_AVAILABLE
+   // TODO :define how to work, when IPV6_AVAILABLE is defined
    // #endif 
    return connect_IO_6(sn , addr , port, 4 );
 }
 
 int8_t connect_W6x00(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen ){
    printf(" W6x00 - connect - addrlen = %d \r\n" , addrlen );
-   // #if !(IPV6_En)
+   // #ifdef IPV6_AVAILABLE
+   // TODO :define how to work, when IPV6_AVAILABLE is defined
    // #endif 
    return connect_IO_6(sn , addr , port ,addrlen );
 }
@@ -375,7 +375,7 @@ static int8_t connect_IO_6 (uint8_t sn, uint8_t * addr, uint16_t port, uint8_t a
    CHECK_TCPMODE(); // same macro " CHECK_SOCKMODE(Sn_MR_TCP);"
    CHECK_SOCKINIT();
   
-#if IPV6_En
+#ifdef IPV6_AVAILABLE
    CHECK_IPZERO(addr, addrlen);
 #else
    uint32_t taddr;
@@ -393,7 +393,7 @@ static int8_t connect_IO_6 (uint8_t sn, uint8_t * addr, uint16_t port, uint8_t a
   
    if (addrlen == 16)     // addrlen=16, Sn_MR_TCP6(1001), Sn_MR_TCPD(1101))
    {
-#if (IPV6_EN) 
+#ifdef IPV6_AVAILABLE
       if( getSn_MR(sn) & 0x08)     
       {
          setSn_DIP6R(sn,addr);
@@ -592,14 +592,14 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
    {
        if (addrlen == 16)      // addrlen=16, Sn_MR_UDP6(1010), Sn_MR_UDPD(1110)), IPRAW6(1011)
       {
-      #if (IPV6_EN) 
+#ifdef IPV6_AVAILABLE
          if( tmp & 0x08)  
          {
             setSn_DIP6R(sn,addr);
             tcmd = Sn_CR_SEND6;
          }
          else
-       #endif 
+#endif 
          return SOCKERR_SOCKMODE;
       } 
       else if(addrlen == 4)      // addrlen=4, Sn_MR_UDP4(0010), Sn_MR_UDPD(1110), IPRAW4(0011)
@@ -615,7 +615,7 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
       if(port){ setSn_DPORTR(sn, port);}
       else   return SOCKERR_PORTZERO;
    }
-   #if !IPV6_EN
+#ifndef IPV6_AVAILABLE
    CHECK_SOCKDATA();
    //M20140501 : For avoiding fatal error on memory align mismatched
    //if(*((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
@@ -631,7 +631,7 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
    if((taddr == 0) && ((getSn_MR(sn)&Sn_MR_MACRAW) != Sn_MR_MACRAW)) return SOCKERR_IPINVALID;
    if((port  == 0) && ((getSn_MR(sn)&Sn_MR_MACRAW) != Sn_MR_MACRAW)) return SOCKERR_PORTZERO;
    tmp = getSn_SR(sn);
-   #endif 
+#endif 
 
    freesize = getSn_TxMAX(sn);
    if (len > freesize) len = freesize; // check size not to exceed MAX size.
@@ -654,11 +654,11 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
       }
       else taddr = 0;
    #endif
-   #if IPV6_EN
+#ifdef IPV6_AVAILABLE
    setSn_CR(sn,tcmd);
-   #else
+#else
    setSn_CR(sn,Sn_CR_SEND);
-   #endif 
+#endif 
    while(getSn_CR(sn));
   
    while(1)
@@ -720,7 +720,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          } 
          if( sock_io_mode & (1<<sn) ) return SOCK_BUSY;
       };
-      #if IPV6_EN
+   #ifdef IPV6_AVAILABLE
       /* First read 2 bytes of PACKET INFO in SOCKETn RX buffer*/
       wiz_recv_data(sn, head, 2);  
       setSn_CR(sn,Sn_CR_RECV);
@@ -728,7 +728,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
       pack_len = head[0] & 0x07;
       pack_len = (pack_len << 8) + head[1];
     
-      #endif 
+   #endif 
       switch (getSn_MR(sn) & 0x0F)
       {
          case Sn_MR_UDP4 :
@@ -736,7 +736,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          case Sn_MR_UDPD:
          case Sn_MR_IPRAW6:
          case Sn_MR_IPRAW4 : 
-         #if IPV6_EN
+#ifdef IPV6_AVAILABLE
             if(addr == 0) 
                return SOCKERR_ARG;
             
@@ -755,7 +755,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
 
             while(getSn_CR(sn));
 
-         #else    
+#else    
          #if _WIZCHIP_ == 5300
    		   if(mr1 & MR_FS)
    		   {
@@ -786,7 +786,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
             }
          #endif
             sock_pack_info[sn] = PACK_FIRST;
-         #endif         
+#endif         
             break;
          case Sn_MR_MACRAW :
 			pack_len-=2;
@@ -800,7 +800,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
             return SOCKERR_SOCKMODE;
             break;
       }
-      #if IPV6_EN
+#ifdef IPV6_AVAILABLE
       sock_remained_size[sn] = pack_len;
       sock_pack_info[sn] |= PACK_FIRST;
       if((getSn_MR(sn) & 0x03) == 0x02)  // Sn_MR_UDP4(0010), Sn_MR_UDP6(1010), Sn_MR_UDPD(1110)
@@ -812,7 +812,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          setSn_CR(sn,Sn_CR_RECV);
          while(getSn_CR(sn));   
       }
-      #endif 
+#endif 
    }   
    
    if   (len < sock_remained_size[sn]) pack_len = len;
@@ -866,7 +866,7 @@ int8_t ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg)
          *((uint8_t*)arg) = getSn_IMR(sn);
          break;
 #endif
-#if IPV6_EN
+#ifdef IPV6_AVAILABLE
       case CS_SET_PREFER:
     	  if((tmp & 0x03) == 0x01) return SOCKERR_ARG;
     	  setSn_PSR(sn, tmp);
@@ -896,7 +896,7 @@ int8_t setsockopt(uint8_t sn, sockopt_type sotype, void* arg)
          setSn_MSSR(sn,*(uint16_t*)arg);
          break;
       case SO_DESTIP:
-      #if IPV6_EN
+#ifdef IPV6_AVAILABLE
          if(((wiz_IPAddress*)arg)->len == 16) 
             setSn_DIP6R(sn, ((wiz_IPAddress*)arg)->ip);
          else 
@@ -941,9 +941,9 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
    switch(sotype)
    {
       case SO_FLAG:
-      #if IPV6_EN 
+#ifdef IPV6_AVAILABLE
          *(uint8_t*)arg = (getSn_MR(sn) & 0xF0) | (getSn_MR2(sn)) | ((uint8_t)(((sock_io_mode >> sn) & 0x0001) << 3));
-      #endif
+#endif
          *(uint8_t*)arg = getSn_MR(sn) & 0xF0;
          break;
       case SO_TTL:
@@ -956,7 +956,7 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
          *(uint16_t*) arg = getSn_MSSR(sn);
          break;
       case SO_DESTIP:
-      #if IPV6_EN
+#ifdef IPV6_AVAILABLE
          CHECK_TCPMODE();
          if(getSn_ESR(sn) & TCPSOCK_MODE) //IPv6 ?
          {
@@ -969,9 +969,10 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
             ((wiz_IPAddress*)arg)->len = 4;
          } 
          break;
-      #else 
+#else 
          getSn_DIPR(sn, (uint8_t*)arg);
-      #endif 
+         break;
+#endif 
       case SO_DESTPORT:  
          *(uint16_t*) arg = getSn_DPORTR(sn);
          break; 
@@ -990,7 +991,7 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
       case SO_STATUS:
          *(uint8_t*) arg = getSn_SR(sn);
          break;
-#if IPV6_EN
+#ifdef IPV6_AVAILABLE
       case SO_EXTSTATUS:
          CHECK_TCPMODE();
          *(uint8_t*) arg = getSn_ESR(sn) & 0x07;
@@ -1031,7 +1032,7 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
    return SOCK_OK;
 }
 
-#if IPV6_EN 
+#ifdef IPV6_AVAILABLE
 int16_t peeksockmsg(uint8_t sn, uint8_t* submsg, uint16_t subsize)
 {
    uint32_t rx_ptr = 0;
