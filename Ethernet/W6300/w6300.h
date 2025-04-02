@@ -3932,8 +3932,10 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, datasize_t len);
 
 #define getSn_DPORTR(sn) \
         ((((uint16_t)WIZCHIP_READ(_Sn_DPORTR_(sn))) << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(_Sn_DPORTR_(sn),1)))
+
 #define getSn_DPORT(sn) getSn_DPORTR(sn)  
-#define setSn_DPORT(sn) setSn_DPORTR(sn)  
+#define setSn_DPORT(sn,dportr)  setSn_DPORTR(sn,dportr)  
+
 
 #define setSn_MR2(sn,mr2) \
         WIZCHIP_WRITE(_Sn_MR2_(sn),(mr2))
