@@ -16,7 +16,7 @@ extern "C" {
 #define F_APP_TFTP
 #define __TFTP_DEBUG__
 
-#define F_STORAGE // If your target support a storage, you have to activate this feature and implement.
+// #define F_STORAGE // If your target support a storage, you have to activate this feature and implement.
 
 #define SOCK_TFTP		1
 

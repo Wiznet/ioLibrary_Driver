@@ -351,7 +351,7 @@ int8_t listen(uint8_t sn)
 }
 //int8_t connect (uint8_t sn, uint8_t * addr, uint16_t port )
 int8_t connect_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  ){
-   printf(" W5x00 - connect - addrlen = %d \r\n" , 4 );
+   // printf(" W5x00 - connect - addrlen = %d \r\n" , 4 );
    // #ifdef IPV6_AVAILABLE
    // TODO :define how to work, when IPV6_AVAILABLE is defined
    // #endif 
@@ -359,7 +359,7 @@ int8_t connect_W5x00(uint8_t sn, uint8_t * addr, uint16_t port  ){
 }
 
 int8_t connect_W6x00(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen ){
-   printf(" W6x00 - connect - addrlen = %d \r\n" , addrlen );
+   // printf(" W6x00 - connect - addrlen = %d \r\n" , addrlen );
    // #ifdef IPV6_AVAILABLE
    // TODO :define how to work, when IPV6_AVAILABLE is defined
    // #endif 
@@ -369,7 +369,7 @@ int8_t connect_W6x00(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen 
 static int8_t connect_IO_6 (uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen )
 { 
 
-   printf(" connect - addrlen = %d \r\n" , addrlen );
+   // printf(" connect - addrlen = %d \r\n" , addrlen );
 
    CHECK_SOCKNUM();
    CHECK_TCPMODE(); // same macro " CHECK_SOCKMODE(Sn_MR_TCP);"
@@ -565,12 +565,12 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
 
 int32_t sendto_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port ){
    //static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port)
-   printf("sendto_W5x00\r\n" ) ;
+   // printf("sendto_W5x00\r\n" ) ;
    return sendto_IO_6(sn,   buf,  len,   addr,  port,4);
 }
 
 int32_t sendto_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen ){
-   printf("sendto_W6x00\r\n" ) ;
+   // printf("sendto_W6x00\r\n" ) ;
    //static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port)
    return sendto_IO_6( sn,  buf,  len,   addr,  port, addrlen);
 }
@@ -684,13 +684,13 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
 
 int32_t recvfrom_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port){
    //int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port)
-   printf("recvfrom_W5x00\r\n" ) ;
+   // printf("recvfrom_W5x00\r\n" ) ;
    uint8_t *dummy ; 
    return recvfrom_IO_6(sn,   buf,  len,   addr,  port, dummy);
 }
 
 int32_t recvfrom_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen ){
-   printf("recvfrom_W6x00\r\n" ) ;
+   // printf("recvfrom_W6x00\r\n" ) ;
    //int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port)
    return recvfrom_IO_6( sn,  buf,  len,   addr,  port, addrlen);
 }
