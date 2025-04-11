@@ -122,6 +122,97 @@ int current_hour = 10;
 int current_min = 10;
 int current_sec = 30;
 
+#if defined(F_FILESYSTEM)
+/* List contents of a directory
+ * Taken from: http://elm-chan.org/fsw/ff/doc/readdir.html*/
+FRESULT scan_files (char* path, char* dbuf, int* size)
+{
+    FRESULT res;
+    DIR dir;
+    UINT i;
+    static FILINFO fno;
+    unsigned int year = 0;
+	char month, day = 0b00000000;
+    char hour, min, second = 0b00000000;
+
+    res = f_opendir(&dir, path); /* Open the directory */
+    if(res != FR_OK)
+    {
+    	printf("Failed to open \"%s\". (%u)\n", path, res);
+    	return res;
+    }
+    if (res == FR_OK)
+    {
+        for (;;)
+        {
+            res = f_readdir(&dir, &fno);                   /* Read a directory item */
+            if (res != FR_OK || fno.fname[0] == 0) break;  /* Break on error or end of dir */
+            if (fno.fattrib & AM_DIR)					   /* It is a directory*/
+            {
+            	i = strlen((char*)dbuf);
+            	year = (fno.fdate >> 9) + 1980;			   /*Year origin from 1980 (0..127)*/
+            	month = (fno.fdate >> 5) & 15;			   /*Month (1..12)*/
+            	day = fno.fdate & 31;					   /*Day (1..31)*/
+            	/*==================*/
+            	hour = (fno.ftime >> 11) & 31;			   /*Hour (0..23)*/
+            	min = (fno.ftime >> 5) & 63;			   /*Minute (0..59)*/
+            	second = fno.ftime & 31;				   /*Second / 2 (0..29)*/
+            	*size = sprintf(&dbuf[i], "type=dir;modify=%u%02d%02d%02d%02d%02d; %s/%s\r\n", year, month, day, hour, min, second, path, fno.fname);
+            }
+            else 										   /* It is a file. */
+            {
+                i = strlen((char*)dbuf);
+                year = (fno.fdate >> 9) + 1980;
+                month = (fno.fdate >> 5) & 15;
+                day = fno.fdate & 31;
+                //==================
+                hour = (fno.ftime >> 11) & 31;
+                min = (fno.ftime >> 5) & 63;
+                second = fno.ftime & 31;
+                *size = sprintf(&dbuf[i], "type=file;size=%lu;modify=%u%02d%02d%02d%02d%02d; %s/%s\r\n", fno.fsize, year, month, day, hour, min, second, path, fno.fname);
+            }
+        }
+        f_closedir(&dir);
+    }
+    return res;
+}
+
+
+/* Return Filesize in unit BYTES, if it's DIRECTORY return 0 */
+int get_filesize(char* path)
+{
+	FIL file_s;
+	FSIZE_t	o_size;
+	FRESULT res;
+
+	res = f_open(&file_s, path, FA_READ);
+	if(res != FR_OK) 					 /*File not found*/
+	{
+	    DIR dir;
+	    res = f_opendir(&dir, path);     /* Is it Directory? */
+	        if(res != FR_OK)
+	        {
+	        	printf("Failed to Open DIR \"%s\". (%u)\n\r", path, res);
+	        	return 0;                /*It's not directory as well, return 0 for SIZE_CMD error handler*/
+	        }
+	        if (res == FR_OK)
+	        {
+
+				printf("Open as DIR \"%s\". (%u)\n\r", path, res);
+				f_closedir(&dir);
+		    	return 0;				 /*return 0 for SIZE_CMD error handler*/
+	        }
+	}
+	o_size = file_s.obj.objsize;
+	if(f_close(&file_s) != FR_OK)
+	{
+				printf("Failed to close \"%s\". (%u)\n\r", path, res);
+				return 0;				/*return 0 for SIZE_CMD error handler*/
+	}
+	return o_size;
+}
+#endif
+
 int fsprintf(uint8_t s, const char *format, ...)
 {
 	int i;
@@ -501,7 +592,7 @@ uint8_t ftpd_run(uint8_t * dbuf)
     				ftp.fr = f_open(&(ftp.fil), (const char *)ftp.filename, FA_READ);
     				//print_filedsc(&(ftp.fil));
     				if(ftp.fr == FR_OK){
-    					remain_filesize = ftp.fil.fsize;
+    					remain_filesize = ftp.fil.obj.objsize;
 #if defined(_FTP_DEBUG_)
     					printf("f_open return FR_OK\r\n");
 #endif
@@ -1066,9 +1157,9 @@ char proc_ftpd(uint8_t sn, char * buf)
 			if(slen > 3)
 			{
 				tmpstr = strrchr(arg, '/');
-				*tmpstr = 0;
+				//*tmpstr = 0;
 #if defined(F_FILESYSTEM)
-				slen = get_filesize(arg, tmpstr + 1);
+				slen = (int) get_filesize(arg);
 #else
 				slen = _MAX_SS;
 #endif
@@ -1090,11 +1181,11 @@ char proc_ftpd(uint8_t sn, char * buf)
 			arg[slen - 2] = 0x00;
 			if(slen > 3)
 			{
-				arg[slen - 3] = 0x00;
+				//arg[slen - 3] = 0x00;
 				tmpstr = strrchr(arg, '/');
-				*tmpstr = 0;
+				//*tmpstr = 0;
 #if defined(F_FILESYSTEM)
-				slen = get_filesize(arg, tmpstr + 1);
+				slen = get_filesize(arg);			/* FATFS Cannot get DIR size; return 0*/
 #else
 				slen = 0;
 #endif
@@ -1262,15 +1353,15 @@ int pport(char * arg)
 void print_filedsc(FIL *fil)
 {
 #if defined(_FTP_DEBUG_)
-	printf("File System pointer : %08X\r\n", fil->fs);
-	printf("File System mount ID : %d\r\n", fil->id);
+	printf("File System pointer : %08X\r\n", fil->obj.fs);
+	printf("File System mount ID : %d\r\n", fil->obj.id);
 	printf("File status flag : %08X\r\n", fil->flag);
 	printf("File System pads : %08X\r\n", fil->err);
 	printf("File read write pointer : %08X\r\n", fil->fptr);
-	printf("File size : %08X\r\n", fil->fsize);
-	printf("File start cluster : %08X\r\n", fil->sclust);
+	printf("File size : %08X\r\n", fil->obj.objsize);
+	printf("File start cluster : %08X\r\n", fil->obj.sclust);
 	printf("current cluster : %08X\r\n", fil->clust);
-	printf("current data sector : %08X\r\n", fil->dsect);
+	printf("current data sector : %08X\r\n", fil->sect);
 	printf("dir entry sector : %08X\r\n", fil->dir_sect);
 	printf("dir entry pointer : %08X\r\n", fil->dir_ptr);
 #endif
