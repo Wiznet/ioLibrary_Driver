@@ -231,6 +231,63 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
    }
    return 1;
 }
+int32_t loopback_udpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport)
+{
+   int32_t ret;
+   uint16_t size = 0, sentsize=0;
+   static uint16_t any_port = 50000;
+   // uint8_t* strtest = "\r\nhello world";
+   // uint8_t flag = 0;
+   switch(getSn_SR(sn))
+   {
+      case SOCK_UDP :
+         // sendto(sn, strtest, strlen(strtest), destip, destport);
+         if((size = getSn_RX_RSR(sn)) > 0)
+         {
+            if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
+            buf[ret]=0x00;
+            printf("recv form[%d.%d.%d.%d][%d]: %s\n", destip[0],destip[1],destip[2],destip[3],destport,buf);
+            if(ret <= 0)
+            {
+#ifdef _LOOPBACK_DEBUG_
+               printf("%d: recvfrom error. %ld\r\n",sn,ret);
+#endif
+               return ret;
+            }
+            size = (uint16_t) ret;
+            sentsize = 0;
+            while(sentsize != size)
+            {
+               ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport);
+               if(ret < 0)
+               {
+#ifdef _LOOPBACK_DEBUG_
+                  printf("%d: sendto error. %ld\r\n",sn,ret);
+#endif
+                  return ret;
+               }
+               sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
+            }
+         }
+         break;
+      case SOCK_CLOSED:
+#ifdef _LOOPBACK_DEBUG_
+         // printf("%d:UDP loopback start\r\n",sn);
+#endif
+         if((ret = socket(sn, Sn_MR_UDP, any_port, 0x00)) != sn)
+            return ret;
+#ifdef _LOOPBACK_DEBUG_
+         printf("%d:Opened, UDP loopback, port [%d]\r\n", sn, any_port);
+#endif   
+         break;
+      default :
+         break;
+   }
+   return 1;
+   
+}
+
 //teddy 240122
 
 
@@ -934,6 +991,92 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
 
 
 
+int32_t loopback_udpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport)
+{
+    check_loopback_mode_W6x00();
+    int32_t ret;
+    uint16_t size = 0, sentsize=0;
+    static uint16_t any_port = 50000;
+    uint8_t addr_len;
+
+
+    uint8_t* mode_msg;
+    if(loopback_mode == AS_IPV4)
+    {
+        mode_msg = msg_v4;
+    }
+    else if(loopback_mode == AS_IPV6)
+    {
+        mode_msg = msg_v6;
+    }
+    else
+    {
+        mode_msg = msg_dual;
+    }   
+
+    // uint8_t* strtest = "\r\nhello world";
+    // uint8_t flag = 0;
+    switch(getSn_SR(sn))
+    {
+        case SOCK_UDP :
+            // sendto(sn, strtest, strlen(strtest), destip, destport);
+            if((size = getSn_RX_RSR(sn)) > 0)
+            {
+            if(size > DATA_BUF_SIZE) size = DATA_BUF_SIZE;
+            ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport , &addr_len);
+            buf[ret]=0x00;
+            printf("recv form[%d.%d.%d.%d][%d]: %s\n", destip[0],destip[1],destip[2],destip[3],destport,buf);
+            if(ret <= 0)
+            {
+#ifdef _LOOPBACK_DEBUG_
+               printf("%d: recvfrom error. %ld\r\n",sn,ret);
+#endif
+               return ret;
+            }
+            size = (uint16_t) ret;
+            sentsize = 0;
+            while(sentsize != size)
+            {
+               ret = sendto(sn, buf+sentsize, size-sentsize, destip, destport,addr_len);
+               if(ret < 0)
+               {
+#ifdef _LOOPBACK_DEBUG_
+                  printf("%d: sendto error. %ld\r\n",sn,ret);
+#endif
+                  return ret;
+               }
+               sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
+            }
+         }
+         break;
+      case SOCK_CLOSED:
+#ifdef _LOOPBACK_DEBUG_
+         // printf("%d:UDP loopback start\r\n",sn);
+#endif
+        
+        switch(loopback_mode)
+        {
+        case AS_IPV4:
+        socket(sn,Sn_MR_UDP4, destport, SOCK_IO_NONBLOCK);
+        break;
+        case AS_IPV6:
+        socket(sn,Sn_MR_UDP6, destport, SOCK_IO_NONBLOCK);
+        break;
+        case AS_IPDUAL:
+            socket(sn,Sn_MR_UDPD, destport, SOCK_IO_NONBLOCK);
+            break;
+        }
+        printf("%d:Opened, UDP loopback, port [%d] as %s\r\n", sn, destport, mode_msg);
+#ifdef _LOOPBACK_DEBUG_
+         printf("%d:Opened, UDP loopback, port [%d]\r\n", sn, any_port);
+#endif   
+         break;
+      default :
+         break;
+   }
+   return 1;
+   
+}
 
 #endif
 
