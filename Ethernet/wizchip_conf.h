@@ -274,7 +274,9 @@ typedef   int16_t   datasize_t;     ///< sent or received data size
 #define QSPI_DUAL_MODE              (0x01 << 6) // 0b0100 0000 // 0x40
 #define QSPI_QUAD_MODE              (0x02 << 6) // 0b1000 0000 // 0x80 
 
-#define _WIZCHIP_QSPI_MODE_          QSPI_QUAD_MODE
+#ifndef _WIZCHIP_QSPI_MODE_
+#define _WIZCHIP_QSPI_MODE_          QSPI_SINGLE_MODE
+#endif
 
 //#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
 #define _WIZCHIP_IO_MODE_           ((_WIZCHIP_IO_MODE_SPI_ & 0xff00) | (_WIZCHIP_QSPI_MODE_ & 0x00ff))

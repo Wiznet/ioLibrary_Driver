@@ -7,7 +7,7 @@
 #if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLCOK
 
 
-static uint8_t loopback_mode = -1 ;
+static int8_t loopback_mode = 0 ;
 
 
 
@@ -243,7 +243,7 @@ int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ){
 }
 
 int8_t check_loopback_mode_W6x00(){
-    if (loopback_mode < 0){ 
+    if (loopback_mode != AS_IPV4 && loopback_mode != AS_IPV6 && loopback_mode != AS_IPDUAL){ 
         loopback_mode = AS_IPV4 ; 
     }
     return loopback_mode;
