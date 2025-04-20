@@ -75,13 +75,13 @@ uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 
 //A20150601 : For integrating with W5300
 #if _WIZCHIP_ == 5300
-   uint8_t sock_remained_byte[_WIZCHIP_SOCK_NUM_] = {0,}; // set by wiz_recv_data()
+   uint8_t sock_remained_byte[_WIZCHIP_SOCK_NUM_] = {0,}; // set by wiz    recv_data()
 #endif
 
 
 #define CHECK_SOCKNUM()   \
    do{                    \
-      if(sn > _WIZCHIP_SOCK_NUM_) return SOCKERR_SOCKNUM;   \
+      if(sn >= _WIZCHIP_SOCK_NUM_) return SOCKERR_SOCKNUM;   \
    }while(0);             \
 
 #define CHECK_SOCKMODE(mode)  \
@@ -235,11 +235,19 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
       case Sn_MR_IPRAW4 :
       case Sn_MR_IPRAW6 :
          break; 
+      #if ( _WIZCHIP_ < 5200 )
+      case Sn_MR_PPPoE :
+         break;
+      #endif
       default :
         return SOCKERR_SOCKMODE;
    } 
 
    if((flag & 0x04)) return SOCKERR_SOCKFLAG;
+#if _WIZCHIP_ == 5200
+   if(flag & 0x10) return SOCKERR_SOCKFLAG;
+#endif
+	   
    if(flag != 0)
    {
       switch(protocol)
@@ -291,7 +299,11 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
       }
    }
    close(sn);
+#if _WIZCHIP_ == 5300   
+   setSn_MR(sn, ((uint16_t)(protocol | (flag & 0xF0))) | (((uint16_t)(flag & 0x02)) << 7) );
+#else
    setSn_MR(sn,(protocol | (flag & 0xF0)));
+#endif
 #ifdef IPV6_AVAILABLE
    setSn_MR2(sn, flag & 0x03);  
 #endif 
@@ -306,10 +318,14 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    while(getSn_CR(sn));
 
    sock_io_mode &= ~(1 <<sn);
+#ifndef IPV6_AVAILABLE
+   sock_io_mode |= ((flag & SF_IO_NONBLOCK) << sn);   
+#else
    sock_io_mode |= ((flag & (SF_IO_NONBLOCK>>3)) << sn);
+#endif
    sock_is_sending &= ~(1<<sn);
    sock_remained_size[sn] = 0;
-   sock_pack_info[sn] = PACK_NONE;
+   sock_pack_info[sn] = PACK_NONE;//PACK_COMPLETED
 
    while(getSn_SR(sn) == SOCK_CLOSED) ;
 //   printf("[%d]%d\r\n", sn, getSn_PORTR(sn));
@@ -320,6 +336,32 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 int8_t close(uint8_t sn)
 {
    CHECK_SOCKNUM();
+//A20160426 : Applied the erratum 1 of W5300
+#if   (_WIZCHIP_ == 5300) 
+   //M20160503 : Wrong socket parameter. s -> sn 
+   //if( ((getSn_MR(s)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(s) != getSn_TxMAX(s)) ) 
+   if( ((getSn_MR(sn)& 0x0F) == Sn_MR_TCP) && (getSn_TX_FSR(sn) != getSn_TxMAX(sn)) ) 
+   { 
+      uint8_t destip[4] = {0, 0, 0, 1};
+      // TODO
+      // You can wait for completing to sending data;
+      // wait about 1 second;
+      // if you have completed to send data, skip the code of erratum 1
+      // ex> wait_1s();
+      //     if (getSn_TX_FSR(s) == getSn_TxMAX(s)) continue;
+      // 
+      //M20160503 : The socket() of close() calls close() itself again. It occures a infinite loop - close()->socket()->close()->socket()-> ~
+      //socket(s,Sn_MR_UDP,0x3000,0);
+      //sendto(s,destip,1,destip,0x3000); // send the dummy data to an unknown destination(0.0.0.1).
+      setSn_MR(sn,Sn_MR_UDP);
+      setSn_PORTR(sn, 0x3000);
+      setSn_CR(sn,Sn_CR_OPEN);
+      while(getSn_CR(sn) != 0);
+      while(getSn_SR(sn) != SOCK_UDP);
+      sendto(sn,destip,1,destip,0x3000); // send the dummy data to an unknown destination(0.0.0.1).
+   };   
+#endif 
+
    setSn_CR(sn,Sn_CR_CLOSE);
    /* wait to process the command... */
    while( getSn_CR(sn) );
@@ -339,6 +381,7 @@ int8_t close(uint8_t sn)
 int8_t listen(uint8_t sn)
 {
    CHECK_SOCKNUM();
+   CHECK_TCPMODE(); 
    CHECK_SOCKINIT();
    setSn_CR(sn,Sn_CR_LISTEN);
    while(getSn_CR(sn));
@@ -462,7 +505,38 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
    //CHECK_SOCKNUM();
    //CHECK_TCPMODE(Sn_MR_TCP4);
    /************/
-
+#ifndef IPV6_AVAILABLE
+   CHECK_SOCKNUM();
+   CHECK_SOCKMODE(Sn_MR_TCP);
+   CHECK_SOCKDATA();
+   tmp = getSn_SR(sn);
+   if(tmp != SOCK_ESTABLISHED && tmp != SOCK_CLOSE_WAIT) return SOCKERR_SOCKSTATUS;
+   if( sock_is_sending & (1<<sn) )
+   {
+      tmp = getSn_IR(sn);
+      if(tmp & Sn_IR_SENDOK)
+      {
+         setSn_IR(sn, Sn_IR_SENDOK);
+         //M20150401 : Typing Error
+         //#if _WZICHIP_ == 5200
+         #if _WIZCHIP_ == 5200
+            if(getSn_TX_RD(sn) != sock_next_rd[sn])
+            {
+               setSn_CR(sn,Sn_CR_SEND);
+               while(getSn_CR(sn));
+               return SOCK_BUSY;
+            }
+         #endif
+         sock_is_sending &= ~(1<<sn);         
+      }
+      else if(tmp & Sn_IR_TIMEOUT)
+      {
+         close(sn);
+         return SOCKERR_TIMEOUT;
+      }
+      else return SOCK_BUSY;
+   }
+#endif 
    freesize = getSn_TxMAX(sn);
    if (len > freesize) len = freesize; // check size not to exceed MAX size.
    while(1)
@@ -478,6 +552,13 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len)
       if( sock_io_mode & (1<<sn) ) return SOCK_BUSY;  
    }
    wiz_send_data(sn, buf, len);
+#if _WIZCHIP_ == 5200
+   sock_next_rd[sn] = getSn_TX_RD(sn) + len;
+#endif
+
+#if _WIZCHIP_ == 5300
+   setSn_TX_WRSR(sn,len);
+#endif
    if(sock_is_sending & (1<<sn))
    {
       while ( !(getSn_IR(sn) & Sn_IR_SENDOK) )
@@ -543,6 +624,13 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
  
    recvsize = getSn_RxMAX(sn); 
    if(recvsize < len) len = recvsize;
+//A20150601 : For Integrating with W5300
+#if _WIZCHIP_ == 5300
+   //sock_pack_info[sn] = PACK_COMPLETED;    // for clear      
+   if(sock_remained_size[sn] == 0)
+   {
+#endif
+//
    while(1)
    {
       recvsize = (uint16_t)getSn_RX_RSR(sn);
@@ -555,10 +643,57 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len)
       if(recvsize) break;
       if(sock_io_mode & (1<<sn)) return SOCK_BUSY;
    }
+#if _WIZCHIP_ == 5300
+   }
+#endif
+
+//A20150601 : For integrating with W5300
+#if _WIZCHIP_ == 5300
+   if((sock_remained_size[sn] == 0) || (getSn_MR(sn) & Sn_MR_ALIGN))
+   {
+      mr = getMR();
+      if((getSn_MR(sn) & Sn_MR_ALIGN)==0)
+      {
+         wiz_recv_data(sn,head,2);
+         if(mr & MR_FS)
+            recvsize = (((uint16_t)head[1]) << 8) | ((uint16_t)head[0]);
+         else
+            recvsize = (((uint16_t)head[0]) << 8) | ((uint16_t)head[1]);
+         sock_pack_info[sn] = PACK_FIRST;
+      }
+      sock_remained_size[sn] = recvsize;
+   }
+   if(len > sock_remained_size[sn]) len = sock_remained_size[sn];
+   recvsize = len;   
+   if(sock_pack_info[sn] & PACK_FIFOBYTE)
+   {
+      *buf = sock_remained_byte[sn];
+      buf++;
+      sock_pack_info[sn] &= ~(PACK_FIFOBYTE);
+      recvsize -= 1;
+      sock_remained_size[sn] -= 1;
+   }
+   if(recvsize != 0)
+   {
+      wiz_recv_data(sn, buf, recvsize);
+      setSn_CR(sn,Sn_CR_RECV);
+      while(getSn_CR(sn));
+   }
+   sock_remained_size[sn] -= recvsize;
+   if(sock_remained_size[sn] != 0)
+   {
+      sock_pack_info[sn] |= PACK_REMAINED;
+      if(recvsize & 0x1) sock_pack_info[sn] |= PACK_FIFOBYTE;
+   }
+   else sock_pack_info[sn] = PACK_COMPLETED;
+   if(getSn_MR(sn) & Sn_MR_ALIGN) sock_remained_size[sn] = 0;
+   //len = recvsize;
+#else   
    if(recvsize < len) len = recvsize;
    wiz_recv_data(sn, buf, len); 
    setSn_CR(sn,Sn_CR_RECV); 
    while(getSn_CR(sn));  
+#endif
    return len;
 }
 
@@ -657,6 +792,10 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
 #ifdef IPV6_AVAILABLE
    setSn_CR(sn,tcmd);
 #else
+//A20150601 : For W5300
+#if _WIZCHIP_ == 5300
+   setSn_TX_WRSR(sn, len);
+#endif
    setSn_CR(sn,Sn_CR_SEND);
 #endif 
    while(getSn_CR(sn));
@@ -672,6 +811,9 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
       else if(tmp & Sn_IR_TIMEOUT)
       {
          setSn_IR(sn, Sn_IR_TIMEOUT);   
+         #if _WIZCHIP_ < 5500   //M20150401 : for WIZCHIP Errata #4, #5 (ARP errata)
+         if(taddr) setSUBR((uint8_t*)&taddr);
+         #endif
          return SOCKERR_TIMEOUT;
       }
    }  
@@ -694,11 +836,16 @@ int32_t recvfrom_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, 
    //int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port)
    return recvfrom_IO_6( sn,  buf,  len,   addr,  port, addrlen);
 }
-static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen)
+static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen) //TODO : WILL BE IMPROVED
 { 
    uint8_t  head[8]; // OR  head[2] by lihan, will be verify later
    uint16_t pack_len=0;
-  
+#if _WIZCHIP_ == 5300
+   uint16_t mr;
+   uint16_t mr1;
+#else   
+   uint8_t  mr;
+#endif
    /* 
     * The below codes can be omitted for optmization of speed
     */
@@ -706,7 +853,25 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
    //CHECK_DGRAMMODE();
    //CHECK_SOCKDATA();
    /************/
-  
+#if _WIZCHIP_ == 5300
+   mr1 = getMR();
+#endif   
+
+switch((mr=getSn_MR(sn)) & 0x0F)
+{
+   case Sn_MR_UDP:
+  case Sn_MR_IPRAW:
+   case Sn_MR_MACRAW:
+      break;
+#if ( _WIZCHIP_ < 5200 )         
+   case Sn_MR_PPPoE:
+      break;
+#endif
+   default:
+      return SOCKERR_SOCKMODE;
+}
+CHECK_SOCKDATA();
+
    if(sock_remained_size[sn] == 0)
    {
       while(1)
@@ -720,6 +885,8 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          } 
          if( sock_io_mode & (1<<sn) ) return SOCK_BUSY;
       };
+   }
+
    #ifdef IPV6_AVAILABLE
       /* First read 2 bytes of PACKET INFO in SOCKETn RX buffer*/
       wiz_recv_data(sn, head, 2);  
@@ -813,7 +980,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          while(getSn_CR(sn));   
       }
 #endif 
-   }   
+   
    
    if   (len < sock_remained_size[sn]) pack_len = len;
    else pack_len = sock_remained_size[sn];    
