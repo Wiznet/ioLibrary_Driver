@@ -367,7 +367,7 @@ void calcdatetime(tstamp seconds)
 				leap = 1;
 			}
 
-		if(leap)
+		if (leap)
 		{
 			if (n < r_year_total_sec) {
  				break;

@@ -68,7 +68,7 @@ int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 #endif
          break;
       case SOCK_INIT :
-#if 1
+#ifdef _LOOPBACK_DEBUG_
     	 printf("%d:Listen, TCP server loopback, port [%d]\r\n", sn, port);
 #endif
          if( (ret = listen(sn)) != SOCK_OK) return ret;
@@ -154,7 +154,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
          break;
 
       case SOCK_INIT :
-#if 1
+#ifdef _LOOPBACK_DEBUG_
     	 printf("%d:Try to connect to the %d.%d.%d.%d : %d\r\n", sn, destip[0], destip[1], destip[2], destip[3], destport);
 #endif
     	 if( (ret = connect(sn, destip, destport)) != SOCK_OK) return ret;	//	Try to TCP connect to the TCP server (destination)
@@ -221,9 +221,8 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
 #endif
          if((ret = socket(sn, Sn_MR_UDP, port, 0x00)) != sn)
             return ret;
-#if 1
-    
-         printf("[iOLB5]%d:_Opened, UDP loopback, port [%d]\r\n", sn, port);
+#ifdef _LOOPBACK_DEBUG_
+         printf("%d:Opened, UDP loopback, port [%d]\r\n", sn, port);
 #endif
          break;
       default :

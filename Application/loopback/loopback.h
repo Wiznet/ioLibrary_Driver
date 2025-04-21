@@ -29,6 +29,7 @@ int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ) ;
 int8_t check_loopback_mode_W6x00();
 #endif 
 
+/* TCP server Loopback test example */
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port);
 
 /* TCP client Loopback test example */
@@ -36,6 +37,8 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 
 /* UDP Loopback test example */
 int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port);
+
+/* UDP Client Loopback test example */
 int32_t loopback_udpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destport);
 
 //teddy 240122
