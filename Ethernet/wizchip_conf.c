@@ -122,7 +122,7 @@ void 	wizchip_bus_writedata(uint32_t AddrSel, iodata_t wb)  { *((volatile iodata
  * @note It can be overwritten with your function or register your functions by calling @ref reg_wizchip_bus_cbfunc().
  * @sa wizchip_bus_write_buf()
  */
-void wizchip_bus_read_buf(uint32_t AddrSel, iodata_t* buf, uint16_t len, uint8_t addrinc)
+void wizchip_bus_read_buf(uint32_t AddrSel, iodata_t* buf, int16_t len, uint8_t addrinc)
 { 
    uint16_t i;
    if(addrinc) addrinc = sizeof(iodata_t);
@@ -146,7 +146,7 @@ void wizchip_bus_read_buf(uint32_t AddrSel, iodata_t* buf, uint16_t len, uint8_t
  * @note It can be overwritten with your function or register your functions by calling @ref reg_wizchip_bus_cbfunc().
  * @sa wizchip_bus_read_buf()
  */
-void wizchip_bus_write_buf(uint32_t AddrSel, iodata_t* buf, uint16_t len, uint8_t addrinc)
+void wizchip_bus_write_buf(uint32_t AddrSel, iodata_t* buf, int16_t len, uint8_t addrinc)
 { 
    uint16_t i;
    if(addrinc) addrinc = sizeof(iodata_t);
