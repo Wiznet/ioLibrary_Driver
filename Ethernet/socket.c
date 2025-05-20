@@ -1120,6 +1120,18 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
          setSn_CR(sn,Sn_CR_RECV);
          while(getSn_CR(sn));   
       }
+            
+      if   (len < sock_remained_size[sn]) pack_len = len;
+      else pack_len = sock_remained_size[sn];    
+      wiz_recv_data(sn, buf, pack_len);
+      setSn_CR(sn,Sn_CR_RECV);  
+   /* wait to process the command... */
+      while(getSn_CR(sn)) ;
+         
+      sock_remained_size[sn] -= pack_len;
+      if(sock_remained_size[sn] != 0) sock_pack_info[sn] |= PACK_REMAINED;
+      else sock_pack_info[sn] |= PACK_COMPLETED;
+      
 #else 
 	setSn_CR(sn,Sn_CR_RECV);
 	/* wait to process the command... */
