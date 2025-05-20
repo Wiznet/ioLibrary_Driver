@@ -71,7 +71,7 @@ typedef struct MQTTMessage
     unsigned char retained;
     unsigned char dup;
     unsigned short id;
-    void *payload;
+    const void *payload;
     size_t payloadlen;
 } MQTTMessage;
 
