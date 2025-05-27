@@ -59,6 +59,10 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
 
 	uint8_t opcode = 0;
 	uint16_t ADDR = 0;
+
+   WIZCHIP_CRITICAL_ENTER();
+   WIZCHIP.CS._select();
+   
    #if (_WIZCHIP_IO_MODE_ & 0xff00) & _WIZCHIP_IO_MODE_BUS_
       uint8_t tAD[4];
       tAD[0] = (uint8_t)((AddrSel & 0x00FF0000) >> 16);
@@ -71,6 +75,9 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
       ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
       WIZCHIP.IF.QSPI._write_qspi(opcode, ADDR, &wb, 1);
    #endif
+   
+   WIZCHIP.CS._deselect();
+   WIZCHIP_CRITICAL_EXIT();
 }
 
 uint8_t  WIZCHIP_READ(uint32_t AddrSel)
@@ -79,6 +86,9 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 	uint8_t ret[2] = {0,};
 	uint8_t opcode = 0;
 	uint16_t ADDR = 0;
+
+   WIZCHIP_CRITICAL_ENTER();
+   WIZCHIP.CS._select();
 
 #if (_WIZCHIP_IO_MODE_ & 0xff00) & _WIZCHIP_IO_MODE_BUS_
       uint8_t tAD[3];
@@ -92,6 +102,8 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
       ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
       WIZCHIP.IF.QSPI._read_qspi(opcode, ADDR, ret, 1);
 #endif
+   WIZCHIP.CS._deselect();
+   WIZCHIP_CRITICAL_EXIT();
    return ret[0];
 }
 
@@ -101,6 +113,9 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, datasize_t len)
 
 	uint8_t opcode = 0;
 	uint16_t ADDR = 0;
+
+   WIZCHIP_CRITICAL_ENTER();
+   WIZCHIP.CS._select();
    
 #if (_WIZCHIP_IO_MODE_ & 0xff00) & _WIZCHIP_IO_MODE_BUS_
       uint8_t tAD[3];
@@ -113,7 +128,9 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, datasize_t len)
       opcode = (uint8_t)((AddrSel & 0x000000FF)| (_W6300_SPI_WRITE_)|(_WIZCHIP_QSPI_MODE_));
       ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
       WIZCHIP.IF.QSPI._write_qspi(opcode, ADDR, pBuf, len);//by_lihan
-      //qspi_write_buf(opcode, ADDR, pBuf, len); 
+      //qspi_write_buf(opcode, ADDR, pBuf, len);
+   WIZCHIP.CS._deselect();
+   WIZCHIP_CRITICAL_EXIT();    
 #endif 
 }
 
@@ -123,6 +140,9 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, datasize_t len)
 	uint8_t ret;
 	uint8_t opcode = 0;
 	uint16_t ADDR = 0;
+
+   WIZCHIP_CRITICAL_ENTER();
+   WIZCHIP.CS._select();
 
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
       uint8_t tAD[3];
@@ -136,6 +156,8 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, datasize_t len)
       ADDR = (uint16_t)((AddrSel & 0x00ffff00) >> 8 );
       WIZCHIP.IF.QSPI._read_qspi(opcode, ADDR, pBuf, len);//by_lihan
       //qspi_read_buf(opcode, ADDR, pBuf, len);
+   WIZCHIP.CS._deselect();
+   WIZCHIP_CRITICAL_EXIT();    
 #endif 
 }
 
