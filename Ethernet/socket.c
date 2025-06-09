@@ -768,6 +768,7 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
 //         break;
 //   #if ( _WIZCHIP_ < 5200 )
       case Sn_MR_IPRAW:
+      case Sn_MR_IPRAW6:    
          break;
 //   #endif
       default:
@@ -897,7 +898,8 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
 int32_t recvfrom_W5x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port){
    //int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port)
    // printf("recvfrom_W5x00\r\n" ) ;
-   uint8_t *dummy ; 
+   uint8_t addrlen = 4; //M20150601 : For W5300
+   uint8_t *dummy = &addrlen;
    return recvfrom_IO_6(sn,   buf,  len,   addr,  port, dummy);
 }
 
@@ -935,7 +937,8 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
    switch((mr=getSn_MR(sn)) & 0x0F)
    {
       case Sn_MR_UDP:
-   case Sn_MR_IPRAW:
+      case Sn_MR_IPRAW:
+      case Sn_MR_IPRAW6: 
       case Sn_MR_MACRAW:
          break;
    #if ( _WIZCHIP_ < 5200 )         
@@ -1081,28 +1084,38 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
       case Sn_MR_IPRAW6:
       case Sn_MR_IPRAW4 : 
          if(sock_remained_size[sn] == 0)
-		   {
-   			wiz_recv_data(sn, head, 6);
-   			setSn_CR(sn,Sn_CR_RECV);
-   			while(getSn_CR(sn));
-   			addr[0] = head[0];
-   			addr[1] = head[1];
-   			addr[2] = head[2];
-   			addr[3] = head[3];
-   			sock_remained_size[sn] = head[4];
-   			//M20150401 : For Typing Error
-   			//sock_remaiend_size[sn] = (sock_remained_size[sn] << 8) + head[5];
-   			sock_remained_size[sn] = (sock_remained_size[sn] << 8) + head[5];
-   			sock_pack_info[sn] = PACK_FIRST;
+         {
+#ifndef IPV6_AVAILABLE
+            wiz_recv_data(sn, head, 6);
+            setSn_CR(sn,Sn_CR_RECV);
+            while(getSn_CR(sn));
+            addr[0] = head[0];
+            addr[1] = head[1];
+            addr[2] = head[2];
+            addr[3] = head[3];
+            sock_remained_size[sn] = head[4];
+            //M20150401 : For Typing Error
+            //sock_remaiend_size[sn] = (sock_remained_size[sn] << 8) + head[5];
+            sock_remained_size[sn] = (sock_remained_size[sn] << 8) + head[5];
+            sock_pack_info[sn] = PACK_FIRST;
+         //
+         // Need to packet length check
+         //
+         if(len < sock_remained_size[sn]) pack_len = len;
+         else pack_len = sock_remained_size[sn];
+         wiz_recv_data(sn, buf, pack_len); // data copy.
+#else
+            if(*addr == 0) return SOCKERR_ARG;
+            sock_pack_info[sn] = head[0] & 0xF8;
+            if(sock_pack_info[sn] & PACK_IPv6) *addrlen = 16;
+            else *addrlen = 4;
+            wiz_recv_data(sn, addr, *addrlen);
+            setSn_CR(sn,Sn_CR_RECV);
+            while(getSn_CR(sn));
+           
+#endif
          }
-			//
-			// Need to packet length check
-			//
-			if(len < sock_remained_size[sn]) pack_len = len;
-			else pack_len = sock_remained_size[sn];
-   		wiz_recv_data(sn, buf, pack_len); // data copy.
-			break;
-//#endif 
+         break;
          default:
             wiz_recv_ignore(sn, pack_len); // data copy.
             sock_remained_size[sn] = pack_len;
