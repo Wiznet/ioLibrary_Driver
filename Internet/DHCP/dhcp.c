@@ -281,7 +281,13 @@ void default_ip_update(void)
    getMR(); // for delay
 #endif
    default_ip_assign();
-   setSHAR(DHCP_CHADDR);
+#if _WIZCHIP_ == W6100
+	NETUNLOCK();
+	setSHAR(DHCP_CHADDR);    
+	NETLOCK();
+#else
+   	setSHAR(DHCP_CHADDR);
+#endif   
 }
 
 /* The default handler of ip changed */
@@ -304,7 +310,13 @@ void default_ip_conflict(void)
    setMR(MR_RST);
    getMR(); // for delay
 #endif
+#if _WIZCHIP_ == W6100
+	NETUNLOCK();
+	setSHAR(DHCP_CHADDR);    
+	NETLOCK();
+#else
 	setSHAR(DHCP_CHADDR);
+#endif   
 }
 
 /* register the call back func. */
@@ -1016,7 +1028,13 @@ void DHCP_init(uint8_t s, uint8_t * buf)
       DHCP_CHADDR[3] = 0x00;
       DHCP_CHADDR[4] = 0x00;
       DHCP_CHADDR[5] = 0x00; 
-      setSHAR(DHCP_CHADDR);     
+      #if _WIZCHIP_ == W6100
+      	NETUNLOCK();
+      	setSHAR(DHCP_CHADDR);    
+      	NETLOCK();
+      #else
+      	setSHAR(DHCP_CHADDR);
+      #endif     
    }
 
 	DHCP_SOCKET = s; // SOCK_DHCP
