@@ -20,7 +20,10 @@ extern "C" {
 #define MOBILE_INITIAL_WEBPAGE		"mobile/index.html"
 
 /* Web Server Content Storage Select */
-//#define _USE_SDCARD_
+#define _USE_SDCARD_
+#ifdef	_USE_SDCARD_
+#include "ff.h" 	// header file for FatFs library (FAT file system)
+#endif
 #ifndef _USE_SDCARD_
 //#define _USE_FLASH_
 #endif
@@ -75,6 +78,9 @@ typedef struct _st_http_socket
 	uint32_t 		file_len;
 	uint32_t 		file_offset; // (start addr + sent size...)
 	uint8_t			storage_type; // Storage type; Code flash, SDcard, Data flash ...
+	#ifdef _USE_SDCARD_
+	FIL				fil; // File handle for SD card
+	#endif
 }st_http_socket;
 
 // Web content structure for file in code flash memory
