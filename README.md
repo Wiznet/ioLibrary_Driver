@@ -1,6 +1,6 @@
 # ioLibrary Driver
 The ioLibrary means “Internet Offload Library” for WIZnet chip. It includes drivers and application protocols.
-The driver (ioLibrary) can be used for the application design of WIZnet TCP/IP chips as [W5500](https://docs.wiznet.io/Product/iEthernet/W5500/overview), W5300, W5200, W5100 [W5100S](https://docs.wiznet.io/Product/iEthernet/W5100S/overview).
+The driver (ioLibrary) can be used for the application design of WIZnet TCP/IP chips as W6300, W6100, [W5500](https://docs.wiznet.io/Product/iEthernet/W5500/overview), W5300, W5200, W5100 [W5100S](https://docs.wiznet.io/Product/iEthernet/W5100S/overview).
 
 ## ioLibrary
 This driver provides the Berkeley Socket type APIs.
