@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define F_APP_TFTP
 #define __TFTP_DEBUG__

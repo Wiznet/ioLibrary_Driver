@@ -9,9 +9,7 @@
 #include "httpParser.h"
 #include "httpUtil.h"
 
-#ifdef	_USE_SDCARD_
-#include "ff.h" 	// header file for FatFs library (FAT file system)
-#endif
+
 
 #ifndef DATA_BUF_SIZE
 	#define DATA_BUF_SIZE		2048
@@ -41,7 +39,6 @@ st_http_socket HTTPSock_Status[_WIZCHIP_SOCK_NUM_] = { {STATE_HTTP_IDLE, }, };
 httpServer_webContent web_content[MAX_CONTENT_CALLBACK];
 
 #ifdef	_USE_SDCARD_
-FIL fs;		// FatFs: File object
 FRESULT fr;	// FatFs: File function return code
 #endif
 
@@ -206,9 +203,9 @@ void httpServer_run(uint8_t seqnum)
 					HTTPSock_Status[seqnum].file_start = 0;
 					HTTPSock_Status[seqnum].sock_status = STATE_HTTP_IDLE;
 
-//#ifdef _USE_SDCARD_
-//					f_close(&fs);
-//#endif
+#ifdef _USE_SDCARD_
+					f_close(&HTTPSock_Status[seqnum].fil); // Close the file handle
+#endif
 #ifdef _USE_WATCHDOG_
 					HTTPServer_WDT_Reset();
 #endif
@@ -231,6 +228,10 @@ void httpServer_run(uint8_t seqnum)
 #ifdef _HTTPSERVER_DEBUG_
 			printf("> HTTPSocket[%d] : CLOSED\r\n", s);
 #endif
+			HTTPSock_Status[seqnum].file_len = 0;
+			HTTPSock_Status[seqnum].file_offset = 0;
+			HTTPSock_Status[seqnum].file_start = 0;
+			HTTPSock_Status[seqnum].sock_status = STATE_HTTP_IDLE;
 			if(socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s)    /* Reinitialize the socket */
 			{
 #ifdef _HTTPSERVER_DEBUG_
@@ -314,7 +315,7 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 	uint8_t flag_datasend_end = 0;
 
 #ifdef _USE_SDCARD_
-	uint16_t blocklen;
+	UINT blocklen;
 #endif
 #ifdef _USE_FLASH_
 	uint32_t addr = 0;
@@ -401,7 +402,8 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 	else if(HTTPSock_Status[get_seqnum].storage_type == SDCARD)
 	{
 		// Data read from SD Card
-		fr = f_read(&fs, &buf[0], send_len, (void *)&blocklen);
+			f_lseek(&HTTPSock_Status[get_seqnum].fil, HTTPSock_Status[get_seqnum].file_offset);
+			fr = f_read(&HTTPSock_Status[get_seqnum].fil, &buf[0], send_len, (void *)&blocklen);
 		if(fr != FR_OK)
 		{
 			send_len = 0;
@@ -452,9 +454,9 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 	}
 
 // ## 20141219 Eric added, for 'File object structure' (fs) allocation reduced (8 -> 1)
-#ifdef _USE_SDCARD_
-	f_close(&fs);
-#endif
+//#ifdef _USE_SDCARD_
+//	f_close(&fs);
+//#endif
 // ## 20141219 added end
 }
 
@@ -553,12 +555,12 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 #ifdef _HTTPSERVER_DEBUG_
 				printf("\r\n> HTTPSocket[%d] : Searching the requested content\r\n", s);
 #endif
-				if((fr = f_open(&fs, (const char *)uri_name, FA_READ)) == 0)
+				if((fr = f_open(&HTTPSock_Status[get_seqnum].fil, (const char *)uri_name, FA_READ)) == 0)
 				{
 					content_found = 1; // file open succeed
 
-					file_len = fs.fsize;
-					content_addr = fs.sclust;
+					file_len =  HTTPSock_Status[get_seqnum].fil.obj.objsize; //file_len =  fs.fsize;
+					content_addr = HTTPSock_Status[get_seqnum].fil.obj.sclust; //content_addr = fs.sclust;
 					HTTPSock_Status[get_seqnum].storage_type = SDCARD;
 				}
 #elif _USE_FLASH_
