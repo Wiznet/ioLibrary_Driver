@@ -212,6 +212,12 @@ int keepalive(MQTTClient* c)
             int len = MQTTSerialize_pingreq(c->buf, c->buf_size);
             if (len > 0 && (rc = sendPacket(c, len, &timer)) == SUCCESSS) // send the ping packet
                 c->ping_outstanding = 1;
+            else
+                c->isconnected = 0;
+        }
+        else
+        {
+           	c->isconnected = 0;
         }
     }
 
