@@ -132,6 +132,7 @@ void httpServer_run(uint8_t seqnum)
 	switch(getSn_SR(s))
 	{
 		case SOCK_ESTABLISHED:
+		{
 			// Interrupt clear
 			if(getSn_IR(s) & Sn_IR_CON)
 			{
@@ -143,9 +144,14 @@ void httpServer_run(uint8_t seqnum)
 			{
 
 				case STATE_HTTP_IDLE :
-					if ((len = getSn_RX_RSR(s)) > 0)
+					if ((len = getSn_RX_RSR(s)) > 0)			//Sn_RX_RSR indicates the data size received and saved in Socket n RX Buffer. Sn_RX_RSR does not exceed the Sn_RXBUF_SIZE 	
 					{
-						if (len > DATA_BUF_SIZE) len = DATA_BUF_SIZE;
+						if (len > DATA_BUF_SIZE){
+							len = DATA_BUF_SIZE;
+#ifdef _HTTPSERVER_DEBUG_
+							printf("> HTTPSocket[%d] : [Error] Received data length exceeds buffer size (%d)\r\n", s, DATA_BUF_SIZE);
+#endif
+						}
 						len = recv(s, (uint8_t *)http_request, len);
 
 						*(((uint8_t *)http_request) + len) = '\0';
@@ -157,8 +163,6 @@ void httpServer_run(uint8_t seqnum)
 						printf("\r\n");
 						printf("> HTTPSocket[%d] : HTTP Request received ", s);
 						printf("from %d.%d.%d.%d : %d\r\n", destip[0], destip[1], destip[2], destip[3], destport);
-#endif
-#ifdef _HTTPSERVER_DEBUG_
 						printf("> HTTPSocket[%d] : [State] STATE_HTTP_REQ_DONE\r\n", s);
 #endif
 						// HTTP 'response' handler; includes send_http_response_header / body function
@@ -216,8 +220,9 @@ void httpServer_run(uint8_t seqnum)
 					break;
 			}
 			break;
-
+		}
 		case SOCK_CLOSE_WAIT:
+		{
 #ifdef _HTTPSERVER_DEBUG_
 		printf("> HTTPSocket[%d] : ClOSE_WAIT\r\n", s);	// if a peer requests to close the current connection
 #endif
@@ -232,6 +237,9 @@ void httpServer_run(uint8_t seqnum)
 			HTTPSock_Status[seqnum].file_offset = 0;
 			HTTPSock_Status[seqnum].file_start = 0;
 			HTTPSock_Status[seqnum].sock_status = STATE_HTTP_IDLE;
+#ifdef _USE_SDCARD_
+			f_close(&HTTPSock_Status[seqnum].fil); // Close the file handle
+#endif
 			if(socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s)    /* Reinitialize the socket */
 			{
 #ifdef _HTTPSERVER_DEBUG_
@@ -239,11 +247,12 @@ void httpServer_run(uint8_t seqnum)
 #endif
 			}
 			break;
-
+		}
 		case SOCK_INIT:
+		{
 			listen(s);
 			break;
-
+		}
 		case SOCK_LISTEN:
 			break;
 
@@ -609,17 +618,42 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 			break;
 
 		case METHOD_POST :
-			mid((char *)p_http_request->URI, "/", " HTTP", (char *)uri_buf);
-			uri_name = uri_buf;
-			find_http_uri_type(&p_http_request->TYPE, uri_name);	// Check file type (HTML, TEXT, GIF, JPEG are included)
+    		mid((char *)p_http_request->URI, "/", " HTTP", (char *)uri_buf);
+    		uri_name = uri_buf;
+    		find_http_uri_type(&p_http_request->TYPE, uri_name);
 
 #ifdef _HTTPSERVER_DEBUG_
-			printf("\r\n> HTTPSocket[%d] : HTTP Method POST\r\n", s);
-			printf("> HTTPSocket[%d] : Request URI = %s ", s, uri_name);
-			printf("Type = %d\r\n", p_http_request->TYPE);
+    		printf("\r\n> HTTPSocket[%d] : HTTP Method POST\r\n", s);
+    		printf("> HTTPSocket[%d] : Request URI = %s ", s, uri_name);
+    		printf("Type = %d\r\n", p_http_request->TYPE);
 #endif
 
-			if(p_http_request->TYPE == PTYPE_CGI)	// HTTP POST Method; CGI Process
+    // Check for JSON content type
+    		if(p_http_request->TYPE == PTYPE_JSON) {
+#ifdef _USE_SDCARD_
+        // Save posted JSON to SD card
+        FRESULT fr;
+        FIL jsonFile;
+        UINT bw;
+        // Use URI as filename, or a fixed name like "post.json"
+        const char *jsonFilename = uri_name; // or "post.json";
+        fr = f_open(&jsonFile, jsonFilename, FA_WRITE | FA_CREATE_ALWAYS);
+        if(fr == FR_OK) {
+            fr = f_write(&jsonFile, p_http_request->BODY, p_http_request->BODY_LENGTH, &bw);
+            f_close(&jsonFile);
+            if(fr == FR_OK && bw == p_http_request->BODY_LENGTH) {
+                send_http_response_header(s, PTYPE_JSON, 0, STATUS_OK);
+            } else {
+                send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+            }
+        } else {
+            send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+        }
+#else
+        send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+#endif
+    }
+    else if(p_http_request->TYPE == PTYPE_CGI)	// HTTP POST Method; CGI Process
 			{
 				content_found = http_post_cgi_handler(uri_name, p_http_request, http_response, &file_len);
 #ifdef _HTTPSERVER_DEBUG_

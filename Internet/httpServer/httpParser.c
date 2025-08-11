@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "socket.h"
 #include "httpParser.h"
@@ -126,12 +127,12 @@ void find_http_uri_type(
  */ 
 void parse_http_request(
 	st_http_request * request, 	/**< request to be returned */
-	uint8_t * buf				/**< pointer to be parsed */
+	volatile uint8_t * buf				/**< pointer to be parsed */
 	)
 {
   char * nexttok;
   nexttok = strtok((char*)buf," ");
-  if(!nexttok)
+  if(nexttok == NULL)
   {
     request->METHOD = METHOD_ERR;
     return;
@@ -164,6 +165,29 @@ void parse_http_request(
     return;
   }
   strcpy((char *)request->URI, nexttok);
+  //nexttok = strtok(NULL,"\0");
+
+  // --- Extract POST body and Content-Length ---
+    if(request->METHOD == METHOD_POST) {
+        char *cl = strstr((char*)nexttok, "Content-Length:");
+        if(cl) {
+            cl += strlen("Content-Length:");
+            while(*cl == ' ') cl++;
+            request->BODY_LENGTH = atoi(cl);
+        } else {
+            request->BODY_LENGTH = 0;
+        }
+        char *body = strstr((char*)nexttok, "\r\n\r\n");
+        if(body) {
+            body += 4;
+            if(request->BODY_LENGTH > 0 && request->BODY_LENGTH < sizeof(request->BODY)) {
+                memcpy(request->BODY, body, request->BODY_LENGTH);
+                request->BODY[request->BODY_LENGTH] = 0;
+            } else {
+                request->BODY[0] = 0;
+            }
+        }
+    }
 }
 
 #ifdef _OLD_
