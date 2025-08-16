@@ -127,7 +127,8 @@ void find_http_uri_type(
  */ 
 void parse_http_request(
 	st_http_request * request, 	/**< request to be returned */
-	volatile uint8_t * buf				/**< pointer to be parsed */
+	uint8_t * buf,				/**< pointer to be parsed */
+	size_t buf_len
 	)
 {
   char * nexttok;
@@ -164,7 +165,15 @@ void parse_http_request(
     request->METHOD = METHOD_ERR;
     return;
   }
+  
+  //check for uri length, if ok copy
+  size_t l = strlen(nexttok);
+  if(l >= MAX_URI_SIZE){
+	request->METHOD = METHOD_ERR;
+	return;
+  }
   strcpy((char *)request->URI, nexttok);
+
   //nexttok = strtok(NULL,"\0");
 
   // --- Extract POST body and Content-Length ---
@@ -173,20 +182,21 @@ void parse_http_request(
         if(cl) {
             cl += strlen("Content-Length:");
             while(*cl == ' ') cl++;
-            request->BODY_LENGTH = atoi(cl);
+            request->post_content_length = atoi(cl);
         } else {
-            request->BODY_LENGTH = 0;
+            request->post_content_length = 0;
         }
         char *body = strstr((char*)nexttok, "\r\n\r\n");
-        if(body) {
-            body += 4;
-            if(request->BODY_LENGTH > 0 && request->BODY_LENGTH < sizeof(request->BODY)) {
-                memcpy(request->BODY, body, request->BODY_LENGTH);
-                request->BODY[request->BODY_LENGTH] = 0;
-            } else {
-                request->BODY[0] = 0;
-            }
-        }
+        if (body) {
+			body += 4;
+			int offset = body - (char*)buf;
+			int available = buf_len - offset;
+			request->post_body_ptr = body;
+			request->post_body_length = (available > 0) ? available : 0;
+		} else {
+			request->post_body_ptr = NULL;
+			request->post_body_length = 0;
+		}
     }
 }
 

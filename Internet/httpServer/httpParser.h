@@ -134,13 +134,14 @@ typedef struct _st_http_request
 	uint8_t	METHOD;						/**< request method(METHOD_GET...). */
 	uint8_t	TYPE;						/**< request type(PTYPE_HTML...).   */
 	uint8_t	URI[MAX_URI_SIZE];					/**< request file name.             */
-	unsigned char BODY[1500];			/**< request body.                  */
-	size_t BODY_LENGTH;					/**< request body length.           */
+	size_t post_content_length;					/**< in POST request Content-Length */
+	size_t post_body_length;				/**< in POST request body length */
+	uint8_t * post_body_ptr;				/**< in POST pointer to body */
 }st_http_request;
 
 // HTTP Parsing functions
 void unescape_http_url(char * url);								/* convert escape character to ascii */
-void parse_http_request(st_http_request *, volatile uint8_t *);			/* parse request from peer */
+void parse_http_request(st_http_request *, uint8_t *, size_t);			/* parse request from peer */
 void find_http_uri_type(uint8_t *, uint8_t *);					/* find MIME type of a file */
 void make_http_response_head(char *, char, uint32_t);			/* make response header */
 uint8_t * get_http_param_value(char* uri, char* param_name);	/* get the user-specific parameter value */

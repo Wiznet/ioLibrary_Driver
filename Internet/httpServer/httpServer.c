@@ -10,15 +10,10 @@
 #include "httpUtil.h"
 
 
-
-#ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE		2048
-#endif
-
 /*****************************************************************************
  * Private types/enumerations/variables
  ****************************************************************************/
-static uint8_t HTTPSock_Num[_WIZCHIP_SOCK_NUM_] = {0, };
+static uint8_t HTTPSock_Num[HTTP_SOCKET_MAX_NUM] = {0, };
 static st_http_request * http_request;				/**< Pointer to received HTTP request */
 static st_http_request * parsed_http_request;		/**< Pointer to parsed HTTP request */
 static uint8_t * http_response;						/**< Pointer to HTTP response */
@@ -35,7 +30,7 @@ uint8_t * pHTTP_TX;
 uint8_t * pHTTP_RX;
 
 volatile uint32_t httpServer_tick_1s = 0;
-st_http_socket HTTPSock_Status[_WIZCHIP_SOCK_NUM_] = { {STATE_HTTP_IDLE, }, };
+st_http_socket HTTPSock_Status[HTTP_SOCKET_MAX_NUM] = { {STATE_HTTP_IDLE, }, };
 httpServer_webContent web_content[MAX_CONTENT_CALLBACK];
 
 #ifdef	_USE_SDCARD_
@@ -85,7 +80,7 @@ static int8_t getHTTPSequenceNum(uint8_t socket)
 {
 	uint8_t i;
 
-	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++)
+	for(i = 0; i < HTTP_SOCKET_MAX_NUM; i++)
 		if(HTTPSock_Num[i] == socket) return i;
 
 	return -1;
@@ -143,20 +138,20 @@ void httpServer_run(uint8_t seqnum)
 			switch(HTTPSock_Status[seqnum].sock_status)
 			{
 
-				case STATE_HTTP_IDLE :
+				case STATE_HTTP_IDLE :{
 					if ((len = getSn_RX_RSR(s)) > 0)			//Sn_RX_RSR indicates the data size received and saved in Socket n RX Buffer. Sn_RX_RSR does not exceed the Sn_RXBUF_SIZE 	
 					{
-						if (len > DATA_BUF_SIZE){
-							len = DATA_BUF_SIZE;
+						if (len > HTTP_RXTX_BUF_SIZE){
+							len = HTTP_RXTX_BUF_SIZE;
 #ifdef _HTTPSERVER_DEBUG_
-							printf("> HTTPSocket[%d] : [Error] Received data length exceeds buffer size (%d)\r\n", s, DATA_BUF_SIZE);
+							printf("> HTTPSocket[%d] : [Error] Received data length exceeds buffer size (%d)\r\n", s, HTTP_RXTX_BUF_SIZE);
 #endif
 						}
 						len = recv(s, (uint8_t *)http_request, len);
 
 						*(((uint8_t *)http_request) + len) = '\0';
 
-						parse_http_request(parsed_http_request, (uint8_t *)http_request);
+						parse_http_request(parsed_http_request, (uint8_t *)http_request, len);
 #ifdef _HTTPSERVER_DEBUG_
 						getSn_DIPR(s, destip);
 						destport = getSn_DPORT(s);
@@ -181,12 +176,13 @@ void httpServer_run(uint8_t seqnum)
 							}
 						}
 
-						if(HTTPSock_Status[seqnum].file_len > 0) HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_INPROC;
+						if(parsed_http_request->METHOD == METHOD_POST) HTTPSock_Status[seqnum].sock_status = STATE_HTTP_POST_INPROC;
+						else if(HTTPSock_Status[seqnum].file_len > 0) HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_INPROC;
 						else HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_DONE; // Send the 'HTTP response' end
 					}
-					break;
+					break;}
 
-				case STATE_HTTP_RES_INPROC :
+				case STATE_HTTP_RES_INPROC :{
 					/* Repeat: Send the remain parts of HTTP responses */
 #ifdef _HTTPSERVER_DEBUG_
 					printf("> HTTPSocket[%d] : [State] STATE_HTTP_RES_INPROC\r\n", s);
@@ -195,9 +191,70 @@ void httpServer_run(uint8_t seqnum)
 					send_http_response_body(s, 0, http_response, 0, 0);
 
 					if(HTTPSock_Status[seqnum].file_len == 0) HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_DONE;
-					break;
+					break;}
 
-				case STATE_HTTP_RES_DONE :
+				case STATE_HTTP_POST_INPROC :{
+					len = getSn_RX_RSR(s);
+					if(len > HTTP_RXTX_BUF_SIZE){
+						len = HTTP_RXTX_BUF_SIZE;
+#ifdef _HTTPSERVER_DEBUG_
+						printf("> HTTPSocket[%d] : [Error] Received data length exceeds buffer size (%d)\r\n", s, HTTP_RXTX_BUF_SIZE);
+#endif
+					}
+					if(len > 0)
+					{
+						len = recv(s, (uint8_t *)http_request, len);
+
+						// Find POST body in buffer (assume it starts after \r\n\r\n)
+						char *body = strstr((char *)http_request, "\r\n\r\n");
+						int body_offset = 0;
+						if(body) {
+							body += 4;
+							body_offset = body - (char *)http_request;
+						} else {
+							// If not found, treat whole buffer as body
+							body = (char *)http_request;
+							body_offset = 0;
+						}
+
+						file_sts_t *pst = &HTTPSock_Status[seqnum].file_status;
+						FRESULT fr;
+						UINT bw;
+
+						// file should be open at this point
+						if (!pst->file_opened) {
+							// File should be open at this point; handle error
+							send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+							HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_DONE;
+							break;
+						}
+
+						// Write fragment to file
+						fr = f_write(&pst->fil, body, len - body_offset, &bw);
+						pst->received_len += bw;
+
+						// If error or mismatch, abort
+						if (fr != FR_OK || bw != (len - body_offset)) {
+							f_close(&pst->fil);
+							pst->file_opened = 0;
+							send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+							HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_DONE;
+							break;
+						}
+
+						// If all data received, close file and send response
+						if (pst->expected_len > 0 && pst->received_len >= pst->expected_len) {
+							f_close(&pst->fil);
+							pst->file_opened = 0;
+							send_http_response_header(s, PTYPE_JSON, 0, STATUS_OK);
+							HTTPSock_Status[seqnum].sock_status = STATE_HTTP_RES_DONE;
+						}
+						// else: stay in STATE_HTTP_POST_INPROC and wait for more data
+					}
+					break;
+				}
+
+				case STATE_HTTP_RES_DONE :{
 #ifdef _HTTPSERVER_DEBUG_
 					printf("> HTTPSocket[%d] : [State] STATE_HTTP_RES_DONE\r\n", s);
 #endif
@@ -208,13 +265,13 @@ void httpServer_run(uint8_t seqnum)
 					HTTPSock_Status[seqnum].sock_status = STATE_HTTP_IDLE;
 
 #ifdef _USE_SDCARD_
-					f_close(&HTTPSock_Status[seqnum].fil); // Close the file handle
+					f_close(&HTTPSock_Status[seqnum].file_status.fil); // Close the file handle
 #endif
 #ifdef _USE_WATCHDOG_
 					HTTPServer_WDT_Reset();
 #endif
 					http_disconnect(s);
-					break;
+					break;}
 
 				default :
 					break;
@@ -238,7 +295,7 @@ void httpServer_run(uint8_t seqnum)
 			HTTPSock_Status[seqnum].file_start = 0;
 			HTTPSock_Status[seqnum].sock_status = STATE_HTTP_IDLE;
 #ifdef _USE_SDCARD_
-			f_close(&HTTPSock_Status[seqnum].fil); // Close the file handle
+			f_close(&HTTPSock_Status[seqnum].file_status.fil); // Close the file handle
 #endif
 			if(socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s)    /* Reinitialize the socket */
 			{
@@ -335,11 +392,11 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 	// Send the HTTP Response 'body'; requested file
 	if(!HTTPSock_Status[get_seqnum].file_len) // ### Send HTTP response body: First part ###
 	{
-		if (file_len > DATA_BUF_SIZE - 1)
+		if (file_len > HTTP_RXTX_BUF_SIZE - 1)
 		{
 			HTTPSock_Status[get_seqnum].file_start = start_addr;
 			HTTPSock_Status[get_seqnum].file_len = file_len;
-			send_len = DATA_BUF_SIZE - 1;
+			send_len = HTTP_RXTX_BUF_SIZE - 1;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // ## 20141219 Eric added, for 'File object structure' (fs) allocation reduced (8 -> 1)
@@ -377,9 +434,9 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 #endif
 		send_len = HTTPSock_Status[get_seqnum].file_len - HTTPSock_Status[get_seqnum].file_offset;
 
-		if(send_len > DATA_BUF_SIZE - 1)
+		if(send_len > HTTP_RXTX_BUF_SIZE - 1)
 		{
-			send_len = DATA_BUF_SIZE - 1;
+			send_len = HTTP_RXTX_BUF_SIZE - 1;
 			//HTTPSock_Status[get_seqnum]->file_offset += send_len;
 		}
 		else
@@ -411,8 +468,8 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 	else if(HTTPSock_Status[get_seqnum].storage_type == SDCARD)
 	{
 		// Data read from SD Card
-			f_lseek(&HTTPSock_Status[get_seqnum].fil, HTTPSock_Status[get_seqnum].file_offset);
-			fr = f_read(&HTTPSock_Status[get_seqnum].fil, &buf[0], send_len, (void *)&blocklen);
+			f_lseek(&HTTPSock_Status[get_seqnum].file_status.fil, HTTPSock_Status[get_seqnum].file_offset);
+			fr = f_read(&HTTPSock_Status[get_seqnum].file_status.fil, &buf[0], send_len, (void *)&blocklen);
 		if(fr != FR_OK)
 		{
 			send_len = 0;
@@ -541,7 +598,7 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 			if(p_http_request->TYPE == PTYPE_CGI)
 			{
 				content_found = http_get_cgi_handler(uri_name, pHTTP_TX, &file_len);
-				if(content_found && (file_len <= (DATA_BUF_SIZE-(strlen(RES_CGIHEAD_OK)+8))))
+				if(content_found && (file_len <= (HTTP_RXTX_BUF_SIZE-(strlen(RES_CGIHEAD_OK)+8))))
 				{
 					send_http_response_cgi(s, http_response, pHTTP_TX, (uint16_t)file_len);
 				}
@@ -564,12 +621,12 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 #ifdef _HTTPSERVER_DEBUG_
 				printf("\r\n> HTTPSocket[%d] : Searching the requested content\r\n", s);
 #endif
-				if((fr = f_open(&HTTPSock_Status[get_seqnum].fil, (const char *)uri_name, FA_READ)) == 0)
+				if((fr = f_open(&HTTPSock_Status[get_seqnum].file_status.fil, (const char *)uri_name, FA_READ)) == 0)
 				{
 					content_found = 1; // file open succeed
 
-					file_len =  HTTPSock_Status[get_seqnum].fil.obj.objsize; //file_len =  fs.fsize;
-					content_addr = HTTPSock_Status[get_seqnum].fil.obj.sclust; //content_addr = fs.sclust;
+					file_len =  HTTPSock_Status[get_seqnum].file_status.fil.obj.objsize; //file_len =  fs.fsize;
+					content_addr = HTTPSock_Status[get_seqnum].file_status.fil.obj.sclust; //content_addr = fs.sclust;
 					HTTPSock_Status[get_seqnum].storage_type = SDCARD;
 				}
 #elif _USE_FLASH_
@@ -628,38 +685,58 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
     		printf("Type = %d\r\n", p_http_request->TYPE);
 #endif
 
-    // Check for JSON content type
+    		// Check for JSON content type
     		if(p_http_request->TYPE == PTYPE_JSON) {
 #ifdef _USE_SDCARD_
-        // Save posted JSON to SD card
-        FRESULT fr;
-        FIL jsonFile;
-        UINT bw;
-        // Use URI as filename, or a fixed name like "post.json"
-        const char *jsonFilename = uri_name; // or "post.json";
-        fr = f_open(&jsonFile, jsonFilename, FA_WRITE | FA_CREATE_ALWAYS);
-        if(fr == FR_OK) {
-            fr = f_write(&jsonFile, p_http_request->BODY, p_http_request->BODY_LENGTH, &bw);
-            f_close(&jsonFile);
-            if(fr == FR_OK && bw == p_http_request->BODY_LENGTH) {
-                send_http_response_header(s, PTYPE_JSON, 0, STATUS_OK);
-            } else {
-                send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
-            }
-        } else {
-            send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
-        }
+				file_sts_t *pst = &HTTPSock_Status[get_seqnum].file_status;
+				FRESULT fr;
+				UINT bw;
+				
+				// On first fragment, open file and initialize state
+				if (!pst->file_opened) {
+					const char *jsonFilename = uri_name; // or "post.json";
+					fr = f_open(&pst->fil, jsonFilename, FA_WRITE | FA_CREATE_ALWAYS);
+					if (fr != FR_OK) {
+						send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+						break;
+					}
+					pst->expected_len = p_http_request->post_content_length; // Set from Content-Length header
+					pst->received_len = 0;
+					pst->file_opened = 1;
+				}
+
+				// Append this fragment
+				if (p_http_request->post_body_ptr && p_http_request->post_body_length > 0) {
+					fr = f_write(&pst->fil, p_http_request->post_body_ptr, p_http_request->post_body_length, &bw);
+					pst->received_len += bw;
+
+					// If error or mismatch, abort
+					if (fr != FR_OK || bw != p_http_request->post_content_length) {
+						f_close(&pst->fil);
+						pst->file_opened = 0;
+						send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+						break;
+					}
+				}
+
+				// If all data received, close file and send response
+				if (pst->received_len >= pst->expected_len) {
+					f_close(&pst->fil);
+					pst->file_opened = 0;
+					send_http_response_header(s, PTYPE_JSON, 0, STATUS_OK);
+				}
+				// else: wait for more data in next call
 #else
-        send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
+				send_http_response_header(s, 0, 0, STATUS_BAD_REQ);
 #endif
-    }
-    else if(p_http_request->TYPE == PTYPE_CGI)	// HTTP POST Method; CGI Process
+			}
+			else if(p_http_request->TYPE == PTYPE_CGI)	// HTTP POST Method; CGI Process
 			{
 				content_found = http_post_cgi_handler(uri_name, p_http_request, http_response, &file_len);
 #ifdef _HTTPSERVER_DEBUG_
-				printf("> HTTPSocket[%d] : [CGI: %s] / Response len [ %ld ]byte\r\n", s, content_found?"Content found":"Content not found", file_len);
+			printf("> HTTPSocket[%d] : [CGI: %s] / Response len [ %ld ]byte\r\n", s, content_found?"Content found":"Content not found", file_len);
 #endif
-				if(content_found && (file_len <= (DATA_BUF_SIZE-(strlen(RES_CGIHEAD_OK)+8))))
+				if(content_found && (file_len <= (HTTP_RXTX_BUF_SIZE-(strlen(RES_CGIHEAD_OK)+8))))
 				{
 					send_http_response_cgi(s, pHTTP_TX, http_response, (uint16_t)file_len);
 
