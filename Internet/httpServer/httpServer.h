@@ -15,12 +15,20 @@ extern "C" {
 // HTTP Server debug message enable
 #define _HTTPSERVER_DEBUG_
 
+// Number of sockets used by HTTP Server
+#define HTTP_SOCKET_MAX_NUM 3
+//Size of RX/TX buffers
+#define HTTP_RXTX_BUF_SIZE		2048
+
 #define INITIAL_WEBPAGE				"index.html"
 #define M_INITIAL_WEBPAGE			"m/index.html"
 #define MOBILE_INITIAL_WEBPAGE		"mobile/index.html"
 
 /* Web Server Content Storage Select */
-//#define _USE_SDCARD_
+#define _USE_SDCARD_
+#ifdef	_USE_SDCARD_
+#include "ff.h" 	// header file for FatFs library (FAT file system)
+#endif
 #ifndef _USE_SDCARD_
 //#define _USE_FLASH_
 #endif
@@ -41,6 +49,8 @@ extern "C" {
 #define STATE_HTTP_REQ_DONE    		2           /* The end of HTTP request parse */
 #define STATE_HTTP_RES_INPROC  		3           /* Sending the HTTP response to HTTP client (in progress) */
 #define STATE_HTTP_RES_DONE    		4           /* The end of HTTP response send (HTTP transaction ended) */
+#define STATE_HTTP_POST_INPROC  	5           /* Receiving HTTP POST data (in progress) */
+
 
 /*********************************************
 * HTTP Simple Return Value
@@ -67,6 +77,14 @@ typedef enum
    DATAFLASH	///< External data flash memory
 }StorageType;
 
+typedef struct{
+	FIL				fil; // File handle for SD card
+	int file_opened;
+	size_t expected_len;
+	size_t received_len;
+}file_sts_t;
+
+
 typedef struct _st_http_socket
 {
 	uint8_t			sock_status;
@@ -75,6 +93,9 @@ typedef struct _st_http_socket
 	uint32_t 		file_len;
 	uint32_t 		file_offset; // (start addr + sent size...)
 	uint8_t			storage_type; // Storage type; Code flash, SDcard, Data flash ...
+	#ifdef _USE_SDCARD_
+	file_sts_t		file_status;
+	#endif
 }st_http_socket;
 
 // Web content structure for file in code flash memory
