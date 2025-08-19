@@ -74,6 +74,9 @@ extern "C" {
 #define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
 
 #define DCHP_HOST_NAME           "WIZnet\0"
+/* If APPEND_MAC_TO_DHCP_HOST_NAME is defined then the last three octets of the
+ * MAC address are appended to the host name supplied with DHCP requests. */
+#define APPEND_MAC_TO_DHCP_HOST_NAME
 
 /* 
  * @brief return value of @ref DHCP_run()
@@ -90,10 +93,15 @@ enum
 
 /*
  * @brief DHCP client initialization (outside of the main loop)
- * @param s   - socket number
- * @param buf - buffer for processing DHCP message
+ * @param s        - socket number
+ * @param buf      - buffer for processing DHCP message
+ * @param hostname - the host name to send with DHCP requests
  */
+#ifdef DCHP_HOST_NAME
 void DHCP_init(uint8_t s, uint8_t * buf);
+#else
+void DHCP_init(uint8_t s, uint8_t * buf, char *hostname);
+#endif
 
 /*
  * @brief DHCP 1s Tick Timer handler

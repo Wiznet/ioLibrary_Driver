@@ -214,7 +214,13 @@ uint32_t DHCP_XID;      // Any number
 
 RIP_MSG* pDHCPMSG;      // Buffer pointer for DHCP processing
 
-uint8_t HOST_NAME[] = DCHP_HOST_NAME;  
+/* The host name to send with DHCP requests may either be hard-coded in
+ * DCHP_HOST_NAME or supplied to DHCP_init. */
+#ifdef DCHP_HOST_NAME
+uint8_t HOST_NAME[] = DCHP_HOST_NAME;
+#else
+char  *HOST_NAME = 0;
+#endif
 
 uint8_t DHCP_CHADDR[6]; // DHCP Client MAC address.
 
@@ -330,6 +336,31 @@ void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_co
    if(ip_conflict) dhcp_ip_conflict = ip_conflict;
 }
 
+/* Some code common to send_DHCP_DISCOVER and send_DHCP_REQUEST. */
+uint16_t pack_host_name(uint16_t k)
+{
+   uint8_t i;
+   pDHCPMSG->OPT[k++] = hostName;
+   pDHCPMSG->OPT[k++] = 0;          // fill zero length of hostname
+   for(i = 0 ; HOST_NAME[i] != 0; i++)
+   {
+      pDHCPMSG->OPT[k++] = HOST_NAME[i];
+   }
+   // `i` is now the length of HOST_NAME
+   #ifdef APPEND_MAC_TO_DHCP_HOST_NAME
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4);
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4);
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4);
+   pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+   pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
+   #else
+   pDHCPMSG->OPT[k - (i+0+1)] = i+0; // length of hostname
+   #endif
+   return k;
+}
+
 /* make the common DHCP message */
 void makeDHCPMSG(void)
 {
@@ -424,18 +455,7 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
 	
-	// host name
-	pDHCPMSG->OPT[k++] = hostName;
-	pDHCPMSG->OPT[k++] = 0;          // fill zero length of hostname 
-	for(i = 0 ; HOST_NAME[i] != 0; i++)
-   	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
-	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
+   k = pack_host_name(k);
 
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x06;	// length of request
@@ -536,17 +556,7 @@ void send_DHCP_REQUEST(void)
 	}
 
 	// host name
-	pDHCPMSG->OPT[k++] = hostName;
-	pDHCPMSG->OPT[k++] = 0; // length of hostname
-	for(i = 0 ; HOST_NAME[i] != 0; i++)
-   	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
-	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
-	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
+   k = pack_host_name(k);
 	
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x08;
@@ -1015,8 +1025,16 @@ int8_t check_DHCP_leasedIP(void)
 	}
 }	
 
+
+#ifdef DCHP_HOST_NAME
 void DHCP_init(uint8_t s, uint8_t * buf)
+#else
+void DHCP_init(uint8_t s, uint8_t * buf, char *hostname)
+#endif
 {
+   #ifndef DCHP_HOST_NAME
+   HOST_NAME = hostname;
+   #endif
    uint8_t zeroip[4] = {0,0,0,0};
    getSHAR(DHCP_CHADDR);
    if((DHCP_CHADDR[0] | DHCP_CHADDR[1]  | DHCP_CHADDR[2] | DHCP_CHADDR[3] | DHCP_CHADDR[4] | DHCP_CHADDR[5]) == 0x00)
