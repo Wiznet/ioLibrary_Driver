@@ -73,6 +73,8 @@ extern "C" {
 
 #define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
 
+#define DHCP_VENDOR_ID           "WIZnetSE\0"  ///< Vendor ID used for DHCP requests, using Class-Id (option 60)
+
 #define DCHP_HOST_NAME           "WIZnet\0"
 
 /* 

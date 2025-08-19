@@ -214,6 +214,8 @@ uint32_t DHCP_XID;      // Any number
 
 RIP_MSG* pDHCPMSG;      // Buffer pointer for DHCP processing
 
+uint8_t VENDOR_ID[] = DHCP_VENDOR_ID;
+
 uint8_t HOST_NAME[] = DCHP_HOST_NAME;  
 
 uint8_t DHCP_CHADDR[6]; // DHCP Client MAC address.
@@ -413,6 +415,13 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = 0x01;
 	pDHCPMSG->OPT[k++] = DHCP_DISCOVER;
 	
+	// Class identifier
+	pDHCPMSG->OPT[k++] = dhcpClassIdentifier;
+	pDHCPMSG->OPT[k++] = 0;          // fill zero length for class identifier
+	for(i = 0 ; VENDOR_ID[i] != 0; i++)
+	   	pDHCPMSG->OPT[k++] = VENDOR_ID[i];
+	pDHCPMSG->OPT[k - (i+1)] = i;
+
 	// Client identifier
 	pDHCPMSG->OPT[k++] = dhcpClientIdentifier;
 	pDHCPMSG->OPT[k++] = 0x07;
@@ -508,6 +517,14 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = 0x01;
 	pDHCPMSG->OPT[k++] = DHCP_REQUEST;
 
+	// Class identifier
+	pDHCPMSG->OPT[k++] = dhcpClassIdentifier;
+	pDHCPMSG->OPT[k++] = 0;          // fill zero length for class identifier
+	for(i = 0 ; VENDOR_ID[i] != 0; i++)
+	   	pDHCPMSG->OPT[k++] = VENDOR_ID[i];
+	pDHCPMSG->OPT[k - (i+1)] = i;
+
+	// Client identifier
 	pDHCPMSG->OPT[k++] = dhcpClientIdentifier;
 	pDHCPMSG->OPT[k++] = 0x07;
 	pDHCPMSG->OPT[k++] = 0x01;
