@@ -1057,9 +1057,11 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
       case Sn_MR_MACRAW :
 	      if(sock_remained_size[sn] == 0)
 	      {
+            #ifndef IPV6_AVAILABLE
    			wiz_recv_data(sn, head, 2);
    			setSn_CR(sn,Sn_CR_RECV);
    			while(getSn_CR(sn));
+            #endif 
    			// read peer's IP address, port number & packet length
     			sock_remained_size[sn] = head[0];
    			sock_remained_size[sn] = (sock_remained_size[sn] <<8) + head[1] -2;
