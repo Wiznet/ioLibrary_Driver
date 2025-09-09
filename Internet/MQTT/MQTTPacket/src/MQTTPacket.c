@@ -257,11 +257,11 @@ int MQTTstrlen(MQTTString mqttstring)
  * @param bptr the C string to compare
  * @return boolean - equal or not
  */
-int MQTTPacket_equals(MQTTString* a, char* bptr)
+int MQTTPacket_equals(MQTTString* a, const char* bptr)
 {
 	int alen = 0,
 		blen = 0;
-	char *aptr;
+	const char *aptr;
 	
 	if (a->cstring)
 	{

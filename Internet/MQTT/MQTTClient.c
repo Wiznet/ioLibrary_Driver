@@ -133,9 +133,9 @@ exit:
 // + and # can only be next to separator
 static char isTopicMatched(char* topicFilter, MQTTString* topicName)
 {
-    char* curf = topicFilter;
-    char* curn = topicName->lenstring.data;
-    char* curn_end = curn + topicName->lenstring.len;
+    const char* curf = topicFilter;
+    const char* curn = topicName->lenstring.data;
+    const char* curn_end = curn + topicName->lenstring.len;
 
     while (*curf && curn < curn_end)
     {
@@ -145,7 +145,7 @@ static char isTopicMatched(char* topicFilter, MQTTString* topicName)
             break;
         if (*curf == '+')
         {   // skip until we meet the next separator, or end of string
-            char* nextpos = curn + 1;
+            const char* nextpos = curn + 1;
             while (nextpos < curn_end && *nextpos != '/')
                 nextpos = ++curn + 1;
         }
