@@ -1,9 +1,9 @@
 /*
- * sntp.h
- *
- *  Created on: 2014. 12. 15.
- *      Author: Administrator
- */
+    sntp.h
+
+    Created on: 2014. 12. 15.
+        Author: Administrator
+*/
 
 #ifndef SNTP_H_
 #define SNTP_H_
@@ -15,9 +15,9 @@ extern "C" {
 #include <stdint.h>
 
 /*
- * @brief Define it for Debug & Monitor DNS processing.
- * @note If defined, it dependens on <stdio.h>
- */
+    @brief Define it for Debug & Monitor DNS processing.
+    @note If defined, it dependens on <stdio.h>
+*/
 //#define _SNTP_DEBUG_
 
 #define	MAX_SNTP_BUF_SIZE	sizeof(ntpformat)		///< maximum size of DNS buffer. */
@@ -27,35 +27,33 @@ typedef signed char s_char;
 typedef unsigned long long tstamp;
 typedef unsigned int tdist;
 
-typedef struct _ntpformat
-{
+typedef struct _ntpformat {
 
-	uint8_t  dstaddr[4];        /* destination (local) address */
-	char    version;        /* version number */
-	char    leap;           /* leap indicator */
-	char    mode;           /* mode */
-	char    stratum;        /* stratum */
-	char    poll;           /* poll interval */
-	s_char  precision;      /* precision */
-	tdist   rootdelay;      /* root delay */
-	tdist   rootdisp;       /* root dispersion */
-	char    refid;          /* reference ID */
-	tstamp  reftime;        /* reference time */
-	tstamp  org;            /* origin timestamp */
-	tstamp  rec;            /* receive timestamp */
-	tstamp  xmt;            /* transmit timestamp */
+    uint8_t  dstaddr[4];        /* destination (local) address */
+    char    version;        /* version number */
+    char    leap;           /* leap indicator */
+    char    mode;           /* mode */
+    char    stratum;        /* stratum */
+    char    poll;           /* poll interval */
+    s_char  precision;      /* precision */
+    tdist   rootdelay;      /* root delay */
+    tdist   rootdisp;       /* root dispersion */
+    char    refid;          /* reference ID */
+    tstamp  reftime;        /* reference time */
+    tstamp  org;            /* origin timestamp */
+    tstamp  rec;            /* receive timestamp */
+    tstamp  xmt;            /* transmit timestamp */
 
 
 } ntpformat;
 
-typedef struct _datetime
-{
-	uint16_t yy;
-	uint8_t mo;
-	uint8_t dd;
-	uint8_t hh;
-	uint8_t mm;
-	uint8_t ss;
+typedef struct _datetime {
+    uint16_t yy;
+    uint8_t mo;
+    uint8_t dd;
+    uint8_t hh;
+    uint8_t mm;
+    uint8_t ss;
 } datetime;
 
 #define ntp_port		123                     //ntp server port number

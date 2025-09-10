@@ -11,7 +11,7 @@ extern "C" {
 #define _MULTICAST_DEBUG_
 
 #ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE			2048
+#define DATA_BUF_SIZE			2048
 #endif
 
 /* UDP Multicast Loopback test example */

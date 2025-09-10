@@ -47,145 +47,144 @@
 unsigned long MilliTimer;
 
 /*
- * @brief MQTT MilliTimer handler
- * @note MUST BE register to your system 1m Tick timer handler.
- */
+    @brief MQTT MilliTimer handler
+    @note MUST BE register to your system 1m Tick timer handler.
+*/
 void MilliTimer_Handler(void) {
-	MilliTimer++;
+    MilliTimer++;
 }
 
 /*
- * @brief Timer Initialize
- * @param  timer : pointer to a Timer structure
- *         that contains the configuration information for the Timer.
- */
+    @brief Timer Initialize
+    @param  timer : pointer to a Timer structure
+           that contains the configuration information for the Timer.
+*/
 void TimerInit(Timer* timer) {
-	timer->end_time = 0;
+    timer->end_time = 0;
 }
 
 /*
- * @brief expired Timer
- * @param  timer : pointer to a Timer structure
- *         that contains the configuration information for the Timer.
- */
+    @brief expired Timer
+    @param  timer : pointer to a Timer structure
+           that contains the configuration information for the Timer.
+*/
 char TimerIsExpired(Timer* timer) {
-	long left = timer->end_time - MilliTimer;
-	return (left < 0);
+    long left = timer->end_time - MilliTimer;
+    return (left < 0);
 }
 
 /*
- * @brief Countdown millisecond Timer
- * @param  timer : pointer to a Timer structure
- *         that contains the configuration information for the Timer.
- *         timeout : setting timeout millisecond.
- */
+    @brief Countdown millisecond Timer
+    @param  timer : pointer to a Timer structure
+           that contains the configuration information for the Timer.
+           timeout : setting timeout millisecond.
+*/
 void TimerCountdownMS(Timer* timer, unsigned int timeout) {
-	timer->end_time = MilliTimer + timeout;
+    timer->end_time = MilliTimer + timeout;
 }
 
 /*
- * @brief Countdown second Timer
- * @param  timer : pointer to a Timer structure
- *         that contains the configuration information for the Timer.
- *         timeout : setting timeout millisecond.
- */
+    @brief Countdown second Timer
+    @param  timer : pointer to a Timer structure
+           that contains the configuration information for the Timer.
+           timeout : setting timeout millisecond.
+*/
 void TimerCountdown(Timer* timer, unsigned int timeout) {
-	timer->end_time = MilliTimer + (timeout * 1000);
+    timer->end_time = MilliTimer + (timeout * 1000);
 }
 
 /*
- * @brief left millisecond Timer
- * @param  timer : pointer to a Timer structure
- *         that contains the configuration information for the Timer.
- */
+    @brief left millisecond Timer
+    @param  timer : pointer to a Timer structure
+           that contains the configuration information for the Timer.
+*/
 int TimerLeftMS(Timer* timer) {
-	long left = timer->end_time - MilliTimer;
-	return (left < 0) ? 0 : left;
+    long left = timer->end_time - MilliTimer;
+    return (left < 0) ? 0 : left;
 }
 
 /*
- * @brief New network setting
- * @param  n : pointer to a Network structure
- *         that contains the configuration information for the Network.
- *         sn : socket number where x can be (0..7).
- * @retval None
- */
+    @brief New network setting
+    @param  n : pointer to a Network structure
+           that contains the configuration information for the Network.
+           sn : socket number where x can be (0..7).
+    @retval None
+*/
 void NewNetwork(Network* n, int sn) {
-	n->my_socket = sn;
-	n->mqttread = w5x00_read;
-	n->mqttwrite = w5x00_write;
-	n->disconnect = w5x00_disconnect;
+    n->my_socket = sn;
+    n->mqttread = w5x00_read;
+    n->mqttwrite = w5x00_write;
+    n->disconnect = w5x00_disconnect;
 }
 
 /*
- * @brief read function
- * @param  n : pointer to a Network structure
- *         that contains the configuration information for the Network.
- *         buffer : pointer to a read buffer.
- *         len : buffer length.
- * @retval received data length or SOCKERR code
- */
-int w5x00_read(Network* n, unsigned char* buffer, int len, long time)
-{
+    @brief read function
+    @param  n : pointer to a Network structure
+           that contains the configuration information for the Network.
+           buffer : pointer to a read buffer.
+           len : buffer length.
+    @retval received data length or SOCKERR code
+*/
+int w5x00_read(Network* n, unsigned char* buffer, int len, long time) {
 
-	if((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket)>0))
-		return recv(n->my_socket, buffer, len);
+    if ((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket) > 0)) {
+        return recv(n->my_socket, buffer, len);
+    }
 
-	return SOCK_ERROR;
+    return SOCK_ERROR;
 }
 
 /*
- * @brief write function
- * @param  n : pointer to a Network structure
- *         that contains the configuration information for the Network.
- *         buffer : pointer to a read buffer.
- *         len : buffer length.
- * @retval length of data sent or SOCKERR code
- */
-int w5x00_write(Network* n, unsigned char* buffer, int len, long time)
-{
-	if(getSn_SR(n->my_socket) == SOCK_ESTABLISHED)
-		return send(n->my_socket, buffer, len);
+    @brief write function
+    @param  n : pointer to a Network structure
+           that contains the configuration information for the Network.
+           buffer : pointer to a read buffer.
+           len : buffer length.
+    @retval length of data sent or SOCKERR code
+*/
+int w5x00_write(Network* n, unsigned char* buffer, int len, long time) {
+    if (getSn_SR(n->my_socket) == SOCK_ESTABLISHED) {
+        return send(n->my_socket, buffer, len);
+    }
 
-	return SOCK_ERROR;
+    return SOCK_ERROR;
 }
 
 /*
- * @brief disconnect function
- * @param  n : pointer to a Network structure
- *         that contains the configuration information for the Network.
- */
-void w5x00_disconnect(Network* n)
-{
-	disconnect(n->my_socket);
+    @brief disconnect function
+    @param  n : pointer to a Network structure
+           that contains the configuration information for the Network.
+*/
+void w5x00_disconnect(Network* n) {
+    disconnect(n->my_socket);
 }
 
 /*
- * @brief connect network function
- * @param  n : pointer to a Network structure
- *         that contains the configuration information for the Network.
- *         ip : server iP.
- *         port : server port.
- * @retval SOCKOK code or SOCKERR code
- */
-int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port)
-{
-	uint16_t myport = 12345;
+    @brief connect network function
+    @param  n : pointer to a Network structure
+           that contains the configuration information for the Network.
+           ip : server iP.
+           port : server port.
+    @retval SOCKOK code or SOCKERR code
+*/
+int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port) {
+    uint16_t myport = 12345;
 
-	if(socket(n->my_socket, Sn_MR_TCP, myport, 0) != n->my_socket)
-		return SOCK_ERROR;
+    if (socket(n->my_socket, Sn_MR_TCP, myport, 0) != n->my_socket) {
+        return SOCK_ERROR;
+    }
 
 #if 1
-	// 20231016 taylor//teddy 240122
+    // 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
-	if(connect(n->my_socket, ip, port, 4) != SOCK_OK)
+    if (connect(n->my_socket, ip, port, 4) != SOCK_OK)
 #else
-	if(connect(n->my_socket, ip, port) != SOCK_OK)
+    if (connect(n->my_socket, ip, port) != SOCK_OK)
 #endif
 #else
-	if(connect(n->my_socket, ip, port) != SOCK_OK)
+    if (connect(n->my_socket, ip, port) != SOCK_OK)
 #endif
-		return SOCK_ERROR;
+        return SOCK_ERROR;
 
-	return SOCK_OK;
+    return SOCK_OK;
 }

@@ -15,7 +15,7 @@ extern "C" {
 
 /* DATA_BUF_SIZE define for Loopback example */
 #ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE			2048
+#define DATA_BUF_SIZE			2048
 #endif
 
 /************************/
@@ -25,9 +25,9 @@ extern "C" {
 #define LOOPBACK_MODE   LOOPBACK_MAIN_NOBLOCK
 
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
-int8_t set_loopback_mode_W6x00 (uint8_t get_loopback_mode ) ;
+int8_t set_loopback_mode_W6x00(uint8_t get_loopback_mode) ;
 int8_t check_loopback_mode_W6x00();
-#endif 
+#endif
 
 /* TCP server Loopback test example */
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port);

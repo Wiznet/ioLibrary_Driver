@@ -1,7 +1,7 @@
 /**
- @file		httpServer.h
- @brief 	Define constants and functions related HTTP Web server.
- */
+    @file		httpServer.h
+    @brief 	Define constants and functions related HTTP Web server.
+*/
 
 #include <stdint.h>
 
@@ -34,7 +34,7 @@ extern "C" {
 //#define _USE_WATCHDOG_
 
 /*********************************************
-* HTTP Process states list
+    HTTP Process states list
 *********************************************/
 #define STATE_HTTP_IDLE             0           /* IDLE, Waiting for data received (TCP established) */
 #define STATE_HTTP_REQ_INPROC  		1           /* Received HTTP request from HTTP client */
@@ -43,49 +43,46 @@ extern "C" {
 #define STATE_HTTP_RES_DONE    		4           /* The end of HTTP response send (HTTP transaction ended) */
 
 /*********************************************
-* HTTP Simple Return Value
+    HTTP Simple Return Value
 *********************************************/
 #define HTTP_FAILED					0
 #define HTTP_OK						1
 #define HTTP_RESET					2
 
 /*********************************************
-* HTTP Content NAME length
+    HTTP Content NAME length
 *********************************************/
 #define MAX_CONTENT_NAME_LEN		128
 
 /*********************************************
-* HTTP Timeout
+    HTTP Timeout
 *********************************************/
 #define HTTP_MAX_TIMEOUT_SEC		3			// Sec.
 
-typedef enum
-{
-   NONE,		///< Web storage none
-   CODEFLASH,	///< Code flash memory
-   SDCARD,    	///< SD card
-   DATAFLASH	///< External data flash memory
-}StorageType;
+typedef enum {
+    NONE,		///< Web storage none
+    CODEFLASH,	///< Code flash memory
+    SDCARD,    	///< SD card
+    DATAFLASH	///< External data flash memory
+} StorageType;
 
-typedef struct _st_http_socket
-{
-	uint8_t			sock_status;
-	uint8_t			file_name[MAX_CONTENT_NAME_LEN];
-	uint32_t 		file_start;
-	uint32_t 		file_len;
-	uint32_t 		file_offset; // (start addr + sent size...)
-	uint8_t			storage_type; // Storage type; Code flash, SDcard, Data flash ...
-}st_http_socket;
+typedef struct _st_http_socket {
+    uint8_t			sock_status;
+    uint8_t			file_name[MAX_CONTENT_NAME_LEN];
+    uint32_t 		file_start;
+    uint32_t 		file_len;
+    uint32_t 		file_offset; // (start addr + sent size...)
+    uint8_t			storage_type; // Storage type; Code flash, SDcard, Data flash ...
+} st_http_socket;
 
 // Web content structure for file in code flash memory
 #define MAX_CONTENT_CALLBACK		20
 
-typedef struct _httpServer_webContent
-{
-	uint8_t	*	content_name;
-	uint32_t	content_len;
-	uint8_t * 	content;
-}httpServer_webContent;
+typedef struct _httpServer_webContent {
+    uint8_t	*	content_name;
+    uint32_t	content_len;
+    uint8_t * 	content;
+} httpServer_webContent;
 
 
 void httpServer_init(uint8_t * tx_buf, uint8_t * rx_buf, uint8_t cnt, uint8_t * socklist);
@@ -98,9 +95,9 @@ uint16_t read_userReg_webContent(uint16_t content_num, uint8_t * buf, uint32_t o
 uint8_t display_reg_webContent_list(void);
 
 /*
- * @brief HTTP Server 1sec Tick Timer handler
- * @note SHOULD BE register to your system 1s Tick timer handler
- */
+    @brief HTTP Server 1sec Tick Timer handler
+    @note SHOULD BE register to your system 1s Tick timer handler
+*/
 void httpServer_time_handler(void);
 uint32_t get_httpServer_timecount(void);
 

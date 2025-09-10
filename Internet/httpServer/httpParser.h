@@ -1,7 +1,7 @@
 /**
- @file		httpd.h
- @brief 		Define Constants and fucntions associated with HTTP protocol.
- */
+    @file		httpd.h
+    @brief 		Define Constants and fucntions associated with HTTP protocol.
+*/
 
 #include <stdint.h>
 
@@ -32,7 +32,7 @@ extern "C" {
 #define		PTYPE_MPEG		6		/**< MPEG file.  */
 #define		PTYPE_PDF		7		/**< PDF file.   */
 #define 	PTYPE_CGI		8		/**< CGI file.   */
-#define     PTYPE_XML       9       /**< XML file.   */ 
+#define     PTYPE_XML       9       /**< XML file.   */
 #define     PTYPE_CSS       10      /**< CSS file.   */
 #define		PTYPE_JS		11		/**< JavaScript file.	*/
 #define		PTYPE_JSON		12		/**< JSON (JavaScript Standard Object Notation) file.	*/
@@ -92,7 +92,7 @@ static const char 	ERROR_REQUEST_PAGE[] = "HTTP/1.1 400 OK\r\nContent-Type: text
 #define RES_XMLHEAD_OK "HTTP/1.1 200 OK\r\nContent-Type: text/xml\r\nConnection: keep-alive\r\nContent-Length: "
 
 /* Response head for CSS */
-#define RES_CSSHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nContent-Length: "		
+#define RES_CSSHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nContent-Length: "
 
 /* Response head for JavaScript */
 #define RES_JSHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\nContent-Length: "
@@ -122,18 +122,17 @@ static const char 	ERROR_REQUEST_PAGE[] = "HTTP/1.1 400 OK\r\nContent-Type: text
 #define RES_SVGHEAD_OK	"HTTP/1.1 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: "
 
 /**
- @brief 	Structure of HTTP REQUEST 
- */
+    @brief 	Structure of HTTP REQUEST
+*/
 
 //#define MAX_URI_SIZE	1461
 #define MAX_URI_SIZE	512
 
-typedef struct _st_http_request
-{
-	uint8_t	METHOD;						/**< request method(METHOD_GET...). */
-	uint8_t	TYPE;						/**< request type(PTYPE_HTML...).   */
-	uint8_t	URI[MAX_URI_SIZE];			/**< request file name.             */
-}st_http_request;
+typedef struct _st_http_request {
+    uint8_t	METHOD;						/**< request method(METHOD_GET...). */
+    uint8_t	TYPE;						/**< request type(PTYPE_HTML...).   */
+    uint8_t	URI[MAX_URI_SIZE];			/**< request file name.             */
+} st_http_request;
 
 // HTTP Parsing functions
 void unescape_http_url(char * url);								/* convert escape character to ascii */

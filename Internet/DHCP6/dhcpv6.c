@@ -80,11 +80,10 @@ uint8_t DNS6_Address[16] = {
 };
 //todo
 
-/* 
- * @brief DHCPv6 option (cf. RFC3315)
- */
-enum
-{
+/*
+    @brief DHCPv6 option (cf. RFC3315)
+*/
+enum {
     OPT_CLIENTID = 1,
     OPT_SERVERID = 2,
     OPT_IANA = 3,
@@ -119,10 +118,9 @@ enum
 };
 
 /*
- * @brief DHCPv6 message format
- */
-typedef struct
-{
+    @brief DHCPv6 message format
+*/
+typedef struct {
     uint8_t *OPT; ///< Option
 } __attribute__((packed)) RIP_MSG;
 
@@ -173,100 +171,93 @@ unsigned num2 = 0;
 unsigned growby;
 
 /**
- * @brief 
- * 
- * @param asize 
- * @param agrowby 
- */
-void InitDhcp6Option(unsigned asize, unsigned agrowby)
-{
+    @brief
+
+    @param asize
+    @param agrowby
+*/
+void InitDhcp6Option(unsigned asize, unsigned agrowby) {
     size = asize;
     growby = agrowby;
     num = 0;
 }
 
 /**
- * @brief 
- * 
- * @param value 
- */
-void AppendDhcp6Option(uint8_t value)
-{
+    @brief
+
+    @param value
+*/
+void AppendDhcp6Option(uint8_t value) {
     uint32_t need;
 
     need = num + 1;
-    if (need > size)
-    {
+    if (need > size) {
         size++;
     }
-	pDHCP6MSG.OPT[num] = value;
+    pDHCP6MSG.OPT[num] = value;
     num++;
 }
 
 /**
- * @brief 
- * 
- * @param sMark 
- */
-void DumpDhcp6Option(char *sMark)
-{
+    @brief
+
+    @param sMark
+*/
+void DumpDhcp6Option(char *sMark) {
     unsigned i;
     printf("%20s => size=%02d,num=%02d : ", sMark, size, num);
-    for (i = num2; i < num; i++)
-    {
-		printf("%.2x ", pDHCP6MSG.OPT[i]);
+    for (i = num2; i < num; i++) {
+        printf("%.2x ", pDHCP6MSG.OPT[i]);
     }
     printf("\r\n");
     num2 = num;
 }
 
 /**
- * @brief 
- * 
- * @param option 
- */
-void DHCP6_Option_Select(uint8_t option)
-{
+    @brief
+
+    @param option
+*/
+void DHCP6_Option_Select(uint8_t option) {
     switch (option)
     case OPT_CLIENTID:
-    case OPT_SERVERID:
-    case OPT_IANA:
-    case OPT_IATA:
-    case OPT_IAADDR:
-    case OPT_REQUEST:
-    case OPT_PREFERENCE:
-    case OPT_ELAPSED_TIME:
-    case OPT_RELAY_MSG:
-    case OPT_AUTH:
-    case OPT_UNICAST:
-    case OPT_STATUS_CODE:
-    case OPT_RAPID_COMMIT:
-    case OPT_USER_CLASS:
-    case OPT_VENDOR_CLASS:
-    case OPT_VENDOR_OPTS:
-    case OPT_INTERFACE_ID:
-    case OPT_RECONF_MSG:
-    case OPT_RECONF_ACCEPT:
-    case SIP_Server_DNL:
-    case SIP_Server_V6ADDR:
-    case DNS_RecursiveNameServer:
-    case Domain_Search_List:
-    case OPT_IAPD:
-    case OPT_IAPREFIX:
-    case OPT_NIS_SERVERS:
-    case OPT_NISP_SERVERS:
-    case OPT_NIS_DOMAIN_NAME:
-    case OPT_NISP_DOMAIN_NAME:
-    case FQ_DOMAIN_NAME:
-        break;
+case OPT_SERVERID:
+case OPT_IANA:
+case OPT_IATA:
+case OPT_IAADDR:
+case OPT_REQUEST:
+case OPT_PREFERENCE:
+case OPT_ELAPSED_TIME:
+case OPT_RELAY_MSG:
+case OPT_AUTH:
+case OPT_UNICAST:
+case OPT_STATUS_CODE:
+case OPT_RAPID_COMMIT:
+case OPT_USER_CLASS:
+case OPT_VENDOR_CLASS:
+case OPT_VENDOR_OPTS:
+case OPT_INTERFACE_ID:
+case OPT_RECONF_MSG:
+case OPT_RECONF_ACCEPT:
+case SIP_Server_DNL:
+case SIP_Server_V6ADDR:
+case DNS_RecursiveNameServer:
+case Domain_Search_List:
+case OPT_IAPD:
+case OPT_IAPREFIX:
+case OPT_NIS_SERVERS:
+case OPT_NISP_SERVERS:
+case OPT_NIS_DOMAIN_NAME:
+case OPT_NISP_DOMAIN_NAME:
+case FQ_DOMAIN_NAME:
+    break;
 }
 
 /**
- * @brief 
- * 
- */
-void send_DHCP6_SOLICIT(void)
-{
+    @brief
+
+*/
+void send_DHCP6_SOLICIT(void) {
     uint16_t j;
     uint8_t ip[16];
     uint8_t rip_msg_size;
@@ -280,8 +271,8 @@ void send_DHCP6_SOLICIT(void)
 
     AppendDhcp6Option(DHCP6_SOLICIT);
     AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 16));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 8));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 0));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 8));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 0));
     DumpDhcp6Option("Type&XID");
 
     // Elapsed time
@@ -300,11 +291,11 @@ void send_DHCP6_SOLICIT(void)
     AppendDhcp6Option(0x01); //Hard_Type
 
     AppendDhcp6Option(DHCP6_CHADDR[0]);
-	AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
-	AppendDhcp6Option(DHCP6_CHADDR[2]);
-	AppendDhcp6Option(DHCP6_CHADDR[3]);
-	AppendDhcp6Option(DHCP6_CHADDR[4]);
-	AppendDhcp6Option(DHCP6_CHADDR[5]);
+    AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
+    AppendDhcp6Option(DHCP6_CHADDR[2]);
+    AppendDhcp6Option(DHCP6_CHADDR[3]);
+    AppendDhcp6Option(DHCP6_CHADDR[4]);
+    AppendDhcp6Option(DHCP6_CHADDR[5]);
     DumpDhcp6Option("Option Client ID");
 
     // Identity Association for Non-temporary Address
@@ -356,8 +347,9 @@ void send_DHCP6_SOLICIT(void)
     ip[0] = 0xff;
     ip[1] = 0x02;
 
-    for (j = 2; j < 13; j++)
+    for (j = 2; j < 13; j++) {
         ip[j] = 0x00;
+    }
 
     ip[13] = 0x01;
     ip[14] = 0x00;
@@ -379,12 +371,11 @@ void send_DHCP6_SOLICIT(void)
 }
 
 /**
- * @brief 
- * 
- * @return uint8_t 
- */
-uint8_t send_DHCP6_REQUEST(void)
-{
+    @brief
+
+    @return uint8_t
+*/
+uint8_t send_DHCP6_REQUEST(void) {
     //uint16_t i;
     uint16_t j;
     uint8_t ip[16];
@@ -395,8 +386,7 @@ uint8_t send_DHCP6_REQUEST(void)
     num = 0;
     growby = 0;
 
-    if (iana_len == 0)
-    {
+    if (iana_len == 0) {
         return 9;
     }
     printf("req : %x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x \r\n", recv_IP[0], recv_IP[1], recv_IP[2], recv_IP[3], recv_IP[4], recv_IP[5], recv_IP[6], recv_IP[7], recv_IP[8], recv_IP[9], recv_IP[10], recv_IP[11], recv_IP[12], recv_IP[13], recv_IP[14], recv_IP[15]);
@@ -406,8 +396,8 @@ uint8_t send_DHCP6_REQUEST(void)
 
     AppendDhcp6Option(DHCP6_REQUEST);
     AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 16));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x0000FF00) >> 8));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x000000FF) >> 0));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x0000FF00) >> 8));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x000000FF) >> 0));
     DumpDhcp6Option("Type&XID");
 
     // Elapsed time
@@ -468,9 +458,9 @@ uint8_t send_DHCP6_REQUEST(void)
     // Status code
 #if 0
     // 20190318
-    AppendDhcp6Option(0x00);AppendDhcp6Option(OPT_STATUS_CODE);DumpDhcp6Option("Option status_code type");
-    AppendDhcp6Option((uint8_t)(Lstatuscode_len>>8));AppendDhcp6Option((uint8_t)Lstatuscode_len); DumpDhcp6Option("Option status_code length");// length
-    AppendDhcp6Option((uint8_t)(code>>8));AppendDhcp6Option((uint8_t)code); DumpDhcp6Option("Option status_code code");// code
+    AppendDhcp6Option(0x00); AppendDhcp6Option(OPT_STATUS_CODE); DumpDhcp6Option("Option status_code type");
+    AppendDhcp6Option((uint8_t)(Lstatuscode_len >> 8)); AppendDhcp6Option((uint8_t)Lstatuscode_len); DumpDhcp6Option("Option status_code length"); // length
+    AppendDhcp6Option((uint8_t)(code >> 8)); AppendDhcp6Option((uint8_t)code); DumpDhcp6Option("Option status_code code"); // code
 #endif
     //    for(i=0; i<(statuscode_len-2); i++)
     //        AppendDhcp6Option(status_msg[i]);
@@ -478,16 +468,16 @@ uint8_t send_DHCP6_REQUEST(void)
 
 #if 0
     // 20190318
-    AppendDhcp6Option(0x41);AppendDhcp6Option(0x73);
-    AppendDhcp6Option(0x73);AppendDhcp6Option(0x69);
-    AppendDhcp6Option(0x67);AppendDhcp6Option(0x6e);
-    AppendDhcp6Option(0x65);AppendDhcp6Option(0x64);
-    AppendDhcp6Option(0x20);AppendDhcp6Option(0x61);
-    AppendDhcp6Option(0x6e);AppendDhcp6Option(0x20);
-    AppendDhcp6Option(0x61);AppendDhcp6Option(0x64);
-    AppendDhcp6Option(0x64);AppendDhcp6Option(0x72);
-    AppendDhcp6Option(0x65);AppendDhcp6Option(0x73);
-    AppendDhcp6Option(0x73);AppendDhcp6Option(0x2e);
+    AppendDhcp6Option(0x41); AppendDhcp6Option(0x73);
+    AppendDhcp6Option(0x73); AppendDhcp6Option(0x69);
+    AppendDhcp6Option(0x67); AppendDhcp6Option(0x6e);
+    AppendDhcp6Option(0x65); AppendDhcp6Option(0x64);
+    AppendDhcp6Option(0x20); AppendDhcp6Option(0x61);
+    AppendDhcp6Option(0x6e); AppendDhcp6Option(0x20);
+    AppendDhcp6Option(0x61); AppendDhcp6Option(0x64);
+    AppendDhcp6Option(0x64); AppendDhcp6Option(0x72);
+    AppendDhcp6Option(0x65); AppendDhcp6Option(0x73);
+    AppendDhcp6Option(0x73); AppendDhcp6Option(0x2e);
 #endif
 
     // Client Identifier
@@ -501,11 +491,11 @@ uint8_t send_DHCP6_REQUEST(void)
     AppendDhcp6Option(0x01); //Hard_Type
 
     AppendDhcp6Option(DHCP6_CHADDR[0]);
-	AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
-	AppendDhcp6Option(DHCP6_CHADDR[2]);
-	AppendDhcp6Option(DHCP6_CHADDR[3]);
-	AppendDhcp6Option(DHCP6_CHADDR[4]);
-	AppendDhcp6Option(DHCP6_CHADDR[5]);
+    AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
+    AppendDhcp6Option(DHCP6_CHADDR[2]);
+    AppendDhcp6Option(DHCP6_CHADDR[3]);
+    AppendDhcp6Option(DHCP6_CHADDR[4]);
+    AppendDhcp6Option(DHCP6_CHADDR[5]);
     DumpDhcp6Option("Option Client ID");
     //    AppendDhcp6Option(0x00);AppendDhcp6Option(OPT_CLIENTID);
     //    AppendDhcp6Option((uint8_t)(clientid_len>>8));AppendDhcp6Option((uint8_t)clientid_len); //length
@@ -526,8 +516,8 @@ uint8_t send_DHCP6_REQUEST(void)
     AppendDhcp6Option((uint8_t)Hardware_type_s); //Hard_Type
 #if 0
     // 20190318
-    AppendDhcp6Option(Time_s[0]);AppendDhcp6Option(Time_s[1]); // Time
-    AppendDhcp6Option(Time_s[2]);AppendDhcp6Option(Time_s[3]);
+    AppendDhcp6Option(Time_s[0]); AppendDhcp6Option(Time_s[1]); // Time
+    AppendDhcp6Option(Time_s[2]); AppendDhcp6Option(Time_s[3]);
 #endif
     AppendDhcp6Option(Server_MAC[0]);
     AppendDhcp6Option(Server_MAC[1]); // MAC Addr
@@ -567,8 +557,9 @@ uint8_t send_DHCP6_REQUEST(void)
     ip[0] = 0xff;
     ip[1] = 0x02;
 
-    for (j = 2; j < 13; j++)
+    for (j = 2; j < 13; j++) {
         ip[j] = 0x00;
+    }
 
     ip[13] = 0x01;
     ip[14] = 0x00;
@@ -589,12 +580,11 @@ uint8_t send_DHCP6_REQUEST(void)
 }
 
 /**
- * @brief 
- * 
- * @return uint8_t 
- */
-uint8_t send_DHCP_INFOREQ(void)
-{
+    @brief
+
+    @return uint8_t
+*/
+uint8_t send_DHCP_INFOREQ(void) {
     //uint16_t i;
     uint16_t j;
     uint8_t ip[16];
@@ -611,8 +601,8 @@ uint8_t send_DHCP_INFOREQ(void)
 
     AppendDhcp6Option(DHCP6_INFO_REQUEST);
     AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x00FF0000) >> 16));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x0000FF00) >> 8));
-	AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x000000FF) >> 0));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x0000FF00) >> 8));
+    AppendDhcp6Option((uint8_t)((DHCP6_XID & 0x000000FF) >> 0));
     DumpDhcp6Option("Type&XID");
 
     //    // Elapsed time
@@ -631,11 +621,11 @@ uint8_t send_DHCP_INFOREQ(void)
     AppendDhcp6Option(0x01); //Hard_Type
 
     AppendDhcp6Option(DHCP6_CHADDR[0]);
-	AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
-	AppendDhcp6Option(DHCP6_CHADDR[2]);
-	AppendDhcp6Option(DHCP6_CHADDR[3]);
-	AppendDhcp6Option(DHCP6_CHADDR[4]);
-	AppendDhcp6Option(DHCP6_CHADDR[5]);
+    AppendDhcp6Option(DHCP6_CHADDR[1]); // MAC Addr
+    AppendDhcp6Option(DHCP6_CHADDR[2]);
+    AppendDhcp6Option(DHCP6_CHADDR[3]);
+    AppendDhcp6Option(DHCP6_CHADDR[4]);
+    AppendDhcp6Option(DHCP6_CHADDR[5]);
     DumpDhcp6Option("Option Client ID");
 
     // Option Request
@@ -656,8 +646,9 @@ uint8_t send_DHCP_INFOREQ(void)
     ip[0] = 0xff;
     ip[1] = 0x02;
 
-    for (j = 2; j < 13; j++)
+    for (j = 2; j < 13; j++) {
         ip[j] = 0x00;
+    }
 
     ip[13] = 0x01;
     ip[14] = 0x00;
@@ -679,12 +670,11 @@ uint8_t send_DHCP_INFOREQ(void)
 }
 
 /**
- * @brief 
- * 
- * @return int8_t 
- */
-int8_t parseDHCP6MSG(void)
-{
+    @brief
+
+    @return int8_t
+*/
+int8_t parseDHCP6MSG(void) {
     uint8_t svr_addr[16];
     uint16_t svr_port;
     uint8_t addlen;
@@ -695,20 +685,17 @@ int8_t parseDHCP6MSG(void)
     uint16_t opt_len;
     uint32_t end_point;
 
-    if ((len = getSn_RX_RSR(DHCP6_SOCKET)) > 0)
-    {
-    	len = recvfrom(DHCP6_SOCKET, (uint8_t *)pDHCP6MSG.OPT, len, svr_addr, (uint16_t *)&svr_port, &addlen);
+    if ((len = getSn_RX_RSR(DHCP6_SOCKET)) > 0) {
+        len = recvfrom(DHCP6_SOCKET, (uint8_t *)pDHCP6MSG.OPT, len, svr_addr, (uint16_t *)&svr_port, &addlen);
 #ifdef _DHCP6_DEBUG_
         printf("DHCP message : %.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x(%d) %d received. \r\n", svr_addr[0], svr_addr[1], svr_addr[2], svr_addr[3], svr_addr[4], svr_addr[5], svr_addr[6], svr_addr[7], svr_addr[8], svr_addr[9], svr_addr[10], svr_addr[11], svr_addr[12], svr_addr[13], svr_addr[14], svr_addr[15], svr_port, len);
 #endif
-    }
-    else
-    {
+    } else {
         return 0;
     }
 
     type = 0;
-	p = (uint8_t *)(pDHCP6MSG.OPT);
+    p = (uint8_t *)(pDHCP6MSG.OPT);
     e = p + len;
 #ifdef _DHCP6_DEBUG_
     printf("in server port %x\r\n", *p);
@@ -724,11 +711,9 @@ int8_t parseDHCP6MSG(void)
         }
         i=0;*/
 
-    switch (*p)
-    {
+    switch (*p) {
     case DHCP6_ADVERTISE:
-    case DHCP6_REPLY:
-    {
+    case DHCP6_REPLY: {
 #ifdef _DHCP6_DEBUG_
         printf("in ADVER or REPLY(7) type : %x \r\n", *p);
 #endif
@@ -736,13 +721,10 @@ int8_t parseDHCP6MSG(void)
         p++;         // xid[0]
         p++;         // xid[1]
         p++;         // xid[2]
-        while (p < e)
-        {
+        while (p < e) {
             p++;
-            switch (*p)
-            {
-            case OPT_CLIENTID:
-            {
+            switch (*p) {
+            case OPT_CLIENTID: {
 #ifdef _DHCP6_DEBUG_
                 printf("in clientid \r\n");
 #endif
@@ -755,15 +737,13 @@ int8_t parseDHCP6MSG(void)
 #endif
                 end_point = (uint32_t)p + clientid_len;
 
-                while ((uint32_t)p != end_point)
-                {
+                while ((uint32_t)p != end_point) {
                     p++;
                 }
                 break;
             }
 
-            case OPT_IANA:
-            {
+            case OPT_IANA: {
 #ifdef _DHCP6_DEBUG_
                 printf("in iana \r\n");
 #endif
@@ -788,13 +768,10 @@ int8_t parseDHCP6MSG(void)
                 T2[2] = *p++;
                 T2[3] = *p++;
                 //IA_NA-options
-                while ((uint32_t)p < end_point)
-                {
+                while ((uint32_t)p < end_point) {
                     p++;
-                    switch (*p)
-                    {
-                    case OPT_IAADDR:
-                    {
+                    switch (*p) {
+                    case OPT_IAADDR: {
 #ifdef _DHCP6_DEBUG_
                         printf("in IA addr \r\n");
 #endif
@@ -831,8 +808,7 @@ int8_t parseDHCP6MSG(void)
                         break;
                     }
 
-                    case OPT_STATUS_CODE:
-                    {
+                    case OPT_STATUS_CODE: {
 #ifdef _DHCP6_DEBUG_
                         printf("in status code \r\n");
 #endif
@@ -855,8 +831,7 @@ int8_t parseDHCP6MSG(void)
                         break;
                     }
 
-                    default:
-                    {
+                    default: {
 #ifdef _DHCP6_DEBUG_
                         printf("in default \r\n");
 #endif
@@ -871,8 +846,7 @@ int8_t parseDHCP6MSG(void)
                 break;
             }
 
-            case OPT_IATA:
-            {
+            case OPT_IATA: {
 #ifdef _DHCP6_DEBUG_
                 printf("in iata \r\n");
 #endif
@@ -884,8 +858,7 @@ int8_t parseDHCP6MSG(void)
                 break;
             }
 
-            case OPT_SERVERID:
-            {
+            case OPT_SERVERID: {
 #ifdef _DHCP6_DEBUG_
                 printf("in serverid \r\n");
 #endif
@@ -903,15 +876,12 @@ int8_t parseDHCP6MSG(void)
 #ifdef _DHCP6_DEBUG_
                 printf("DUID_type : %.4x\r\n", DUID_type_s);
 #endif
-                if (DUID_type_s == 0x02)
-                {
+                if (DUID_type_s == 0x02) {
                     Enterprise_num_s = (*p++ << 24);
                     Enterprise_num_s = Enterprise_num_s + (*p++ << 16);
                     Enterprise_num_s = Enterprise_num_s + (*p++ << 8);
                     Enterprise_num_s = Enterprise_num_s + (*p++);
-                }
-                else
-                {
+                } else {
                     Hardware_type_s = (*p++ << 8);
                     Hardware_type_s = Hardware_type_s + (*p++);
 #ifdef _DHCP6_DEBUG_
@@ -919,16 +889,16 @@ int8_t parseDHCP6MSG(void)
 #endif
                 }
 
-                if (DUID_type_s == 0x01)
-                {
+                if (DUID_type_s == 0x01) {
                     Time_s[0] = *p++;
                     Time_s[1] = *p++;
                     Time_s[2] = *p++;
                     Time_s[3] = *p++;
 #ifdef _DHCP6_DEBUG_
                     printf("Time : ");
-                    for (i = 0; i < 4; i++)
+                    for (i = 0; i < 4; i++) {
                         printf("%.2x", Time_s[i]);
+                    }
                     printf("\r\n");
 #endif
                 }
@@ -942,19 +912,18 @@ int8_t parseDHCP6MSG(void)
 
 #ifdef _DHCP6_DEBUG_
                 printf("Server_MAC : ");
-                for (i = 0; i < 6; i++)
+                for (i = 0; i < 6; i++) {
                     printf("%.2x", Server_MAC[i]);
+                }
                 printf("\r\n");
 #endif
-                while ((uint32_t)p != end_point)
-                {
+                while ((uint32_t)p != end_point) {
                     p++;
                 }
                 break;
             }
 
-            case DNS_RecursiveNameServer:
-            {
+            case DNS_RecursiveNameServer: {
 #ifdef _DHCP6_DEBUG_
                 printf("in DNS Recursive Name Server \r\n");
 #endif
@@ -980,16 +949,14 @@ int8_t parseDHCP6MSG(void)
                 DNS6_Address[14] = *p++;
                 DNS6_Address[15] = *p++;
 
-                while ((uint32_t)p < end_point)
-                {
+                while ((uint32_t)p < end_point) {
                     p++;
                 }
 
                 break;
             }
 
-            case Domain_Search_List:
-            {
+            case Domain_Search_List: {
 #ifdef _DHCP6_DEBUG_
                 printf("in Domain Search List \r\n");
 #endif
@@ -998,16 +965,14 @@ int8_t parseDHCP6MSG(void)
                 opt_len = opt_len + (*p++);
                 end_point = (uint32_t)p + opt_len;
 
-                while ((uint32_t)p < end_point)
-                {
+                while ((uint32_t)p < end_point) {
                     p++;
                 }
 
                 break;
             }
 
-            default:
-            {
+            default: {
 #ifdef _DHCP6_DEBUG_
                 printf("in default \r\n");
 #endif
@@ -1025,68 +990,64 @@ int8_t parseDHCP6MSG(void)
 }
 
 /**
- * @brief 
- * 
- * @return uint8_t 
- */
-uint8_t DHCP6_run2(void)
-{
+    @brief
+
+    @return uint8_t
+*/
+uint8_t DHCP6_run2(void) {
     uint8_t type;
     uint8_t ret;
 
-    if (dhcp6_state == STATE_DHCP6_STOP)
-	{
-		return DHCP6_STOPPED; // Check DHCPv6 STOP State
-	}
+    if (dhcp6_state == STATE_DHCP6_STOP) {
+        return DHCP6_STOPPED; // Check DHCPv6 STOP State
+    }
 
-	if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP)
-	{                                                // Check DHCPv6 SOCKET == UDP
-		WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
-		socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
-	}
-	ret = DHCP6_RUNNING;
-	type = parseDHCP6MSG();
-	switch (dhcp6_state)
-	{
-	case STATE_DHCP6_INIT:
-		send_DHCP_INFOREQ();
-		dhcp6_state = STATE_DHCP6_RELEASE;
-		break;
-	case STATE_DHCP6_RELEASE:
-		return DHCP6_IP_LEASED;
-	default:
-		break;
-	}
+    if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP) {
+        // Check DHCPv6 SOCKET == UDP
+        WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
+        socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
+    }
+    ret = DHCP6_RUNNING;
+    type = parseDHCP6MSG();
+    switch (dhcp6_state) {
+    case STATE_DHCP6_INIT:
+        send_DHCP_INFOREQ();
+        dhcp6_state = STATE_DHCP6_RELEASE;
+        break;
+    case STATE_DHCP6_RELEASE:
+        return DHCP6_IP_LEASED;
+    default:
+        break;
+    }
 
     return ret;
 }
 
 /**
- * @brief 
- * 
- * @param netinfo 
- * @return uint8_t 
- */
-uint8_t DHCP6_run(wiz_NetInfo *netinfo)
-{
+    @brief
+
+    @param netinfo
+    @return uint8_t
+*/
+uint8_t DHCP6_run(wiz_NetInfo *netinfo) {
     uint8_t type;
     uint8_t ret;
     uint8_t i;
 
-    if (dhcp6_state == STATE_DHCP6_STOP)
-		return DHCP6_STOPPED; // Check DHCPv6 STOP State
+    if (dhcp6_state == STATE_DHCP6_STOP) {
+        return DHCP6_STOPPED;    // Check DHCPv6 STOP State
+    }
 
-    if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP)
-	{                                                // Check DHCPv6 SOCKET == UDP
-		WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
-		socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
-	}
+    if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP) {
+        // Check DHCPv6 SOCKET == UDP
+        WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
+        socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
+    }
 
     ret = DHCP6_RUNNING;
     type = parseDHCPMSG();
     printf("type:%d, dhcp_state :%d\r\n", type, dhcp6_state);
-	switch (dhcp6_state)
-    {
+    switch (dhcp6_state) {
     case STATE_DHCP6_INIT:
         DHCP6_allocated_ip[0] = 0;
         DHCP6_allocated_ip[1] = 0;
@@ -1109,35 +1070,33 @@ uint8_t DHCP6_run(wiz_NetInfo *netinfo)
         dhcp6_state = STATE_DHCP6_SOLICIT;
         break;
     case STATE_DHCP6_SOLICIT:
-        if (type == DHCP6_ADVERTISE)
-        {
+        if (type == DHCP6_ADVERTISE) {
 #ifdef _DHCP6_DEBUG_
             printf("> Receive DHCP_ADVERTISE\r\n");
 #endif
 
             DHCP6_allocated_ip[0] = recv_IP[0];
-			DHCP6_allocated_ip[1] = recv_IP[1];
-			DHCP6_allocated_ip[2] = recv_IP[2];
-			DHCP6_allocated_ip[3] = recv_IP[3];
-			DHCP6_allocated_ip[4] = recv_IP[4];
-			DHCP6_allocated_ip[5] = recv_IP[5];
-			DHCP6_allocated_ip[6] = recv_IP[6];
-			DHCP6_allocated_ip[7] = recv_IP[7];
-			DHCP6_allocated_ip[8] = recv_IP[8];
-			DHCP6_allocated_ip[9] = recv_IP[9];
-			DHCP6_allocated_ip[10] = recv_IP[10];
-			DHCP6_allocated_ip[11] = recv_IP[11];
-			DHCP6_allocated_ip[12] = recv_IP[12];
-			DHCP6_allocated_ip[13] = recv_IP[13];
-			DHCP6_allocated_ip[14] = recv_IP[14];
-			DHCP6_allocated_ip[15] = recv_IP[15];
+            DHCP6_allocated_ip[1] = recv_IP[1];
+            DHCP6_allocated_ip[2] = recv_IP[2];
+            DHCP6_allocated_ip[3] = recv_IP[3];
+            DHCP6_allocated_ip[4] = recv_IP[4];
+            DHCP6_allocated_ip[5] = recv_IP[5];
+            DHCP6_allocated_ip[6] = recv_IP[6];
+            DHCP6_allocated_ip[7] = recv_IP[7];
+            DHCP6_allocated_ip[8] = recv_IP[8];
+            DHCP6_allocated_ip[9] = recv_IP[9];
+            DHCP6_allocated_ip[10] = recv_IP[10];
+            DHCP6_allocated_ip[11] = recv_IP[11];
+            DHCP6_allocated_ip[12] = recv_IP[12];
+            DHCP6_allocated_ip[13] = recv_IP[13];
+            DHCP6_allocated_ip[14] = recv_IP[14];
+            DHCP6_allocated_ip[15] = recv_IP[15];
 
-			ret = send_DHCP_REQUEST();
-			if (ret == 9)
-			{
-				return 0;
-			}
-			dhcp6_state = STATE_DHCP6_REQUEST;
+            ret = send_DHCP_REQUEST();
+            if (ret == 9) {
+                return 0;
+            }
+            dhcp6_state = STATE_DHCP6_REQUEST;
         } //else ret = check_DHCP_timeout();
         break;
     case STATE_DHCP6_REQUEST:
@@ -1155,119 +1114,106 @@ uint8_t DHCP6_run(wiz_NetInfo *netinfo)
 }
 
 /**
- * @brief 
- * 
- */
-void DHCP6_stop(void)
-{
-	close(DHCP6_SOCKET);
-	dhcp6_state = STATE_DHCP6_STOP;
+    @brief
+
+*/
+void DHCP6_stop(void) {
+    close(DHCP6_SOCKET);
+    dhcp6_state = STATE_DHCP6_STOP;
 }
 
 /**
- * @brief 
- * 
- * @return uint8_t 
- */
-uint8_t check_DHCP6_timeout(void)
-{
-	uint8_t ret = DHCP6_RUNNING;
+    @brief
 
-    if (dhcp6_retry_count < MAX_DHCP6_RETRY)
-	{
-		if (dhcp6_tick_next < dhcp6_tick_1s)
-		{
-			switch (dhcp6_state)
-			{
-			case STATE_DHCP6_SOLICIT:
-			{
+    @return uint8_t
+*/
+uint8_t check_DHCP6_timeout(void) {
+    uint8_t ret = DHCP6_RUNNING;
+
+    if (dhcp6_retry_count < MAX_DHCP6_RETRY) {
+        if (dhcp6_tick_next < dhcp6_tick_1s) {
+            switch (dhcp6_state) {
+            case STATE_DHCP6_SOLICIT: {
 #ifdef _DHCP6_DEBUG_
-				printf("<<timeout>> state : STATE_DHCP_DISCOVER\r\n");
+                printf("<<timeout>> state : STATE_DHCP_DISCOVER\r\n");
 #endif
-				send_DHCP6_SOLICIT();
-				break;
-			}
-			default:
-			{
-				break;
-			}
-			}
+                send_DHCP6_SOLICIT();
+                break;
+            }
+            default: {
+                break;
+            }
+            }
 
-			dhcp6_tick_1s = 0;
-			dhcp6_tick_next = dhcp6_tick_1s + DHCP6_WAIT_TIME;
-			dhcp6_retry_count++;
-		}
-	}
-	else
-	{ // timeout occurred
+            dhcp6_tick_1s = 0;
+            dhcp6_tick_next = dhcp6_tick_1s + DHCP6_WAIT_TIME;
+            dhcp6_retry_count++;
+        }
+    } else {
+        // timeout occurred
 
-		switch (dhcp6_state)
-		{
-		case STATE_DHCP6_SOLICIT:
-			dhcp6_state = STATE_DHCP6_INIT;
-			ret = DHCP6_FAILED;
-			break;
-		default:
-			break;
-		}
-		reset_DHCP6_timeout();
-	}
+        switch (dhcp6_state) {
+        case STATE_DHCP6_SOLICIT:
+            dhcp6_state = STATE_DHCP6_INIT;
+            ret = DHCP6_FAILED;
+            break;
+        default:
+            break;
+        }
+        reset_DHCP6_timeout();
+    }
     return ret;
 }
 
 /**
- * @brief 
- * 
- * @param s 
- * @param buf 
- */
-void DHCP6_init(uint8_t s, uint8_t *buf)
-{
+    @brief
+
+    @param s
+    @param buf
+*/
+void DHCP6_init(uint8_t s, uint8_t *buf) {
     uint8_t zeroip[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     getSHAR(DHCP6_CHADDR);
-	if ((DHCP6_CHADDR[0] | DHCP6_CHADDR[1] | DHCP6_CHADDR[2] | DHCP6_CHADDR[3] | DHCP6_CHADDR[4] | DHCP6_CHADDR[5]) == 0x00)
-	{
+    if ((DHCP6_CHADDR[0] | DHCP6_CHADDR[1] | DHCP6_CHADDR[2] | DHCP6_CHADDR[3] | DHCP6_CHADDR[4] | DHCP6_CHADDR[5]) == 0x00) {
 #ifdef _DHCP6_DEBUG_
-		printf("DHCP_init-set MAC\r\n");
+        printf("DHCP_init-set MAC\r\n");
 #endif
-		// assing temporary mac address, you should be set SHAR before call this function.
-		DHCP6_CHADDR[0] = 0x00;
-		DHCP6_CHADDR[1] = 0x08;
-		DHCP6_CHADDR[2] = 0xdc;
-		DHCP6_CHADDR[3] = 0x00;
-		DHCP6_CHADDR[4] = 0x00;
-		DHCP6_CHADDR[5] = 0x00;
-		setSHAR(DHCP6_CHADDR);
-	}
+        // assing temporary mac address, you should be set SHAR before call this function.
+        DHCP6_CHADDR[0] = 0x00;
+        DHCP6_CHADDR[1] = 0x08;
+        DHCP6_CHADDR[2] = 0xdc;
+        DHCP6_CHADDR[3] = 0x00;
+        DHCP6_CHADDR[4] = 0x00;
+        DHCP6_CHADDR[5] = 0x00;
+        setSHAR(DHCP6_CHADDR);
+    }
 
-	DHCP6_SOCKET = s; // SOCK_DHCP
+    DHCP6_SOCKET = s; // SOCK_DHCP
 
-	memset(buf, 0, sizeof(buf));
-	pDHCP6MSG.OPT = buf;
-	DHCP6_XID = 0x515789;
+    memset(buf, 0, sizeof(buf));
+    pDHCP6MSG.OPT = buf;
+    DHCP6_XID = 0x515789;
 
-	reset_DHCP_timeout();
-	dhcp6_state = STATE_DHCP6_INIT;
+    reset_DHCP_timeout();
+    dhcp6_state = STATE_DHCP6_INIT;
 }
 
 /**
- * @brief 
- * 
- */
-void reset_DHCP6_timeout(void)
-{
-	dhcp6_tick_1s = 0;
-	dhcp6_tick_next = DHCP6_WAIT_TIME;
-	dhcp6_retry_count = 0;
+    @brief
+
+*/
+void reset_DHCP6_timeout(void) {
+    dhcp6_tick_1s = 0;
+    dhcp6_tick_next = DHCP6_WAIT_TIME;
+    dhcp6_retry_count = 0;
 }
 
 /**
- * @brief 
- * 
- */
-void DHCP6_time_handler(void)
-{
-	dhcp6_tick_1s++;
+    @brief
+
+*/
+void DHCP6_time_handler(void) {
+    dhcp6_tick_1s++;
 }
 
 #endif

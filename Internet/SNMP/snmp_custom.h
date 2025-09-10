@@ -26,10 +26,10 @@ void initTable();
 
 /* User defined functions: LED control examples */
 #ifdef _USE_WIZNET_W5500_EVB_
-	void get_LEDStatus_all(void *ptr, uint8_t *len);
-	void set_LEDStatus_R(int32_t val);
-	void set_LEDStatus_G(int32_t val);
-	void set_LEDStatus_B(int32_t val);
+void get_LEDStatus_all(void *ptr, uint8_t *len);
+void set_LEDStatus_R(int32_t val);
+void set_LEDStatus_G(int32_t val);
+void set_LEDStatus_B(int32_t val);
 #endif
 /* SNMP Trap: warmStart(1) */
 void initial_Trap(uint8_t * managerIP, uint8_t * agentIP);

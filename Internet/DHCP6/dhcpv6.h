@@ -56,10 +56,10 @@
 #if (_WIZCHIP_ == W6100)
 
 /*
- * @brief 
- * @details If you want to display debug & procssing message, Define _DHCP_DEBUG_ 
- * @note    If defined, it dependens on <stdio.h>
- */
+    @brief
+    @details If you want to display debug & procssing message, Define _DHCP_DEBUG_
+    @note    If defined, it dependens on <stdio.h>
+*/
 #if 0
 #define _DHCP6_DEBUG_
 #endif
@@ -74,76 +74,75 @@
 
 #define DCHP6_HOST_NAME "WIZnet\0"
 
-/* 
- * @brief return value of @ref DHCP6_run()
- */
-enum
-{
-   DHCP6_FAILED = 0, ///< Procssing Fail
-   DHCP6_RUNNING,    ///< Procssing DHCPv6 proctocol
-   DHCP6_IP_ASSIGN,  ///< First Occupy IP from DHCPv6 server      (if cbfunc == null, act as default default_ip_assign)
-   DHCP6_IP_CHANGED, ///< Change IP address by new ip from DHCPv6 (if cbfunc == null, act as default default_ip_update)
-   DHCP6_IP_LEASED,  ///< Stand by
-   DHCP6_STOPPED     ///< Stop procssing DHCPv6 protocol
+/*
+    @brief return value of @ref DHCP6_run()
+*/
+enum {
+    DHCP6_FAILED = 0, ///< Procssing Fail
+    DHCP6_RUNNING,    ///< Procssing DHCPv6 proctocol
+    DHCP6_IP_ASSIGN,  ///< First Occupy IP from DHCPv6 server      (if cbfunc == null, act as default default_ip_assign)
+    DHCP6_IP_CHANGED, ///< Change IP address by new ip from DHCPv6 (if cbfunc == null, act as default default_ip_update)
+    DHCP6_IP_LEASED,  ///< Stand by
+    DHCP6_STOPPED     ///< Stop procssing DHCPv6 protocol
 };
 
 /**
- * @brief 
- * 
- * @param asize 
- * @param agrowby 
- */
+    @brief
+
+    @param asize
+    @param agrowby
+*/
 void InitDhcp6Option(unsigned asize, unsigned agrowby);
 /**
- * @brief 
- * 
- * @param value 
- */
+    @brief
+
+    @param value
+*/
 void AppendDhcp6Option(uint8_t value);
 /**
- * @brief 
- * 
- * @param sMark 
- */
+    @brief
+
+    @param sMark
+*/
 void DumpDhcp6Option(char *sMark);
 /**
- * @brief 
- * 
- * @param Option 
- */
+    @brief
+
+    @param Option
+*/
 void DHCP6_Option_Select(uint8_t Option);
 /*
- * @brief DHCPv6 client initialization (outside of the main loop)
- * @param s   - socket number
- * @param buf - buffer for procssing DHCPv6 message
- */
+    @brief DHCPv6 client initialization (outside of the main loop)
+    @param s   - socket number
+    @param buf - buffer for procssing DHCPv6 message
+*/
 void DHCP6_init(uint8_t s, uint8_t *buf);
 
 /*
- * @brief DHCPv6 1s Tick Timer handler
- * @note SHOULD BE register to your system 1s Tick timer handler 
- */
+    @brief DHCPv6 1s Tick Timer handler
+    @note SHOULD BE register to your system 1s Tick timer handler
+*/
 void DHCP6_time_handler(void);
 
 /**
- * @brief 
- * 
- * @param netinfo 
- * @return uint8_t 
- */
+    @brief
+
+    @param netinfo
+    @return uint8_t
+*/
 uint8_t DHCP6_run(wiz_NetInfo *netinfo);
 
 /**
- * @brief 
- * 
- * @return uint8_t 
- */
+    @brief
+
+    @return uint8_t
+*/
 uint8_t DHCP6_run2(void);
 
 /*
- * @brief Stop DHCPv6 procssing
- * @note If you want to restart. call DHCP6_init() and DHCP_run()
- */
+    @brief Stop DHCPv6 procssing
+    @note If you want to restart. call DHCP6_init() and DHCP_run()
+*/
 void DHCP6_stop(void);
 
 /* send DISCOVER message to DHCPv6 server */

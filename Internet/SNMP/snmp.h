@@ -68,7 +68,7 @@ extern "C" {
 }
 
 #ifndef HTONL
-    #define HTONL(x)                    \
+#define HTONL(x)                    \
         ((((x) >> 24) & 0x000000ff) |   \
          (((x) >>  8) & 0x0000ff00) |   \
          (((x) <<  8) & 0x00ff0000) |   \
@@ -76,29 +76,29 @@ extern "C" {
 #endif
 
 typedef struct {
-	uint8_t oidlen;
-	uint8_t oid[MAX_OID];
-	uint8_t dataType;
-	uint8_t dataLen;
-	union {
-		uint8_t octetstring[MAX_STRING];
-		uint32_t intval;
-	} u;
-	void (*getfunction)(void *, uint8_t *);
-	void (*setfunction)(int32_t);
+    uint8_t oidlen;
+    uint8_t oid[MAX_OID];
+    uint8_t dataType;
+    uint8_t dataLen;
+    union {
+        uint8_t octetstring[MAX_STRING];
+        uint32_t intval;
+    } u;
+    void (*getfunction)(void *, uint8_t *);
+    void (*setfunction)(int32_t);
 } dataEntryType;
 
 struct messageStruct {
-	uint8_t buffer[MAX_SNMPMSG_LEN];
-	int32_t len;
-	int32_t index;
+    uint8_t buffer[MAX_SNMPMSG_LEN];
+    int32_t len;
+    int32_t index;
 };
 
 typedef struct {
-	int32_t start;		/* Absolute Index of the TLV */
-	int32_t len;		/* The L value of the TLV */
-	int32_t vstart;		/* Absolute Index of this TLV's Value */
-	int32_t nstart;		/* Absolute Index of the next TLV */
+    int32_t start;		/* Absolute Index of the TLV */
+    int32_t len;		/* The L value of the TLV */
+    int32_t vstart;		/* Absolute Index of this TLV's Value */
+    int32_t nstart;		/* Absolute Index of the next TLV */
 } tlvStructType;
 
 
