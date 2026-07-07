@@ -213,7 +213,7 @@ uint32_t DHCP_XID;      // Any number
 
 RIP_MSG* pDHCPMSG;      // Buffer pointer for DHCP processing
 
-uint8_t HOST_NAME[] = DCHP_HOST_NAME;
+uint8_t HOST_NAME[DHCP_HOST_NAME_MAX_LEN + 1] = DHCP_HOST_NAME;
 
 uint8_t DHCP_CHADDR[6]; // DHCP Client MAC address.
 
@@ -329,6 +329,14 @@ void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_co
     if (ip_conflict) {
         dhcp_ip_conflict = ip_conflict;
     }
+}
+
+void DHCP_set_hostname(const char* hostname) {
+    uint8_t i;
+    for (i = 0; i < DHCP_HOST_NAME_MAX_LEN && hostname[i] != 0; i++) {
+        HOST_NAME[i] = (uint8_t)hostname[i];
+    }
+    HOST_NAME[i] = 0;
 }
 
 /* make the common DHCP message */
