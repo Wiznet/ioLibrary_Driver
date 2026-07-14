@@ -768,7 +768,7 @@ extern "C" {
 #define PHYCFGR_OPMDC_ALLA           (7<<3)
 #define PHYCFGR_OPMDC_PDOWN          (6<<3)
 #define PHYCFGR_OPMDC_NA             (5<<3)
-#define PHYCFGR_OPMDC_100FA          (4<<3)
+#define PHYCFGR_OPMDC_100HA          (4<<3)
 #define PHYCFGR_OPMDC_100F           (3<<3)
 #define PHYCFGR_OPMDC_100H           (2<<3)
 #define PHYCFGR_OPMDC_10F            (1<<3)
