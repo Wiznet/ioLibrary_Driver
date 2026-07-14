@@ -1103,7 +1103,7 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf) {
     phyconf->by   = (tmp & PHYCFGR_OPMD) ? PHY_CONFBY_SW : PHY_CONFBY_HW;
     switch (tmp & PHYCFGR_OPMDC_ALLA) {
     case PHYCFGR_OPMDC_ALLA:
-    case PHYCFGR_OPMDC_100FA:
+    case PHYCFGR_OPMDC_100HA:
         phyconf->mode = PHY_MODE_AUTONEGO;
         break;
     default:
@@ -1111,7 +1111,8 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf) {
         break;
     }
     switch (tmp & PHYCFGR_OPMDC_ALLA) {
-    case PHYCFGR_OPMDC_100FA:
+    case PHYCFGR_OPMDC_ALLA:
+    case PHYCFGR_OPMDC_100HA:
     case PHYCFGR_OPMDC_100F:
     case PHYCFGR_OPMDC_100H:
         phyconf->speed = PHY_SPEED_100;
@@ -1121,7 +1122,8 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf) {
         break;
     }
     switch (tmp & PHYCFGR_OPMDC_ALLA) {
-    case PHYCFGR_OPMDC_100FA:
+    case PHYCFGR_OPMDC_ALLA:
+    case PHYCFGR_OPMDC_100HA:
     case PHYCFGR_OPMDC_100F:
     case PHYCFGR_OPMDC_10F:
         phyconf->duplex = PHY_DUPLEX_FULL;
