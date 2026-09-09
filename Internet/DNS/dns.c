@@ -531,7 +531,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns) {
 
     retry_count = 0;
     dns_1s_tick = 0;
-#if 1
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
     // 20231019 taylor
     uint8_t addr_len;
 #endif
