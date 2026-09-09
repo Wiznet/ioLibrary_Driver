@@ -142,6 +142,13 @@ uint8_t sock_remained_byte[_WIZCHIP_SOCK_NUM_] = {0,}; // set by wiz_recv_data()
 #define IPV6_AVAILABLE
 #endif
 
+// File-local helpers; defined further down. Declared here rather than in
+// socket.h so that translation units including socket.h do not see a
+// 'static' declaration they never define.
+static int8_t  connect_IO_6(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
+
 #if 1
 
 
