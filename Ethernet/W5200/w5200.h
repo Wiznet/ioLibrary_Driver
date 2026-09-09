@@ -1656,7 +1656,6 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 	}
 #define setSn_PORTR  setSn_PORT
 /**
-    /**
     @ingroup Socket_register_access_function_W5200
     @brief Get @ref Sn_PORT register
     @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
@@ -1724,7 +1723,6 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 #define getSn_KPALVTR(sn) \
 		WIZCHIP_READ(Sn_KPALVTR(sn))
 /**
-    /**
     @ingroup Socket_register_access_function_W5200
     @brief Get @ref Sn_DPORT register
     @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.

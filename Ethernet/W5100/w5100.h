@@ -1495,7 +1495,6 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 		WIZCHIP_READ_BUF(Sn_DIPR(sn), dipr, 4)
 
 /**
-    /**
     @ingroup Socket_register_access_function_W5100
     @brief Set @ref Sn_DPORT register
     @param (uint8_t)sn Socket number. It should be <b>0 ~ @ref \_WIZCHIP_SOCK_NUM_</b>.
