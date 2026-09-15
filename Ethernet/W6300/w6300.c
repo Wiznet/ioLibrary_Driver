@@ -133,7 +133,6 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, datasize_t len) {
 
 void WIZCHIP_READ_BUF(uint32_t AddrSel, uint8_t* pBuf, datasize_t len) {
 
-    uint8_t ret;
     uint8_t opcode = 0;
     uint16_t ADDR = 0;
 

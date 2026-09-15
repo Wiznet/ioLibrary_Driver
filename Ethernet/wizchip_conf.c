@@ -362,8 +362,8 @@ void reg_wizchip_busbuf_cbfunc(void(*busbuf_rb)(uint32_t AddrSel, iodata_t* pBuf
 
 void reg_wizchip_spi_cbfunc(uint8_t (*spi_rb)(void),
                             void (*spi_wb)(uint8_t wb),
-                            void (*spi_rbuf)(uint8_t* buf, datasize_t len),
-                            void (*spi_wbuf)(uint8_t* buf, datasize_t len)) {
+                            void (*spi_rbuf)(uint8_t* buf, uint16_t len),
+                            void (*spi_wbuf)(uint8_t* buf, uint16_t len)) {
     while (!(WIZCHIP.if_mode & _WIZCHIP_IO_MODE_SPI_));
 
     if (!spi_rb) {

@@ -142,6 +142,13 @@ uint8_t sock_remained_byte[_WIZCHIP_SOCK_NUM_] = {0,}; // set by wiz_recv_data()
 #define IPV6_AVAILABLE
 #endif
 
+// File-local helpers; defined further down. Declared here rather than in
+// socket.h so that translation units including socket.h do not see a
+// 'static' declaration they never define.
+static int8_t  connect_IO_6(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
+static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
+
 #if 1
 
 
@@ -196,8 +203,9 @@ inline uint8_t inline_CheckAddrlen_W6x00(void) {
 
 int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag) {
 
+#ifdef IPV6_AVAILABLE
     uint8_t taddr[16];
-    uint16_t local_port = 0;
+#endif
     CHECK_SOCKNUM();
     switch (protocol & 0x0F) {
 #ifdef IPV6_AVAILABLE
@@ -769,9 +777,13 @@ int32_t sendto_W6x00(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, ui
 
 static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen) {
     uint8_t tmp = 0;
+#ifdef IPV6_AVAILABLE
     uint8_t tcmd = Sn_CR_SEND;
+#endif
     uint16_t freesize = 0;
+#ifndef IPV6_AVAILABLE
     uint32_t taddr;
+#endif
 
     /*
         The below codes can be omitted for optmization of speed
@@ -806,7 +818,9 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
                 return SOCKERR_SOCKMODE;
             }
             setSn_DIPR(sn, addr);
+#ifdef IPV6_AVAILABLE
             tcmd = Sn_CR_SEND;
+#endif
         } else {
             return SOCKERR_IPINVALID;
         }
@@ -1036,7 +1050,7 @@ static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * 
         if (sock_remained_size[sn] == 0) {
             wiz_recv_data(sn, head, 8);
             setSn_CR(sn, Sn_CR_RECV);
-            while (getSn_CR(sn));
+            while (getSn_CR(sn)) { }
             // read peer's IP address, port number & packet length
             //A20150601 : For W5300
 #if _WIZCHIP_ == 5300

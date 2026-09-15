@@ -311,7 +311,6 @@ int8_t  listen(uint8_t sn);
          In block io mode, it does not return until connection is completed. \n
          In Non-block io mode(@ref SF_IO_NONBLOCK), it returns @ref SOCK_BUSY immediately.
 */
-static int8_t connect_IO_6(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
 //int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port, uint8_t addrlen);
 
 /**
@@ -401,7 +400,6 @@ int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
          In non-block io mode(@ref SF_IO_NONBLOCK), It return @ref SOCK_BUSY immediately when SOCKET transimttable buffer size is not enough.
 */
 //int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
-static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t port, uint8_t addrlen);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -436,7 +434,6 @@ static int32_t sendto_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * ad
          In non-block io mode(@ref SF_IO_NONBLOCK), it return @ref SOCK_BUSY immediately when SOCKET RX buffer is empty. \n
 */
 //int32_t recvfrom(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
-static int32_t recvfrom_IO_6(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t *port, uint8_t *addrlen);
 
 
 /////////////////////////////

@@ -665,7 +665,7 @@ int8_t parseDHCPMSG(void) {
     uint8_t * e;
     uint8_t type = 0;
     uint8_t opt_len;
-#if 1
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
     // 20231019 taylor
     uint8_t addr_len;
 #endif
