@@ -264,6 +264,16 @@ _WIZCHIP  WIZCHIP = {
         wizchip_cs_select,
         wizchip_cs_deselect
     },
+#if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
+    {
+        .SPI = {
+            ._read_byte   = wizchip_spi_readbyte,
+            ._write_byte  = wizchip_spi_writebyte,
+            ._read_burst  = 0,
+            ._write_burst = 0
+        }
+    }
+#else
     {
         {
             //M20150601 : Rename the function
@@ -274,6 +284,7 @@ _WIZCHIP  WIZCHIP = {
         },
 
     }
+#endif
 };
 
 
