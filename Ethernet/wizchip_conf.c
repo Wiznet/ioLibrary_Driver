@@ -431,37 +431,42 @@ void reg_wizchip_qspi_cbfunc(void (*qspi_rb)(uint8_t opcode, uint16_t addr, uint
 #endif
 
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg) {
-    //teddy 240122
-#if	_WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
-    uint8_t tmp = *(uint8_t*) arg;
-#endif
     uint8_t* ptmp[2] = {0, 0};
     switch (cwtype) {
         //teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
     case CW_SYS_LOCK:
-        if (tmp & SYS_CHIP_LOCK) {
-            CHIPLOCK();
-        }
-        if (tmp & SYS_NET_LOCK) {
-            NETLOCK();
-        }
-        if (tmp & SYS_PHY_LOCK) {
-            PHYLOCK();
+        if (arg == 0) return -1;
+        {
+            uint8_t tmp = *(uint8_t*)arg;
+            if (tmp & SYS_CHIP_LOCK) {
+                CHIPLOCK();
+            }
+            if (tmp & SYS_NET_LOCK) {
+                NETLOCK();
+            }
+            if (tmp & SYS_PHY_LOCK) {
+                PHYLOCK();
+            }
         }
         break;
     case CW_SYS_UNLOCK:
-        if (tmp & SYS_CHIP_LOCK) {
-            CHIPUNLOCK();
-        }
-        if (tmp & SYS_NET_LOCK) {
-            NETUNLOCK();
-        }
-        if (tmp & SYS_PHY_LOCK) {
-            PHYUNLOCK();
+        if (arg == 0) return -1;
+        {
+            uint8_t tmp = *(uint8_t*)arg;
+            if (tmp & SYS_CHIP_LOCK) {
+                CHIPUNLOCK();
+            }
+            if (tmp & SYS_NET_LOCK) {
+                NETUNLOCK();
+            }
+            if (tmp & SYS_PHY_LOCK) {
+                PHYUNLOCK();
+            }
         }
         break;
     case CW_GET_SYSLOCK:
+        if (arg == 0) return -1;
         *(uint8_t*)arg = getSYSR() >> 5;
         break;
 #endif
@@ -554,18 +559,24 @@ int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg) {
         //teddy 240122
 #if _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500 || _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300
     case CW_GET_PHYPOWMODE:
-        tmp = wizphy_getphypmode();
-        if ((int8_t)tmp == -1) {
-            return -1;
+        if (arg == 0) return -1;
+        {
+            uint8_t tmp = wizphy_getphypmode();
+            if ((int8_t)tmp == -1) {
+                return -1;
+            }
+            *(uint8_t*)arg = tmp;
         }
-        *(uint8_t*)arg = tmp;
         break;
     case CW_GET_PHYLINK:
-        tmp = wizphy_getphylink();
-        if ((int8_t)tmp == -1) {
-            return -1;
+        if (arg == 0) return -1;
+        {
+            uint8_t tmp = wizphy_getphylink();
+            if ((int8_t)tmp == -1) {
+                return -1;
+            }
+            *(uint8_t*)arg = tmp;
         }
-        *(uint8_t*)arg = tmp;
         break;
 #endif
     default:
