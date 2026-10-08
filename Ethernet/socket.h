@@ -90,6 +90,29 @@ extern "C" {
 
 #include "wizchip_conf.h"
 
+/*
+ * Several functions below share their names with the BSD socket API, so they
+ * clash with libc or another network stack linked into the same image.
+ * Set WIZCHIP_PREFIXED_EXPORTS to 1 when building the library and its users
+ * to compile them as wizchip_socket(), wizchip_close() and so on instead.
+ * The macros only rename a name followed by '(', so struct members and
+ * variables of the same name are left alone.
+ */
+#ifndef WIZCHIP_PREFIXED_EXPORTS
+#define WIZCHIP_PREFIXED_EXPORTS 0
+#endif
+
+#if WIZCHIP_PREFIXED_EXPORTS
+#define socket(...)      wizchip_socket(__VA_ARGS__)
+#define close(...)       wizchip_close(__VA_ARGS__)
+#define listen(...)      wizchip_listen(__VA_ARGS__)
+#define disconnect(...)  wizchip_disconnect(__VA_ARGS__)
+#define send(...)        wizchip_send(__VA_ARGS__)
+#define recv(...)        wizchip_recv(__VA_ARGS__)
+#define setsockopt(...)  wizchip_setsockopt(__VA_ARGS__)
+#define getsockopt(...)  wizchip_getsockopt(__VA_ARGS__)
+#endif
+
 #define SOCKET                uint8_t  ///< SOCKET type define for legacy driver
 
 #define SOCK_OK               1        ///< Result is OK about socket process.
