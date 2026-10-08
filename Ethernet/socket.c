@@ -1394,7 +1394,7 @@ int8_t getsockopt(uint8_t sn, sockopt_type sotype, void* arg) {
 #if  _WIZCHIP_ > 5200
     case SO_KEEPALIVEAUTO:
         CHECK_TCPMODE();
-        *(uint16_t*) arg = getSn_KPALVTR(sn);
+        *(uint8_t*) arg = getSn_KPALVTR(sn);
         break;
 #endif
     case SO_SENDBUF:
