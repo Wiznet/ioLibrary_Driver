@@ -249,14 +249,14 @@ int32_t loopback_udpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
                 size = DATA_BUF_SIZE;
             }
             ret = recvfrom(sn, buf, size, destip, (uint16_t*)&destport);
-            buf[ret] = 0x00;
-            printf("recv form[%d.%d.%d.%d][%d]: %s\n", destip[0], destip[1], destip[2], destip[3], destport, buf);
             if (ret <= 0) {
 #ifdef _LOOPBACK_DEBUG_
                 printf("%d: recvfrom error. %ld\r\n", sn, ret);
 #endif
                 return ret;
             }
+            buf[ret] = 0x00;
+            printf("recv form[%d.%d.%d.%d][%d]: %s\n", destip[0], destip[1], destip[2], destip[3], destport, buf);
             size = (uint16_t) ret;
             sentsize = 0;
             while (sentsize != size) {
