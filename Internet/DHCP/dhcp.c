@@ -65,8 +65,9 @@
 #define STATE_DHCP_REQUEST       2        ///< send REQEUST and wait ACK or NACK
 #define STATE_DHCP_LEASED        3        ///< ReceiveD ACK and IP leased
 #define STATE_DHCP_REREQUEST     4        ///< send REQUEST for maintaining leased IP
-#define STATE_DHCP_RELEASE       5        ///< No use
-#define STATE_DHCP_STOP          6        ///< Stop processing DHCP
+#define STATE_DHCP_REBINDING     5        ///< send broadcast REQUEST before lease expiry
+#define STATE_DHCP_RELEASE       6        ///< No use
+#define STATE_DHCP_STOP          7        ///< Stop processing DHCP
 
 #define DHCP_FLAGSBROADCAST      0x8000   ///< The broadcast value of flags in @ref RIP_MSG 
 #define DHCP_FLAGSUNICAST        0x0000   ///< The unicast   value of flags in @ref RIP_MSG
@@ -207,6 +208,9 @@ int8_t   dhcp_retry_count  = 0;
 
 uint32_t dhcp_lease_time   			= INFINITE_LEASETIME;
 volatile uint32_t dhcp_tick_1s      = 0;                 // unit 1 second
+static uint32_t dhcp_lease_elapsed  = 0;
+static uint32_t dhcp_t1_time        = INFINITE_LEASETIME;
+static uint32_t dhcp_t2_time        = INFINITE_LEASETIME;
 uint32_t dhcp_tick_next    			= DHCP_WAIT_TIME ;
 
 uint32_t DHCP_XID;      // Any number
@@ -248,6 +252,15 @@ uint8_t  check_DHCP_timeout(void);
 
 /* Initialize to timeout process.  */
 void     reset_DHCP_timeout(void);
+
+/* Initialize RFC 2131 renewal and rebinding timers for the active lease. */
+static void update_DHCP_lease_timers(void);
+
+/* Return non-zero once the active lease reaches the supplied deadline. */
+static int8_t check_DHCP_lease_deadline(uint32_t deadline);
+
+/* Stop using the current leased address. */
+static void clear_DHCP_lease(void);
 
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
 int8_t   parseDHCPCMSG(void);
@@ -483,21 +496,34 @@ void send_DHCP_DISCOVER(void) {
 void send_DHCP_REQUEST(void) {
     int i;
     uint8_t ip[4];
+    uint8_t renewing;
+    uint8_t rebinding;
     uint16_t k = 0;
 
     makeDHCPMSG();
 
-    if (dhcp_state == STATE_DHCP_LEASED || dhcp_state == STATE_DHCP_REREQUEST) {
+    renewing = (dhcp_state == STATE_DHCP_LEASED || dhcp_state == STATE_DHCP_REREQUEST);
+    rebinding = (dhcp_state == STATE_DHCP_REBINDING);
+    if (renewing || rebinding) {
         *((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSUNICAST & 0xFF00) >> 8);
         *((uint8_t*)(&pDHCPMSG->flags) +1) = (DHCP_FLAGSUNICAST & 0x00FF);
         pDHCPMSG->ciaddr[0] = DHCP_allocated_ip[0];
         pDHCPMSG->ciaddr[1] = DHCP_allocated_ip[1];
         pDHCPMSG->ciaddr[2] = DHCP_allocated_ip[2];
         pDHCPMSG->ciaddr[3] = DHCP_allocated_ip[3];
-        ip[0] = DHCP_SIP[0];
-        ip[1] = DHCP_SIP[1];
-        ip[2] = DHCP_SIP[2];
-        ip[3] = DHCP_SIP[3];
+        if (renewing) {
+            ip[0] = DHCP_SIP[0];
+            ip[1] = DHCP_SIP[1];
+            ip[2] = DHCP_SIP[2];
+            ip[3] = DHCP_SIP[3];
+        } else {
+            *((uint8_t*)(&pDHCPMSG->flags))   = ((DHCP_FLAGSBROADCAST & 0xFF00) >> 8);
+            *((uint8_t*)(&pDHCPMSG->flags) +1) = (DHCP_FLAGSBROADCAST & 0x00FF);
+            ip[0] = 255;
+            ip[1] = 255;
+            ip[2] = 255;
+            ip[3] = 255;
+        }
     } else {
         ip[0] = 255;
         ip[1] = 255;
@@ -522,7 +548,7 @@ void send_DHCP_REQUEST(void) {
     pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
     pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
 
-    if (ip[3] == 255) { // if(dchp_state == STATE_DHCP_LEASED || dchp_state == DHCP_REREQUEST_STATE)
+    if (!renewing && !rebinding) {
         pDHCPMSG->OPT[k++] = dhcpRequestedIPaddr;
         pDHCPMSG->OPT[k++] = 0x04;
         pDHCPMSG->OPT[k++] = DHCP_allocated_ip[0];
@@ -801,6 +827,14 @@ uint8_t DHCP_run(void) {
     ret = DHCP_RUNNING;
     type = parseDHCPMSG();
 
+    if ((dhcp_state == STATE_DHCP_LEASED || dhcp_state == STATE_DHCP_REREQUEST ||
+            dhcp_state == STATE_DHCP_REBINDING) && check_DHCP_lease_deadline(dhcp_lease_time)) {
+        clear_DHCP_lease();
+        reset_DHCP_timeout();
+        dhcp_state = STATE_DHCP_INIT;
+        return DHCP_FAILED;
+    }
+
     switch (dhcp_state) {
     case STATE_DHCP_INIT     :
         DHCP_allocated_ip[0] = 0;
@@ -834,6 +868,7 @@ uint8_t DHCP_run(void) {
             printf("> Receive DHCP_ACK\r\n");
 #endif
             if (check_DHCP_leasedIP()) {
+                update_DHCP_lease_timers();
                 // Network info assignment from DHCP
                 dhcp_ip_assign();
                 reset_DHCP_timeout();
@@ -861,7 +896,7 @@ uint8_t DHCP_run(void) {
 
     case STATE_DHCP_LEASED :
         ret = DHCP_IP_LEASED;
-        if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time / 2) < dhcp_tick_1s)) {
+        if (check_DHCP_lease_deadline(dhcp_t1_time)) {
 
 #ifdef _DHCP_DEBUG_
             printf("> Maintains the IP address \r\n");
@@ -886,6 +921,7 @@ uint8_t DHCP_run(void) {
     case STATE_DHCP_REREQUEST :
         ret = DHCP_IP_LEASED;
         if (type == DHCP_ACK) {
+            update_DHCP_lease_timers();
             dhcp_retry_count = 0;
             if (OLD_allocated_ip[0] != DHCP_allocated_ip[0] ||
                     OLD_allocated_ip[1] != DHCP_allocated_ip[1] ||
@@ -911,8 +947,49 @@ uint8_t DHCP_run(void) {
             printf("> Receive DHCP_NACK, Failed to maintain ip\r\n");
 #endif
 
+            clear_DHCP_lease();
             reset_DHCP_timeout();
+            dhcp_state = STATE_DHCP_DISCOVER;
+        } else if (check_DHCP_lease_deadline(dhcp_t2_time)) {
+            DHCP_XID++;
+            dhcp_state = STATE_DHCP_REBINDING;
+            send_DHCP_REQUEST();
+            reset_DHCP_timeout();
+        } else {
+            ret = check_DHCP_timeout();
+        }
+        break;
 
+    case STATE_DHCP_REBINDING :
+        ret = DHCP_IP_LEASED;
+        if (type == DHCP_ACK) {
+            update_DHCP_lease_timers();
+            dhcp_retry_count = 0;
+            if (OLD_allocated_ip[0] != DHCP_allocated_ip[0] ||
+                    OLD_allocated_ip[1] != DHCP_allocated_ip[1] ||
+                    OLD_allocated_ip[2] != DHCP_allocated_ip[2] ||
+                    OLD_allocated_ip[3] != DHCP_allocated_ip[3]) {
+                ret = DHCP_IP_CHANGED;
+                dhcp_ip_update();
+#ifdef _DHCP_DEBUG_
+                printf(">IP changed.\r\n");
+#endif
+            }
+#ifdef _DHCP_DEBUG_
+            else {
+                printf(">IP is continued.\r\n");
+            }
+#endif
+            reset_DHCP_timeout();
+            dhcp_state = STATE_DHCP_LEASED;
+        } else if (type == DHCP_NAK) {
+
+#ifdef _DHCP_DEBUG_
+            printf("> Receive DHCP_NACK, Failed to maintain ip\r\n");
+#endif
+
+            clear_DHCP_lease();
+            reset_DHCP_timeout();
             dhcp_state = STATE_DHCP_DISCOVER;
         } else {
             ret = check_DHCP_timeout();
@@ -927,7 +1004,52 @@ uint8_t DHCP_run(void) {
 
 void    DHCP_stop(void) {
     close(DHCP_SOCKET);
+    clear_DHCP_lease();
     dhcp_state = STATE_DHCP_STOP;
+}
+
+static void update_DHCP_lease_timers(void) {
+    dhcp_lease_elapsed = 0;
+    if (dhcp_lease_time == INFINITE_LEASETIME) {
+        dhcp_t1_time = INFINITE_LEASETIME;
+        dhcp_t2_time = INFINITE_LEASETIME;
+        return;
+    }
+
+    dhcp_t1_time = dhcp_lease_time / 2;
+    dhcp_t2_time = (dhcp_lease_time / 8) * 7;
+    if (dhcp_t1_time == 0) {
+        dhcp_t1_time = 1;
+    }
+    if (dhcp_t2_time <= dhcp_t1_time) {
+        dhcp_t2_time = dhcp_t1_time + 1;
+    }
+    if (dhcp_t2_time > dhcp_lease_time) {
+        dhcp_t2_time = dhcp_lease_time;
+    }
+}
+
+static int8_t check_DHCP_lease_deadline(uint32_t deadline) {
+    if (deadline == INFINITE_LEASETIME) {
+        return 0;
+    }
+    return (dhcp_lease_elapsed >= deadline) ? 1 : 0;
+}
+
+static void clear_DHCP_lease(void) {
+    uint8_t zeroip[4] = {0, 0, 0, 0};
+
+    setSIPR(zeroip);
+    setGAR(zeroip);
+    setSUBR(zeroip);
+    DHCP_allocated_ip[0] = 0;
+    DHCP_allocated_ip[1] = 0;
+    DHCP_allocated_ip[2] = 0;
+    DHCP_allocated_ip[3] = 0;
+    dhcp_lease_time = INFINITE_LEASETIME;
+    dhcp_lease_elapsed = 0;
+    dhcp_t1_time = INFINITE_LEASETIME;
+    dhcp_t2_time = INFINITE_LEASETIME;
 }
 
 uint8_t check_DHCP_timeout(void) {
@@ -944,13 +1066,17 @@ uint8_t check_DHCP_timeout(void) {
 
             case STATE_DHCP_REQUEST :
                 //					printf("<<timeout>> state : STATE_DHCP_REQUEST\r\n");
-
                 send_DHCP_REQUEST();
                 break;
 
             case STATE_DHCP_REREQUEST :
                 //					printf("<<timeout>> state : STATE_DHCP_REREQUEST\r\n");
 
+                send_DHCP_REQUEST();
+                break;
+
+            case STATE_DHCP_REBINDING :
+                //               printf("<<timeout>> state : STATE_DHCP_REBINDING\r\n");
                 send_DHCP_REQUEST();
                 break;
 
@@ -970,9 +1096,19 @@ uint8_t check_DHCP_timeout(void) {
             ret = DHCP_FAILED;
             break;
         case STATE_DHCP_REQUEST:
-        case STATE_DHCP_REREQUEST:
             send_DHCP_DISCOVER();
             dhcp_state = STATE_DHCP_DISCOVER;
+            break;
+        case STATE_DHCP_REREQUEST:
+            if (check_DHCP_lease_deadline(dhcp_t2_time)) {
+                dhcp_state = STATE_DHCP_REBINDING;
+                send_DHCP_REQUEST();
+            } else {
+                send_DHCP_REQUEST();
+            }
+            break;
+        case STATE_DHCP_REBINDING:
+            send_DHCP_REQUEST();
             break;
         default :
             break;
@@ -1057,6 +1193,11 @@ void DHCP_init(uint8_t s, uint8_t * buf) {
     // WIZchip Netinfo Clear
     setSIPR(zeroip);
     setGAR(zeroip);
+    setSUBR(zeroip);
+    dhcp_lease_time = INFINITE_LEASETIME;
+    dhcp_lease_elapsed = 0;
+    dhcp_t1_time = INFINITE_LEASETIME;
+    dhcp_t2_time = INFINITE_LEASETIME;
 
     reset_DHCP_timeout();
     dhcp_state = STATE_DHCP_INIT;
@@ -1072,6 +1213,9 @@ void reset_DHCP_timeout(void) {
 
 void DHCP_time_handler(void) {
     dhcp_tick_1s++;
+    if (dhcp_lease_elapsed != INFINITE_LEASETIME) {
+        dhcp_lease_elapsed++;
+    }
 }
 
 void getIPfromDHCP(uint8_t* ip) {
@@ -1114,5 +1258,3 @@ char NibbleToHex(uint8_t nibble) {
         return nibble + ('A' - 0x0A);
     }
 }
-
-
