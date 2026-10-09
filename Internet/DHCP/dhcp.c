@@ -210,6 +210,7 @@ volatile uint32_t dhcp_tick_1s      = 0;                 // unit 1 second
 uint32_t dhcp_tick_next    			= DHCP_WAIT_TIME ;
 
 uint32_t DHCP_XID;      // Any number
+static uint32_t DHCP_XID_RANDOM;
 
 RIP_MSG* pDHCPMSG;      // Buffer pointer for DHCP processing
 
@@ -249,8 +250,19 @@ uint8_t  check_DHCP_timeout(void);
 /* Initialize to timeout process.  */
 void     reset_DHCP_timeout(void);
 
+/* Generate a transaction ID for a new DHCP transaction. */
+static uint32_t next_DHCP_XID(void);
+
+/* Read a network-order 32-bit value. */
+static uint32_t read_DHCP_u32(uint8_t *p);
+
+/* Validate a reply against the current transaction ID. */
+static int8_t check_DHCP_xid(void);
+
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
 int8_t   parseDHCPCMSG(void);
+
+static uint32_t (*dhcp_xid_entropy_hook)(void);
 
 /* The default handler of ip assign first */
 void default_ip_assign(void) {
@@ -697,6 +709,12 @@ int8_t parseDHCPMSG(void) {
 #endif
             return 0;
         }
+        if (!check_DHCP_xid()) {
+#ifdef _DHCP_DEBUG_
+            printf("Another DHCP transaction response is ignored.\r\n");
+#endif
+            return 0;
+        }
         //compare DHCP server ip address
         if ((DHCP_SIP[0] != 0) || (DHCP_SIP[1] != 0) || (DHCP_SIP[2] != 0) || (DHCP_SIP[3] != 0)) {
             if (((svr_addr[0] != DHCP_SIP[0]) || (svr_addr[1] != DHCP_SIP[1]) || (svr_addr[2] != DHCP_SIP[2]) || (svr_addr[3] != DHCP_SIP[3])) &&
@@ -803,6 +821,7 @@ uint8_t DHCP_run(void) {
 
     switch (dhcp_state) {
     case STATE_DHCP_INIT     :
+        DHCP_XID = next_DHCP_XID();
         DHCP_allocated_ip[0] = 0;
         DHCP_allocated_ip[1] = 0;
         DHCP_allocated_ip[2] = 0;
@@ -873,7 +892,7 @@ uint8_t DHCP_run(void) {
             OLD_allocated_ip[2] = DHCP_allocated_ip[2];
             OLD_allocated_ip[3] = DHCP_allocated_ip[3];
 
-            DHCP_XID++;
+            DHCP_XID = next_DHCP_XID();
 
             send_DHCP_REQUEST();
 
@@ -1047,19 +1066,58 @@ void DHCP_init(uint8_t s, uint8_t * buf) {
 
     DHCP_SOCKET = s; // SOCK_DHCP
     pDHCPMSG = (RIP_MSG*)buf;
-    DHCP_XID = 0x12345678;
-    {
-        DHCP_XID += DHCP_CHADDR[3];
-        DHCP_XID += DHCP_CHADDR[4];
-        DHCP_XID += DHCP_CHADDR[5];
-        DHCP_XID += (DHCP_CHADDR[3] ^ DHCP_CHADDR[4] ^ DHCP_CHADDR[5]);
-    }
+    DHCP_XID = next_DHCP_XID();
     // WIZchip Netinfo Clear
     setSIPR(zeroip);
     setGAR(zeroip);
 
     reset_DHCP_timeout();
     dhcp_state = STATE_DHCP_INIT;
+}
+
+void DHCP_set_xid_entropy_hook(uint32_t (*entropy)(void)) {
+    dhcp_xid_entropy_hook = entropy;
+}
+
+static uint32_t next_DHCP_XID(void) {
+    uint32_t entropy = 0;
+
+    if (dhcp_xid_entropy_hook != 0) {
+        entropy = dhcp_xid_entropy_hook();
+    }
+    if (entropy == 0) {
+        entropy = DHCP_XID_RANDOM ^ dhcp_tick_1s;
+        entropy ^= ((uint32_t)DHCP_CHADDR[0] << 24);
+        entropy ^= ((uint32_t)DHCP_CHADDR[1] << 16);
+        entropy ^= ((uint32_t)DHCP_CHADDR[2] << 8);
+        entropy ^= ((uint32_t)DHCP_CHADDR[3]);
+        entropy ^= ((uint32_t)DHCP_CHADDR[4] << 8);
+        entropy ^= ((uint32_t)DHCP_CHADDR[5] << 16);
+    }
+    if (entropy == 0) {
+        entropy = 0x6d2b79f5;
+    }
+
+    DHCP_XID_RANDOM ^= entropy;
+    if (DHCP_XID_RANDOM == 0) {
+        DHCP_XID_RANDOM = 0x6d2b79f5;
+    }
+    DHCP_XID_RANDOM ^= DHCP_XID_RANDOM << 13;
+    DHCP_XID_RANDOM ^= DHCP_XID_RANDOM >> 17;
+    DHCP_XID_RANDOM ^= DHCP_XID_RANDOM << 5;
+    if (DHCP_XID_RANDOM == 0) {
+        DHCP_XID_RANDOM = 0x6d2b79f5;
+    }
+    return DHCP_XID_RANDOM;
+}
+
+static uint32_t read_DHCP_u32(uint8_t *p) {
+    return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) |
+           ((uint32_t)p[2] << 8) | (uint32_t)p[3];
+}
+
+static int8_t check_DHCP_xid(void) {
+    return read_DHCP_u32((uint8_t *)&pDHCPMSG->xid) == DHCP_XID;
 }
 
 
@@ -1114,5 +1172,3 @@ char NibbleToHex(uint8_t nibble) {
         return nibble + ('A' - 0x0A);
     }
 }
-
-

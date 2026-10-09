@@ -101,6 +101,12 @@ void DHCP_init(uint8_t s, uint8_t * buf);
 void DHCP_time_handler(void);
 
 /*
+    @brief Register a caller-provided entropy hook for DHCP transaction IDs.
+    @param entropy - function returning entropy, or NULL to use the default mixer
+*/
+void DHCP_set_xid_entropy_hook(uint32_t (*entropy)(void));
+
+/*
     @brief Register call back function
     @param ip_assign   - callback func when IP is assigned from DHCP server first
     @param ip_update   - callback func when IP is changed
