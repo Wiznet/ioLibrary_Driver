@@ -73,7 +73,10 @@ extern "C" {
 
 #define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
 
-#define DCHP_HOST_NAME           "WIZnet\0"
+#define DHCP_HOST_NAME           "WIZnet\0"
+
+/* Maximum length (excluding null terminator) of a hostname set via @ref DHCP_set_hostname */
+#define DHCP_HOST_NAME_MAX_LEN   32
 
 /*
     @brief return value of @ref DHCP_run()
@@ -107,6 +110,15 @@ void DHCP_time_handler(void);
     @param ip_conflict - callback func when the assigned IP is conflict with others.
 */
 void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_conflict)(void));
+
+/*
+    @brief Set the hostname (DHCP option 12) sent with DISCOVER/REQUEST messages
+    @param hostname - null-terminated hostname string. Truncated to @ref DHCP_HOST_NAME_MAX_LEN
+                      characters if longer. May be called at any time before/while DHCP is running;
+                      takes effect on the next message sent.
+    @note If never called, defaults to @ref DHCP_HOST_NAME
+*/
+void DHCP_set_hostname(const char* hostname);
 
 /*
     @brief DHCP client in the main loop
