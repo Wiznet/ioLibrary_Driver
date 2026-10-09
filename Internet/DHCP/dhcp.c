@@ -207,6 +207,8 @@ int8_t   dhcp_retry_count  = 0;
 
 uint32_t dhcp_lease_time   			= INFINITE_LEASETIME;
 volatile uint32_t dhcp_tick_1s      = 0;                 // unit 1 second
+static uint32_t dhcp_t1_time        = INFINITE_LEASETIME;
+static uint32_t dhcp_t2_time        = INFINITE_LEASETIME;
 uint32_t dhcp_tick_next    			= DHCP_WAIT_TIME ;
 
 uint32_t DHCP_XID;      // Any number
@@ -248,6 +250,9 @@ uint8_t  check_DHCP_timeout(void);
 
 /* Initialize to timeout process.  */
 void     reset_DHCP_timeout(void);
+
+/* Read a DHCP option length/value pair as a four-octet network-order value. */
+static uint8_t read_DHCP_option_u32(uint8_t **cursor, uint8_t *end, uint32_t *value);
 
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
 int8_t   parseDHCPCMSG(void);
@@ -759,6 +764,8 @@ int8_t parseDHCPMSG(void) {
                 dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
                 dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
                 dhcp_lease_time  = (dhcp_lease_time << 8) + *p++;
+                dhcp_t1_time = dhcp_lease_time / 2;
+                dhcp_t2_time = (dhcp_lease_time / 8) * 7;
 #ifdef _DHCP_DEBUG_
                 dhcp_lease_time = 10;
 #endif
@@ -775,6 +782,14 @@ int8_t parseDHCPMSG(void) {
                 DHCP_REAL_SIP[2] = svr_addr[2];
                 DHCP_REAL_SIP[3] = svr_addr[3];
                 break;
+            case dhcpT1value :
+                p++;
+                read_DHCP_option_u32(&p, e, &dhcp_t1_time);
+                break;
+            case dhcpT2value :
+                p++;
+                read_DHCP_option_u32(&p, e, &dhcp_t2_time);
+                break;
             default :
                 p++;
                 opt_len = *p++;
@@ -784,6 +799,34 @@ int8_t parseDHCPMSG(void) {
         } // while
     } // if
     return	type;
+}
+
+static uint8_t read_DHCP_option_u32(uint8_t **cursor, uint8_t *end, uint32_t *value) {
+    uint8_t *p = *cursor;
+    uint8_t opt_len;
+
+    if (p >= end) {
+        *cursor = end;
+        return 0;
+    }
+
+    opt_len = *p++;
+    if ((uint16_t)(end - p) < opt_len) {
+        *cursor = end;
+        return 0;
+    }
+
+    if (opt_len == 4) {
+        *value  = (uint32_t)*p++ << 24;
+        *value |= (uint32_t)*p++ << 16;
+        *value |= (uint32_t)*p++ << 8;
+        *value |= (uint32_t)*p++;
+        *cursor = p;
+        return 1;
+    }
+
+    *cursor = p + opt_len;
+    return 0;
 }
 
 uint8_t DHCP_run(void) {
@@ -861,7 +904,7 @@ uint8_t DHCP_run(void) {
 
     case STATE_DHCP_LEASED :
         ret = DHCP_IP_LEASED;
-        if ((dhcp_lease_time != INFINITE_LEASETIME) && ((dhcp_lease_time / 2) < dhcp_tick_1s)) {
+        if ((dhcp_lease_time != INFINITE_LEASETIME) && (dhcp_t1_time < dhcp_tick_1s)) {
 
 #ifdef _DHCP_DEBUG_
             printf("> Maintains the IP address \r\n");
@@ -1114,5 +1157,3 @@ char NibbleToHex(uint8_t nibble) {
         return nibble + ('A' - 0x0A);
     }
 }
-
-
