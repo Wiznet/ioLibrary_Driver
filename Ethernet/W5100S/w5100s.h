@@ -1834,6 +1834,17 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
 */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
 #define setMR(mr) 	WIZCHIP_WRITE(MR,mr)
+#elif (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_)
+/* The raw *(uint8_t*)MR dereference performs a phase-00 (IDM_MR) bus write.
+   On boards where that phase write does not reach the chip (observed on a
+   third-party W5100S module board, HS-EVBW5100S), MR can still be accessed
+   reliably through the indirect data path: WIZCHIP_WRITE() selects MR via
+   AR=0x0000 + DR. Note that MR_IND
+   and MR_AI are sticky through that path, which is fine for the library:
+   every setMR() call only ever ORs bits in (setMR(getMR() | MR_AI) etc.) and
+   a persistent MR_AI is harmless because AR is reloaded before each buffer
+   transfer. This matches the vendor EVB library. */
+#define setMR(mr) 	WIZCHIP_WRITE(MR,mr)
 #else
 #define setMR(mr)    (*((uint8_t*)MR) = mr)
 #endif
@@ -1845,6 +1856,9 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len);
     @sa setMR()
 */
 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_)
+#define getMR() 		WIZCHIP_READ(MR)
+#elif (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_BUS_INDIR_)
+/* See setMR(): use the indirect data path (AR=0x0000 + DR) for MR. */
 #define getMR() 		WIZCHIP_READ(MR)
 #else
 #define getMR()      (*(uint8_t*)MR)
