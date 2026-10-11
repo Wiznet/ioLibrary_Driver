@@ -45,7 +45,9 @@
     @brief  This function writes the data into W5100S registers.
 */
 void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb) {
+#if ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_) || (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
     uint8_t spi_data[4];
+#endif
 
     WIZCHIP_CRITICAL_ENTER();
     WIZCHIP.CS._select();
@@ -99,7 +101,9 @@ void     WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb) {
 */
 uint8_t  WIZCHIP_READ(uint32_t AddrSel) {
     uint8_t ret;
+#if ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_) || (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
     uint8_t spi_data[3];
+#endif
     WIZCHIP_CRITICAL_ENTER();
     WIZCHIP.CS._select();
 
@@ -152,8 +156,10 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel) {
     @brief  This function writes into W5100S memory(Buffer)
 */
 void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len) {
+#if ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_) || (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
     uint8_t spi_data[3];
     uint16_t i = 0;
+#endif
 
     WIZCHIP_CRITICAL_ENTER();
     WIZCHIP.CS._select();   //M20150601 : Moved here.
@@ -240,8 +246,10 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len) {
 */
 
 void     WIZCHIP_READ_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len) {
+#if ( (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_) || (_WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_5500_) )
     uint8_t spi_data[3];
     uint16_t i = 0;
+#endif
     WIZCHIP_CRITICAL_ENTER();
     WIZCHIP.CS._select();   //M20150601 : Moved here.
 
