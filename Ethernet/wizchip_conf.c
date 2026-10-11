@@ -634,7 +634,7 @@ void wizchip_sw_reset(void) {
     getSHAR(mac);
     getGAR(gw);  getSUBR(sn);  getSIPR(sip);
     setMR(MR_RST);
-    getMR(); // for delay
+    (void)getMR(); // for delay
     //A2015051 : For indirect bus mode
 #if _WIZCHIP_IO_MODE_  == _WIZCHIP_IO_MODE_BUS_INDIR_
     setMR(mr | MR_IND);
