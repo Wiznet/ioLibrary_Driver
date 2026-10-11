@@ -128,7 +128,9 @@ extern "C" {
     @todo You should select one of @ref _PHY_IO_MODE_PHYCR_ or @ref _PHY_IO_MODE_MII_.
     @sa ctlwizchip()
 */
-#define _PHY_IO_MODE_                  _PHY_IO_MODE_MII_ //_PHY_IO_MODE_MII_
+#ifndef _PHY_IO_MODE_
+#define _PHY_IO_MODE_                  _PHY_IO_MODE_MII_
+#endif
 
 
 
@@ -138,9 +140,11 @@ extern "C" {
     @brief Define interface mode.
     @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
 */
-// 	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
-//	#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+#ifndef _WIZCHIP_IO_MODE_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
 #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+#endif
 
 //A20150601 : Define the unit of IO DATA.
 typedef   uint8_t   iodata_t;
@@ -153,11 +157,10 @@ typedef   uint8_t   iodata_t;
     @brief Define interface mode.
     @todo you should select interface mode as chip. Select one of @ref \_WIZCHIP_IO_MODE_SPI_ , @ref \_WIZCHIP_IO_MODE_BUS_DIR_ or @ref \_WIZCHIP_IO_MODE_BUS_INDIR_
 */
-#if 0
-#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
-#elif 0
-#define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
-#else
+#ifndef _WIZCHIP_IO_MODE_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_DIR_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_BUS_INDIR_
+// #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_5500_
 #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
 #endif
 
@@ -241,13 +244,11 @@ typedef   uint16_t   iodata_t;
         Select one of @ref _WIZCHIP_IO_MODE_SPI_VDM_, @ref _WIZCHIP_IO_MODE_SPI_FDM_, and @ref _WIZCHIP_IO_MODE_BUS_INDIR_
     @sa WIZCHIP_READ(), WIZCHIP_WRITE(), WIZCHIP_READ_BUF(), WIZCHIP_WRITE_BUF()
 */
-#if 1
+#ifndef _WIZCHIP_IO_MODE_
 // 20231103 taylor
 #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_VDM_
-#elif 0
-#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_VDM_
-#else
-#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPV_FDM_
+// #define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_SPI_FDM_
+// #define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
 #endif
 
 typedef   uint8_t   iodata_t;       ///< IO access unit. bus width
@@ -278,8 +279,10 @@ typedef   int16_t   datasize_t;     ///< sent or received data size
 #define _WIZCHIP_QSPI_MODE_          QSPI_SINGLE_MODE
 #endif
 
+#ifndef _WIZCHIP_IO_MODE_
 //#define _WIZCHIP_IO_MODE_         _WIZCHIP_IO_MODE_BUS_INDIR_
 #define _WIZCHIP_IO_MODE_           ((_WIZCHIP_IO_MODE_SPI_ & 0xff00) | (_WIZCHIP_QSPI_MODE_ & 0x00ff))
+#endif
 
 
 
@@ -303,26 +306,18 @@ typedef   int16_t   datasize_t;     ///< sent or received data size
          ex> <code> #define \_WIZCHIP_IO_BASE_      0x00008000 </code>
 */
 #if _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_BUS_
-#if 1
+#ifndef _WIZCHIP_IO_BASE_
 // 20231108 taylor
 #if (_WIZCHIP_ == W6300)
-#define _WIZCHIP_IO_BASE_            0x60000000   // for W6100-EVB
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W6300-EVB
 #elif (_WIZCHIP_ == W6100)
-#define _WIZCHIP_IO_BASE_            0x60000000   // for W5100S-EV
+#define _WIZCHIP_IO_BASE_            0x60000000   // for W6100-EVB
 #elif (_WIZCHIP_ == W5100S)
 #define _WIZCHIP_IO_BASE_            0x60000000   // for W5100S-EVB
 #elif (_WIZCHIP_ == W5300)
 #define _WIZCHIP_IO_BASE_            0x68000000   // for W5300 by javakys 20210408 @66c27e960a813f7ea6e8b1ce083d12b3e7e86fc0
 #else
 #define _WIZCHIP_IO_BASE_            0x00000000
-#endif
-
-#else
-#if (_WIZCHIP_ == W6100)
-#define _WIZCHIP_IO_BASE_            0x60000000   // for W6100 BUS
-#else
-//	#define _WIZCHIP_IO_BASE_				0x60000000	// for 5100S IND
-#define _WIZCHIP_IO_BASE_				0x68000000	// for W5300
 #endif
 #endif
 #elif _WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SPI_
