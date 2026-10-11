@@ -6,8 +6,9 @@
 
 #if LOOPBACK_MODE == LOOPBACK_MAIN_NOBLCOK
 
-
+#if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
 static int8_t loopback_mode = 0 ;
+#endif
 
 
 
