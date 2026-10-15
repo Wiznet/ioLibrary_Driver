@@ -113,14 +113,14 @@ static inline uint16_t get_block_number() {
 static int open_tftp_socket(uint8_t sock) {
     uint8_t sd, sck_state;
 
-    sd = socket(sock, Sn_MR_UDP, 51000, SF_IO_NONBLOCK);
+    sd = wizchip_socket(sock, Sn_MR_UDP, 51000, SF_IO_NONBLOCK);
     if (sd != sock) {
         //DBG_PRINT(ERROR_DBG, "[%s] socket error\r\n", __func__);
         return -1;
     }
 
     do {
-        getsockopt(sd, SO_STATUS, &sck_state);
+        wizchip_getsockopt(sd, SO_STATUS, &sck_state);
     } while (sck_state != SOCK_UDP);
 
     return sd;
@@ -159,14 +159,14 @@ static int recv_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t *
 #endif
 
     /* Receive Packet Process */
-    ret = getsockopt(socket, SO_STATUS, &sck_state);
+    ret = wizchip_getsockopt(socket, SO_STATUS, &sck_state);
     if (ret != SOCK_OK) {
         //DBG_PRINT(ERROR_DBG, "[%s] getsockopt SO_STATUS error\r\n", __func__);
         return -1;
     }
 
     if (sck_state == SOCK_UDP) {
-        ret = getsockopt(socket, SO_RECVBUF, &recv_len);
+        ret = wizchip_getsockopt(socket, SO_RECVBUF, &recv_len);
         if (ret != SOCK_OK) {
             //DBG_PRINT(ERROR_DBG, "[%s] getsockopt SO_RECVBUF error\r\n", __func__);
             return -1;
@@ -197,7 +197,7 @@ static int recv_udp_packet(int socket, uint8_t *packet, uint32_t len, uint32_t *
 }
 
 static void close_tftp_socket(int socket) {
-    close(socket);
+    wizchip_close(socket);
 }
 
 

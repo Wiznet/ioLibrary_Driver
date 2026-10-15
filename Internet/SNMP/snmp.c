@@ -203,7 +203,7 @@ int32_t snmpd_run(void) {
         break;
 
     case SOCK_CLOSED :
-        if ((ret = socket(SOCK_SNMP_AGENT, Sn_MR_UDP, PORT_SNMP_AGENT, 0x00)) != SOCK_SNMP_AGENT) {
+        if ((ret = wizchip_socket(SOCK_SNMP_AGENT, Sn_MR_UDP, PORT_SNMP_AGENT, 0x00)) != SOCK_SNMP_AGENT) {
             return ret;
         }
 #ifdef _SNMP_DEBUG_
@@ -854,7 +854,7 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
 
     // Send SNMP Trap Packet to NMS
     {
-        socket(SOCK_SNMP_TRAP, Sn_MR_UDP, PORT_SNMP_TRAP, 0);
+        wizchip_socket(SOCK_SNMP_TRAP, Sn_MR_UDP, PORT_SNMP_TRAP, 0);
 #if 1
         // 20231016 taylor//teddy 240122
 #if ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
@@ -866,7 +866,7 @@ int32_t snmp_sendTrap(uint8_t * managerIP, uint8_t * agentIP, int8_t* community,
         sendto(SOCK_SNMP_TRAP, packet_trap, packet_index, managerIP, PORT_SNMP_TRAP);
 #endif
 
-        close(SOCK_SNMP_TRAP);
+        wizchip_close(SOCK_SNMP_TRAP);
         return 0;
     }
 }

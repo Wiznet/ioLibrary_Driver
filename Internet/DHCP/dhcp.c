@@ -795,7 +795,7 @@ uint8_t DHCP_run(void) {
     }
 
     if (getSn_SR(DHCP_SOCKET) != SOCK_UDP) {
-        socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
+        wizchip_socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
     }
 
     ret = DHCP_RUNNING;
@@ -926,7 +926,7 @@ uint8_t DHCP_run(void) {
 }
 
 void    DHCP_stop(void) {
-    close(DHCP_SOCKET);
+    wizchip_close(DHCP_SOCKET);
     dhcp_state = STATE_DHCP_STOP;
 }
 

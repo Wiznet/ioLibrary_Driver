@@ -66,7 +66,7 @@ int32_t multicast_loopback(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint
 #endif
         setSn_DIPR(0, multicast_ip);
         setSn_DPORT(0, multicast_port);
-        if ((ret = socket(sn, Sn_MR_UDP, port, Sn_MR_MULTI)) != sn) {
+        if ((ret = wizchip_socket(sn, Sn_MR_UDP, port, Sn_MR_MULTI)) != sn) {
             return ret;
         }
 #ifdef _MULTICAST_DEBUG_
@@ -129,7 +129,7 @@ int32_t multicast_recv(uint8_t sn, uint8_t* buf, uint8_t* multicast_ip, uint16_t
 #endif
         setSn_DIPR(sn, multicast_ip);
         setSn_DPORT(sn, multicast_port);
-        if ((ret = socket(sn, Sn_MR_UDP, port, Sn_MR_MULTI)) != sn) {
+        if ((ret = wizchip_socket(sn, Sn_MR_UDP, port, Sn_MR_MULTI)) != sn) {
             return ret;
         }
 #ifdef _MULTICAST_DEBUG_

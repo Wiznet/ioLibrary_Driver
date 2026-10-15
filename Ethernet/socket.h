@@ -91,26 +91,33 @@ extern "C" {
 #include "wizchip_conf.h"
 
 /*
- * Several functions below share their names with the BSD socket API, so they
- * clash with libc or another network stack linked into the same image.
- * Set WIZCHIP_PREFIXED_EXPORTS to 1 when building the library and its users
- * to compile them as wizchip_socket(), wizchip_close() and so on instead.
- * The macros only rename a name followed by '(', so struct members and
- * variables of the same name are left alone.
+ * The socket functions below are named wizchip_socket(), wizchip_close() and
+ * so on.  Several of them would otherwise share their names with the BSD
+ * socket API and clash with libc or another network stack linked into the
+ * same image.
+ * By default (WIZCHIP_BSD_SOCKET_NAMES == 1) the macros below map each one
+ * back to its BSD name, so existing code that calls socket(), close() and so
+ * on is unchanged.  Set WIZCHIP_BSD_SOCKET_NAMES to 0 to keep the wizchip_
+ * names; no macro is then defined on the BSD names, so another socket API
+ * can be used alongside this one.
  */
-#ifndef WIZCHIP_PREFIXED_EXPORTS
-#define WIZCHIP_PREFIXED_EXPORTS 0
+#ifdef WIZCHIP_PREFIXED_EXPORTS
+#error "WIZCHIP_PREFIXED_EXPORTS has been replaced: set WIZCHIP_BSD_SOCKET_NAMES to 0 instead"
 #endif
 
-#if WIZCHIP_PREFIXED_EXPORTS
-#define socket(...)      wizchip_socket(__VA_ARGS__)
-#define close(...)       wizchip_close(__VA_ARGS__)
-#define listen(...)      wizchip_listen(__VA_ARGS__)
-#define disconnect(...)  wizchip_disconnect(__VA_ARGS__)
-#define send(...)        wizchip_send(__VA_ARGS__)
-#define recv(...)        wizchip_recv(__VA_ARGS__)
-#define setsockopt(...)  wizchip_setsockopt(__VA_ARGS__)
-#define getsockopt(...)  wizchip_getsockopt(__VA_ARGS__)
+#ifndef WIZCHIP_BSD_SOCKET_NAMES
+#define WIZCHIP_BSD_SOCKET_NAMES 1
+#endif
+
+#if WIZCHIP_BSD_SOCKET_NAMES
+#define wizchip_socket(...)      socket(__VA_ARGS__)
+#define wizchip_close(...)       close(__VA_ARGS__)
+#define wizchip_listen(...)      listen(__VA_ARGS__)
+#define wizchip_disconnect(...)  disconnect(__VA_ARGS__)
+#define wizchip_send(...)        send(__VA_ARGS__)
+#define wizchip_recv(...)        recv(__VA_ARGS__)
+#define wizchip_setsockopt(...)  setsockopt(__VA_ARGS__)
+#define wizchip_getsockopt(...)  getsockopt(__VA_ARGS__)
 #endif
 
 #define SOCKET                uint8_t  ///< SOCKET type define for legacy driver
@@ -284,7 +291,7 @@ extern "C" {
                           @ref SOCKERR_SOCKMODE    - Not support socket mode as TCP, UDP, and so on. \n
                           @ref SOCKERR_SOCKFLAG    - Invaild socket flag.
 */
-int8_t  socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
+int8_t  wizchip_socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -296,7 +303,7 @@ int8_t  socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag);
     @return @b Success : @ref SOCK_OK \n
            @b Fail    : @ref SOCKERR_SOCKNUM - Invalid socket number
 */
-int8_t  close(uint8_t sn);
+int8_t  wizchip_close(uint8_t sn);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -309,7 +316,7 @@ int8_t  close(uint8_t sn);
            @b Fail    :\n @ref SOCKERR_SOCKINIT   - Socket is not initialized \n
                           @ref SOCKERR_SOCKCLOSED - Socket closed unexpectedly.
 */
-int8_t  listen(uint8_t sn);
+int8_t  wizchip_listen(uint8_t sn);
 
 //teddy 240122
 /**
@@ -351,7 +358,7 @@ int8_t  listen(uint8_t sn);
                           @ref SOCKERR_TIMEOUT  - Timeout occurred \n
                           @ref SOCK_BUSY        - Socket is busy.
 */
-int8_t  disconnect(uint8_t sn);
+int8_t  wizchip_disconnect(uint8_t sn);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -371,7 +378,7 @@ int8_t  disconnect(uint8_t sn);
                             @ref SOCKERR_DATALEN    - zero data length \n
                             @ref SOCK_BUSY          - Socket is busy.
 */
-int32_t send(uint8_t sn, uint8_t * buf, uint16_t len);
+int32_t wizchip_send(uint8_t sn, uint8_t * buf, uint16_t len);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -393,7 +400,7 @@ int32_t send(uint8_t sn, uint8_t * buf, uint16_t len);
                        @ref SOCKERR_DATALEN    - zero data length \n
                        @ref SOCK_BUSY          - Socket is busy.
 */
-int32_t recv(uint8_t sn, uint8_t * buf, uint16_t len);
+int32_t wizchip_recv(uint8_t sn, uint8_t * buf, uint16_t len);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -584,7 +591,7 @@ int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg);
     - @ref SOCKERR_SOCKOPT     - Invalid socket option or its value \n
     - @ref SOCKERR_TIMEOUT     - Timeout occurred when sending keep-alive packet \n
 */
-int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
+int8_t  wizchip_setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
 
 /**
     @ingroup WIZnet_socket_APIs
@@ -618,7 +625,7 @@ int8_t  setsockopt(uint8_t sn, sockopt_type sotype, void* arg);
      When SO_PACKINFO value is PACK_FIRST and the return value of recvfrom() is zero,
      This means the zero byte UDP data(UDP Header only) received.
 */
-int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
+int8_t  wizchip_getsockopt(uint8_t sn, sockopt_type sotype, void* arg);
 
 //teddy 240122
 #if _WIZCHIP_ == W6100 || _WIZCHIP_ == W6300

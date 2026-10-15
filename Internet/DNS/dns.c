@@ -537,7 +537,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns) {
 #endif
 
     // Socket open
-    socket(DNS_SOCKET, Sn_MR_UDP, 0, 0);
+    wizchip_socket(DNS_SOCKET, Sn_MR_UDP, 0, 0);
 
 #ifdef _DNS_DEBUG_
     printf("> DNS Query to DNS Server : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
@@ -583,7 +583,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns) {
 #ifdef _DNS_DEBUG_
             printf("> DNS Server is not responding : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
 #endif
-            close(DNS_SOCKET);
+            wizchip_close(DNS_SOCKET);
             return 0; // timeout occurred
         } else if (ret_check_timeout == 0) {
 
@@ -602,7 +602,7 @@ int8_t DNS_run(uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns) {
 #endif
         }
     }
-    close(DNS_SOCKET);
+    wizchip_close(DNS_SOCKET);
     // Return value
     // 0 > :  failed / 1 - success
     return ret;

@@ -146,7 +146,7 @@ void httpServer_run(uint8_t seqnum) {
                 if (len > DATA_BUF_SIZE) {
                     len = DATA_BUF_SIZE;
                 }
-                len = recv(s, (uint8_t *)http_request, len);
+                len = wizchip_recv(s, (uint8_t *)http_request, len);
 
                 *(((uint8_t *)http_request) + len) = '\0';
 
@@ -224,14 +224,14 @@ void httpServer_run(uint8_t seqnum) {
 #ifdef _HTTPSERVER_DEBUG_
         printf("> HTTPSocket[%d] : ClOSE_WAIT\r\n", s);	// if a peer requests to close the current connection
 #endif
-        disconnect(s);
+        wizchip_disconnect(s);
         break;
 
     case SOCK_CLOSED:
 #ifdef _HTTPSERVER_DEBUG_
         printf("> HTTPSocket[%d] : CLOSED\r\n", s);
 #endif
-        if (socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s) { /* Reinitialize the socket */
+        if (wizchip_socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s) { /* Reinitialize the socket */
 #ifdef _HTTPSERVER_DEBUG_
             printf("> HTTPSocket[%d] : OPEN\r\n", s);
 #endif
@@ -239,7 +239,7 @@ void httpServer_run(uint8_t seqnum) {
         break;
 
     case SOCK_INIT:
-        listen(s);
+        wizchip_listen(s);
         break;
 
     case SOCK_LISTEN:
@@ -295,7 +295,7 @@ static void send_http_response_header(uint8_t s, uint8_t content_type, uint32_t 
 #ifdef _HTTPSERVER_DEBUG_
         printf("> HTTPSocket[%d] : [Send] HTTP Response Header [ %d ]byte\r\n", s, (uint16_t)strlen((char *)http_response));
 #endif
-        send(s, http_response, strlen((char *)http_response));
+        wizchip_send(s, http_response, strlen((char *)http_response));
     }
 }
 
@@ -415,7 +415,7 @@ static void send_http_response_body(uint8_t s, uint8_t * uri_name, uint8_t * buf
 #endif
 
     if (send_len) {
-        send(s, buf, send_len);
+        wizchip_send(s, buf, send_len);
     } else {
         flag_datasend_end = 1;
     }
@@ -450,7 +450,7 @@ static void send_http_response_cgi(uint8_t s, uint8_t * buf, uint8_t * http_body
     printf("> HTTPSocket[%d] : HTTP Response Header + Body - send len [ %d ]byte\r\n", s, send_len);
 #endif
 
-    send(s, buf, send_len);
+    wizchip_send(s, buf, send_len);
 }
 
 

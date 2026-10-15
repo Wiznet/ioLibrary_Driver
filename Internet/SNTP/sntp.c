@@ -279,7 +279,7 @@ int8_t SNTP_run(datetime *time) {
             time->ss = Nowdatetime.ss;
 
             ntp_retry_cnt = 0;
-            close(NTP_SOCKET);
+            wizchip_close(NTP_SOCKET);
 
             return 1;
         }
@@ -320,11 +320,11 @@ int8_t SNTP_run(datetime *time) {
 #ifdef _SNTP_DEBUG_
             printf("ntp retry failed!\r\n");
 #endif
-            close(NTP_SOCKET);
+            wizchip_close(NTP_SOCKET);
         }
         break;
     case SOCK_CLOSED:
-        socket(NTP_SOCKET, Sn_MR_UDP, ntp_port, 0);
+        wizchip_socket(NTP_SOCKET, Sn_MR_UDP, ntp_port, 0);
         break;
     }
     // Return value

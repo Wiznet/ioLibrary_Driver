@@ -112,7 +112,7 @@ uint8_t AddressAutoConfig_Init(uint8_t s, wiz_NetInfo *netinfo) {
         result_aac = 0;
     }
 
-    while (SOCK_OK != close(AAC_SOCKET));
+    while (SOCK_OK != wizchip_close(AAC_SOCKET));
 
     return result_aac;
 }
@@ -152,7 +152,7 @@ uint8_t Address_Auto_Config_SLDHCP(uint8_t sn, uint8_t *test_buf) {
                 getSIPR(tmp);
                 printf("> DHCP IP : %d.%d.%d.%d\r\n", tmp[0], tmp[1], tmp[2], tmp[3]);
                 toggle = 0;
-                close(sn); /*
+                wizchip_close(sn); /*
 								If renewal IP address was defferent previous IP address,
 								socket becomes to disconnect or close for new connection.
 */
@@ -240,7 +240,7 @@ uint8_t Address_Auto_Config_SFDHCP(uint8_t sn, uint8_t *test_buf, wiz_NetInfo *n
                 //                    getSUBR(tmp); printf("> DHCP SN : %d.%d.%d.%d\r\n", tmp[0], tmp[1], tmp[2], tmp[3]);
                 //                    getSIPR(tmp); printf("> DHCP IP : %d.%d.%d.%d\r\n", tmp[0], tmp[1], tmp[2], tmp[3]);
                 toggle = 0;
-                close(sn); /*
+                wizchip_close(sn); /*
 								If renewal IP address was defferent previous IP address,
 								socket becomes to disconnect or close for new connection.
 */
@@ -340,7 +340,7 @@ uint8_t Address_Auto_Config_RA(uint8_t sn, uint8_t *icmpbuf, uint16_t buf_size, 
     setSn_PNR(sn, PROTOCOL_NUM_ICMPv6);						  //ICMPv6 : 58
     printf("getSn_PROTOR(%d) = 0x%x\r\n", sn, getSn_PNR(sn)); // 0X3a
 
-    socket(sn, Sn_MR_IPRAW6, 0, 0);
+    wizchip_socket(sn, Sn_MR_IPRAW6, 0, 0);
 
 #if 1
     printf("Sn_SR : %x \r\n", getSn_SR(sn)); // 0X21 33
@@ -556,7 +556,7 @@ uint8_t Address_Auto_Config_RA(uint8_t sn, uint8_t *icmpbuf, uint16_t buf_size, 
         }	 //while
     }
 
-    close(sn);
+    wizchip_close(sn);
 
     printf("RA : %x \r\n", RA_flag);
 

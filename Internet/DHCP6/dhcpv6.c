@@ -1005,7 +1005,7 @@ uint8_t DHCP6_run2(void) {
     if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP) {
         // Check DHCPv6 SOCKET == UDP
         WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
-        socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
+        wizchip_socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
     }
     ret = DHCP6_RUNNING;
     type = parseDHCP6MSG();
@@ -1041,7 +1041,7 @@ uint8_t DHCP6_run(wiz_NetInfo *netinfo) {
     if (getSn_SR(DHCP6_SOCKET) != SOCK_UDP) {
         // Check DHCPv6 SOCKET == UDP
         WIZCHIP_WRITE(_Sn_TTLR_(DHCP6_SOCKET), 0x01); // hop limit 1
-        socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
+        wizchip_socket(DHCP6_SOCKET, (Sn_MR_UDP6), DHCP6_CLIENT_PORT, 0x00);
     }
 
     ret = DHCP6_RUNNING;
@@ -1118,7 +1118,7 @@ uint8_t DHCP6_run(wiz_NetInfo *netinfo) {
 
 */
 void DHCP6_stop(void) {
-    close(DHCP6_SOCKET);
+    wizchip_close(DHCP6_SOCKET);
     dhcp6_state = STATE_DHCP6_STOP;
 }
 

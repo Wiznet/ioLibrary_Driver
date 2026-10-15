@@ -128,7 +128,7 @@ void NewNetwork(Network* n, int sn) {
 int w5x00_read(Network* n, unsigned char* buffer, int len, long time) {
 
     if ((getSn_SR(n->my_socket) == SOCK_ESTABLISHED) && (getSn_RX_RSR(n->my_socket) > 0)) {
-        return recv(n->my_socket, buffer, len);
+        return wizchip_recv(n->my_socket, buffer, len);
     }
 
     return SOCK_ERROR;
@@ -144,7 +144,7 @@ int w5x00_read(Network* n, unsigned char* buffer, int len, long time) {
 */
 int w5x00_write(Network* n, unsigned char* buffer, int len, long time) {
     if (getSn_SR(n->my_socket) == SOCK_ESTABLISHED) {
-        return send(n->my_socket, buffer, len);
+        return wizchip_send(n->my_socket, buffer, len);
     }
 
     return SOCK_ERROR;
@@ -156,7 +156,7 @@ int w5x00_write(Network* n, unsigned char* buffer, int len, long time) {
            that contains the configuration information for the Network.
 */
 void w5x00_disconnect(Network* n) {
-    disconnect(n->my_socket);
+    wizchip_disconnect(n->my_socket);
 }
 
 /*
@@ -170,7 +170,7 @@ void w5x00_disconnect(Network* n) {
 int ConnectNetwork(Network* n, uint8_t* ip, uint16_t port) {
     uint16_t myport = 12345;
 
-    if (socket(n->my_socket, Sn_MR_TCP, myport, 0) != n->my_socket) {
+    if (wizchip_socket(n->my_socket, Sn_MR_TCP, myport, 0) != n->my_socket) {
         return SOCK_ERROR;
     }
 
