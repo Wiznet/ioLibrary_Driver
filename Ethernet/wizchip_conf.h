@@ -65,6 +65,7 @@ extern "C" {
  *       ex> <code> #define \_WIZCHIP_      W5500 </code>
  */
 
+#define W3150A						3150   // W3150A+ (register compatible with W5100, external PHY over MII)
 #define W5100						5100
 #define W5100S						5100+5
 #define W5200						5200
@@ -132,7 +133,19 @@ extern "C" {
 
 
 
-#if   (_WIZCHIP_ == W5100)
+#if   (_WIZCHIP_ == W3150A)
+   #define _WIZCHIP_ID_                "W3150A+\0"
+/**
+ * @brief Define interface mode.
+ * @note W3150A+ supports only SPI mode 0 (mode 3 is broken, W3150A+/W5100 errata 4).
+ *       Every byte is its own 32-bit frame: OP-code + 2-byte address + 1 data byte.
+ */
+   #define _WIZCHIP_IO_MODE_           _WIZCHIP_IO_MODE_SPI_
+
+   typedef   uint8_t   iodata_t;
+   #include "W3150A/w3150a.h"
+
+#elif (_WIZCHIP_ == W5100)
    #define _WIZCHIP_ID_                "W5100\0"
 /**
  * @brief Define interface mode.
@@ -521,7 +534,7 @@ typedef enum
 }ctlnetservice_type;
 #endif
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /**
  * @ingroup DATA_TYPE
  *  Interrupt kind when CW_SET_INTRRUPT, CW_GET_INTERRUPT, CW_SET_INTRMASK
@@ -658,7 +671,7 @@ typedef struct wiz_PhyConf_t
    }wiz_PhyConf;
 #endif   
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /**
  * @ingroup DATA_TYPE
  *  It used in setting dhcp_mode of @ref wiz_NetInfo.
@@ -1265,7 +1278,7 @@ int8_t wizchip_unsolicited(void);
 int8_t wizchip_getprefix(wiz_Prefix * prefix);
 #endif
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
    /**
    * @ingroup extra_functions
     * @brief Set the network information for WIZCHIP

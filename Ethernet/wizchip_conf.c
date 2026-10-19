@@ -277,7 +277,7 @@ _WIZCHIP  WIZCHIP =
 
 
 static uint8_t    _DNS_[4];      // DNS server ip address
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 static dhcp_mode  _DHCP_;        // DHCP mode
 //teddy 240122
 #elif ((_WIZCHIP_ == 6100) || (_WIZCHIP_ == 6300))
@@ -590,7 +590,7 @@ int8_t ctlnetwork(ctlnetwork_type cntype, void* arg)
          wizchip_getnetinfo((wiz_NetInfo*)arg);
          break;
       case CN_SET_NETMODE:
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
          return wizchip_setnetmode(*(netmode_type*)arg);
 		 //teddy 240122
       #elif ((_WIZCHIP_ == 6100)||(_WIZCHIP_ == W6300))
@@ -630,7 +630,7 @@ void wizchip_sw_reset(void)
    uint8_t islock = getSYSR();
 #endif
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 //A20150601
 #if _WIZCHIP_IO_MODE_  == _WIZCHIP_IO_MODE_BUS_INDIR_
    uint16_t mr = (uint16_t)getMR();
@@ -1363,7 +1363,7 @@ int8_t wizchip_getprefix(wiz_Prefix * prefix)
 
 #endif
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 void wizchip_setnetinfo(wiz_NetInfo* pnetinfo)
 {
    setSHAR(pnetinfo->mac);

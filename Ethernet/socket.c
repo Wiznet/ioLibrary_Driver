@@ -1204,7 +1204,7 @@ int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg)
       case CS_GET_INTERRUPT:
          *((uint8_t*)arg) = getSn_IR(sn);
          break;
-#if _WIZCHIP_ != 5100
+#if (_WIZCHIP_ != 5100) && (_WIZCHIP_ != W3150A)   // W3150A+ has no Sn_IMR
       case CS_SET_INTMASK:
          if( tmp > SIK_ALL) return SOCKERR_ARG;
          setSn_IMR(sn,tmp);

@@ -13,7 +13,7 @@ static int8_t loopback_mode = 0 ;
 
 
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 {
    int32_t ret;

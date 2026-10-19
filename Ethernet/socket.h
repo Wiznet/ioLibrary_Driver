@@ -113,7 +113,7 @@
 
 #define SOCKFATAL_PACKLEN     (SOCK_FATAL - 1)     ///< Invalid packet length. Fatal Error.
 
-#if (_WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
+#if (_WIZCHIP_ == W3150A || _WIZCHIP_ == W5100 || _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5300 || _WIZCHIP_ == W5500)
 /*
  * SOCKET FLAG
  */
@@ -505,7 +505,7 @@ typedef enum
    SO_DESTPORT,         ///< Set the destination Port number. @ref Sn_DPORT ( @ref setSn_DPORT(), @ref getSn_DPORT() )
 #if _WIZCHIP_ != 5100   
    SO_KEEPALIVESEND,    ///< Valid only in setsockopt. Manually send keep-alive packet in TCP mode, Not supported in W5100
-   #if !( (_WIZCHIP_ == 5100) || (_WIZCHIP_ == 5200) )
+   #if !( (_WIZCHIP_ == 5100) || (_WIZCHIP_ == 5200) || (_WIZCHIP_ == W3150A) )
       SO_KEEPALIVEAUTO, ///< Set/Get keep-alive auto transmission timer in TCP mode, Not supported in W5100, W5200
    #endif      
 #endif
